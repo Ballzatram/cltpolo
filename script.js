@@ -10,23 +10,47 @@ if (navToggle && siteNav) {
 const contactForm = document.getElementById("contactForm");
 
 if (contactForm) {
-  contactForm.addEventListener("submit", (event) => {
+  contactForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const name = document.getElementById("name")?.value.trim();
-    const email = document.getElementById("email")?.value.trim();
-    const interest = document.getElementById("interest")?.value;
-    const message = document.getElementById("message")?.value.trim();
+    const submitButton = contactForm.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton ? submitButton.textContent : "Submit";
 
-    if (!name || !email || !interest || !message) {
-      alert("Please complete all required fields.");
-      return;
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Sending...";
     }
 
-    alert(
-      "Thanks — your inquiry form is set up visually. Next step is connecting it to a real form handler."
-    );
+    const formData = new FormData(contactForm);
 
-    contactForm.reset();
+    try {
+      const response = await fetch(contactForm.action, {
+        method: "POST",
+        body: formData,
+        headers: {
+          Accept: "application/json"
+        }
+      });
+
+      if (response.ok) {
+        window.location.href = "thank-you.html";
+        return;
+      }
+
+      const data = await response.json().catch(() => null);
+
+      if (data && data.errors && Array.isArray(data.errors)) {
+        alert(data.errors.map((error) => error.message).join(", "));
+      } else {
+        alert("Something went wrong. Please try again.");
+      }
+    } catch (error) {
+      alert("Something went wrong. Please check your connection and try again.");
+    }
+
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = originalButtonText;
+    }
   });
 }

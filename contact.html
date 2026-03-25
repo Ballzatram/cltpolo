@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Contact | Charlotte Polo Club</title>
-  <meta
-    name="description"
-    content="Contact Charlotte Polo Club about learning, events, partnerships, sponsorship, or general inquiries."
-  />
+  <meta name="description"
+    content="Contact Charlotte Polo Club about learning, events, partnerships, sponsorship, or general inquiries." />
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
   <header class="site-header">
     <div class="wrap header-inner">
@@ -25,30 +25,40 @@
   </header>
 
   <main>
-
     <section class="section">
       <div class="wrap contact-layout">
         <div class="contact-copy">
           <p class="section-kicker">Reach Out</p>
-          <h2>Start the Conversation</h2>
+          <h2>Get in Touch</h2>
           <p class="lead">
             Whether you are interested in learning the sport, attending future
             events, discussing partnership opportunities, or supporting the
             long-term vision of Charlotte Polo Club, we would be glad to hear from
             you.
           </p>
-
-          <ul class="simple-list">
-            <li>Learning to play</li>
-            <li>Attending events</li>
-            <li>Investing or partnership</li>
-            <li>Sponsorship</li>
-            <li>General inquiries</li>
-          </ul>
         </div>
 
         <div class="card form-card">
-          <form class="contact-form" id="contactForm">
+          <form
+            class="contact-form"
+            id="contactForm"
+            action="https://formspree.io/f/xaqlwbpy"
+            method="POST"
+          >
+            <input
+              type="hidden"
+              name="_subject"
+              value="New Charlotte Polo Club contact form submission"
+            />
+
+            <input
+              type="text"
+              name="_gotcha"
+              tabindex="-1"
+              autocomplete="off"
+              style="display: none;"
+            />
+
             <label for="name">Full Name</label>
             <input id="name" name="name" type="text" required />
 
@@ -60,11 +70,10 @@
 
             <label for="interest">Inquiry Type</label>
             <select id="interest" name="interest" required>
-              <option value="">Select one</option>
-              <option value="Learning to Play">Learning to Play</option>
-              <option value="Attending Events">Attending Events</option>
-              <option value="Investing / Partnership">Investing / Partnership</option>
-              <option value="Learning + Investing">Learning + Investing</option>
+              <option value="" disabled selected>Select one</option>
+              <option value="Lessons">Lessons</option>
+              <option value="Events">Events</option>
+              <option value="Partnership">Partnership</option>
               <option value="Sponsorship">Sponsorship</option>
               <option value="General Inquiry">General Inquiry</option>
             </select>
@@ -73,13 +82,8 @@
             <textarea id="message" name="message" rows="6" required></textarea>
 
             <button class="button button-primary full-width" type="submit">
-              Submit Inquiry
+              Submit
             </button>
-
-            <p class="form-note">
-              This starter form is front-end only for now. Next step is wiring it
-              to Formspree, Netlify Forms, Resend, or your own backend.
-            </p>
           </form>
         </div>
       </div>
@@ -118,4 +122,5 @@
 
   <script src="script.js"></script>
 </body>
+
 </html>
