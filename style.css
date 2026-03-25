@@ -1153,11 +1153,23 @@ button:disabled,
 
 @media (max-width: 760px) {
   :root {
-    --header-height: 78px;
+    --header-height: 70px;
+  }
+
+  .header-inner {
+    min-height: var(--header-height);
+    gap: 14px;
   }
 
   .nav-toggle {
     display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-height: 46px;
+    padding: 10px 14px;
+    font-size: 0.98rem;
+    line-height: 1;
   }
 
   .site-nav {
@@ -1169,9 +1181,12 @@ button:disabled,
     flex-direction: column;
     align-items: flex-start;
     gap: 0;
-    padding: 16px 20px 20px;
+    padding: 12px 20px 16px;
     background: rgba(10, 10, 10, 0.98);
     border-bottom: 1px solid var(--border);
+    max-height: calc(100vh - var(--header-height));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .site-nav.open {
@@ -1181,21 +1196,22 @@ button:disabled,
   .site-nav a {
     width: 100%;
     padding: 12px 0;
+    font-size: 1rem;
   }
 
   .site-nav .nav-cta {
-    margin-top: 10px;
+    margin-top: 8px;
     padding: 12px 16px;
   }
 
   .hero,
   .page-hero {
-    min-height: calc(86vh - var(--header-height));
+    min-height: calc(80vh - var(--header-height));
   }
 
   .hero-content,
   .page-hero-content {
-    padding: 48px 0 82px;
+    padding: 40px 0 56px;
   }
 
   .hero-content {
@@ -1203,31 +1219,70 @@ button:disabled,
   }
 
   .section {
-    padding: 72px 0;
+    padding: 56px 0;
+  }
+
+  .section-head {
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .events-section {
+    padding-top: 56px;
+  }
+
+  .events-head {
+    margin-bottom: 22px;
   }
 
   .wrap,
   .narrow,
   .text-block-wide {
-    width: min(calc(100% - 28px), var(--max-width));
+    width: min(calc(100% - 24px), var(--max-width));
   }
 
   .brand {
-    font-size: 1rem;
-    letter-spacing: 0.14em;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: calc(100% - 108px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.92rem;
+    letter-spacing: 0.11em;
+  }
+
+  .hero-home .eyebrow,
+  .eyebrow,
+  .section-kicker {
+    font-size: 0.74rem;
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
   }
 
   .hero-copy,
   .lead {
-    font-size: 1.04rem;
+    font-size: 1rem;
+    line-height: 1.66;
+  }
+
+  .hero-actions {
+    margin-top: 22px;
+    gap: 12px;
+  }
+
+  .button {
+    min-height: 50px;
+    padding: 13px 20px;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
   }
 
   .page-hero-about {
-    min-height: calc(66vh - var(--header-height));
+    min-height: calc(60vh - var(--header-height));
   }
 
   .page-hero-about .page-hero-content {
-    padding: 22px 0 28px;
+    padding: 18px 0 24px;
   }
 
   .page-hero-about::before {
@@ -1239,24 +1294,24 @@ button:disabled,
       ),
       linear-gradient(
         90deg,
-        rgba(5, 8, 6, 0.88) 0%,
-        rgba(5, 8, 6, 0.72) 30%,
-        rgba(5, 8, 6, 0.44) 54%,
-        rgba(5, 8, 6, 0.18) 76%,
-        rgba(5, 8, 6, 0.12) 100%
+        rgba(5, 8, 6, 0.9) 0%,
+        rgba(5, 8, 6, 0.76) 28%,
+        rgba(5, 8, 6, 0.48) 52%,
+        rgba(5, 8, 6, 0.22) 76%,
+        rgba(5, 8, 6, 0.14) 100%
       ),
       url("./Assets/about.png") 78% center / cover no-repeat;
   }
 
   .about-hero-panel {
-    width: min(100%, 360px);
+    width: min(100%, 340px);
     margin-left: 0;
   }
 
   .page-hero-about h1 {
     max-width: 100%;
-    font-size: clamp(2.45rem, 10.2vw, 3.8rem);
-    line-height: 0.92;
+    font-size: clamp(2.2rem, 9.6vw, 3.4rem);
+    line-height: 0.94;
   }
 
   .page-hero-about h1 span:first-child {
@@ -1264,55 +1319,142 @@ button:disabled,
   }
 
   .page-hero-about .hero-copy {
-    max-width: 320px;
+    max-width: 300px;
     margin-top: 10px;
-    font-size: 0.98rem;
-    line-height: 1.56;
+    font-size: 0.95rem;
+    line-height: 1.52;
   }
 
   .lessons-feature {
-    padding-top: 20px;
+    padding-top: 16px;
   }
 
   .lessons-callout {
     grid-template-columns: 1fr;
-    gap: 24px;
-    padding: 24px;
+    gap: 22px;
+    padding: 22px;
   }
 
-  .cta-band {
-    padding: 84px 0;
+  .card-grid {
+    gap: 18px;
   }
 
-  .cta-band h2 {
-    font-size: clamp(2.2rem, 8vw, 3.2rem);
+  .card {
+    padding: 20px;
   }
 
   .timeline {
-    gap: 18px;
+    gap: 16px;
   }
 
   .timeline-large-years .timeline-item {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 10px;
   }
 
   .timeline-year {
     padding-top: 0;
-    font-size: clamp(2rem, 9vw, 3rem);
+    font-size: clamp(1.8rem, 8.5vw, 2.7rem);
   }
 
   .timeline-card {
-    padding: 24px 24px 22px;
+    padding: 20px;
   }
 
   .timeline-card h3 {
-    font-size: 1.4rem;
+    font-size: 1.28rem;
+    line-height: 1.12;
+  }
+
+  .timeline-card p,
+  .vision-grid .card p,
+  .heritage-note p,
+  .event-description,
+  .page-intro-copy {
+    line-height: 1.62;
   }
 
   .about-intro .lead,
   .about-future .lead {
-    line-height: 1.72;
+    line-height: 1.68;
+  }
+
+  .cta-band {
+    padding: 56px 0;
+  }
+
+  .cta-band h2 {
+    font-size: clamp(2rem, 7.8vw, 2.7rem);
+    line-height: 1;
+  }
+
+  .cta-band .lead {
+    max-width: 33ch;
+    font-size: 1rem;
+    line-height: 1.62;
+  }
+
+  .event-item {
+    padding: 20px 0 22px;
+  }
+
+  .event-item h3 {
+    font-size: 1.38rem;
+    line-height: 1.1;
+  }
+
+  .event-item .event-meta {
+    margin-bottom: 12px;
+    font-size: 0.96rem;
+  }
+
+  .event-description {
+    margin-bottom: 12px;
+  }
+
+  .contact-layout {
+    gap: 24px;
+  }
+
+  .contact-form {
+    gap: 10px;
+  }
+
+  .contact-form label,
+  .lesson-interest-form label {
+    gap: 6px;
+    font-size: 0.88rem;
+  }
+
+  .contact-form input,
+  .contact-form select,
+  .contact-form textarea,
+  .lesson-interest-form input,
+  .lesson-interest-form select,
+  .lesson-interest-form textarea {
+    padding: 14px 14px;
+    font-size: 16px;
+  }
+
+  .site-footer {
+    padding: 40px 0;
+  }
+
+  .footer-grid {
+    gap: 22px;
+  }
+
+  .footer-brand {
+    margin-bottom: 12px;
+  }
+
+  .footer-copy {
+    max-width: 100%;
+    line-height: 1.62;
+  }
+
+  .footer-links li {
+    padding: 10px 0;
   }
 }
 
@@ -1320,29 +1462,35 @@ button:disabled,
   .wrap,
   .narrow,
   .text-block-wide {
-    width: min(calc(100% - 24px), var(--max-width));
+    width: min(calc(100% - 20px), var(--max-width));
   }
 
   .section {
-    padding: 64px 0;
+    padding: 52px 0;
   }
 
   h1 {
-    font-size: clamp(2.6rem, 12vw, 4rem);
+    font-size: clamp(2.45rem, 11.2vw, 3.7rem);
     line-height: 0.98;
   }
 
   h2 {
-    font-size: clamp(1.9rem, 8vw, 2.5rem);
-    line-height: 1.04;
+    font-size: clamp(1.75rem, 7.2vw, 2.3rem);
+    line-height: 1.03;
+    margin-bottom: 12px;
+  }
+
+  h3 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
   }
 
   .page-intro-copy,
   .lead,
   .event-description,
   .hero-copy {
-    font-size: 1rem;
-    line-height: 1.65;
+    font-size: 0.98rem;
+    line-height: 1.62;
   }
 
   .button,
@@ -1365,19 +1513,19 @@ button:disabled,
   }
 
   .lessons-callout {
-    padding: 20px;
+    padding: 18px;
   }
 
   .card {
-    padding: 22px;
+    padding: 18px;
   }
 
   .event-item {
-    padding: 22px 0 24px;
+    padding: 18px 0 20px;
   }
 
   .event-item h3 {
-    font-size: 1.45rem;
+    font-size: 1.28rem;
   }
 
   .site-nav a,
@@ -1387,21 +1535,21 @@ button:disabled,
   }
 
   .footer-grid {
-    gap: 24px;
+    gap: 20px;
   }
 
   .timeline-card {
-    padding: 22px;
+    padding: 18px;
   }
 
   .page-hero-about h1 {
-    font-size: clamp(2.25rem, 12vw, 3.35rem);
+    font-size: clamp(2rem, 11vw, 3rem);
   }
 
   .page-hero-about .hero-copy {
     max-width: 100%;
-    font-size: 0.96rem;
-    line-height: 1.58;
+    font-size: 0.93rem;
+    line-height: 1.54;
   }
 }
 
