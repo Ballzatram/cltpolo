@@ -2,249 +2,299 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Investor Portal | Charlotte Polo Club</title>
-  <meta
-    name="description"
-    content="Private investor portal for Charlotte Polo Club land research, acquisition candidates, and development diligence."
-  />
+    <title>Investor Portal | Charlotte Polo Club</title>
+    <meta name="description"
+        content="Private investor portal for Charlotte Polo Club land research, acquisition candidates, drive-time context, and development diligence." />
 
-  <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css" />
 </head>
 
 <body class="investors-page">
-  <header class="site-header">
-    <div class="wrap header-inner">
-      <a class="brand" href="index.html">Charlotte Polo Club</a>
+    <header class="site-header">
+        <div class="wrap header-inner">
+            <a class="brand" href="index.html">Charlotte Polo Club</a>
 
-      <button class="nav-toggle" aria-label="Toggle navigation">Menu</button>
+            <button class="nav-toggle" aria-label="Toggle navigation">Menu</button>
 
-      <nav class="site-nav">
-        <a href="index.html">Home</a>
-        <a href="events.html">Events</a>
-        <a href="about.html">About</a>
-        <a href="contact.html" class="nav-cta">Contact</a>
-      </nav>
-    </div>
-  </header>
-
-  <main>
-    <section class="investor-lock section" id="investorLock">
-      <div class="wrap investor-lock-wrap">
-        <div class="investor-lock-card">
-          <p class="section-kicker">Private Access</p>
-
-          <h1>Investor Portal</h1>
-
-          <p class="lead">
-            A private working dashboard for land acquisition research, site scoring,
-            and due diligence connected to Charlotte Polo Club’s long-term facility vision.
-          </p>
-
-          <form class="investor-code-form" id="investorCodeForm">
-            <label for="investorCode">Access Code</label>
-
-            <input
-              id="investorCode"
-              name="investorCode"
-              type="password"
-              placeholder="Enter access code"
-              autocomplete="off"
-              required
-            />
-
-            <button class="button button-primary full-width" type="submit">
-              Enter Portal
-            </button>
-
-            <p class="investor-error" id="investorCodeError" hidden>
-              Incorrect code. Please try again.
-            </p>
-          </form>
-
-          <p class="investor-lock-note">
-            This portal is intended for preliminary review only. Property details,
-            pricing, and diligence notes should be independently verified.
-          </p>
+            <nav class="site-nav">
+                <a href="index.html">Home</a>
+                <a href="events.html">Events</a>
+                <a href="about.html">About</a>
+                <a href="contact.html" class="nav-cta">Contact</a>
+            </nav>
         </div>
-      </div>
-    </section>
+    </header>
 
-    <section class="investor-dashboard" id="investorDashboard" hidden>
-      <section class="investor-hero">
-        <div class="wrap investor-hero-inner">
-          <div class="investor-hero-main">
-            <p class="section-kicker">Investor Research</p>
+    <main>
+        <section class="investor-lock section" id="investorLock">
+            <div class="wrap investor-lock-wrap">
+                <div class="investor-lock-card">
+                    <p class="section-kicker">Private Access</p>
 
-            <h1>Land Acquisition Dashboard</h1>
+                    <h1>Investor Portal</h1>
 
-            <p class="lead">
-              A live-style view of potential land opportunities being evaluated for
-              polo fields, equestrian programming, event use, and long-term regional growth.
-            </p>
+                    <p class="lead">
+                        A private working dashboard for land acquisition research, site scoring,
+                        drive-time context, and due diligence connected to Charlotte Polo Club’s
+                        long-term facility vision.
+                    </p>
 
-            <div class="investor-hero-pills">
-              <span>Charlotte Region</span>
-              <span>Land Search</span>
-              <span>Investor Review</span>
+                    <form class="investor-code-form" id="investorCodeForm">
+                        <label for="investorCode">Access Code</label>
+
+                        <input id="investorCode" name="investorCode" type="password" placeholder="Enter access code"
+                            autocomplete="off" required />
+
+                        <button class="button button-primary full-width" type="submit">
+                            Enter Portal
+                        </button>
+
+                        <p class="investor-error" id="investorCodeError" hidden>
+                            Incorrect code. Please try again.
+                        </p>
+                    </form>
+
+                    <p class="investor-lock-note">
+                        This portal is intended for preliminary review only. Property details,
+                        pricing, location, drive times, and diligence notes should be independently verified.
+                    </p>
+                </div>
             </div>
-          </div>
+        </section>
 
-          <aside class="investor-hero-panel" aria-label="Dashboard summary">
-            <p>Data Source</p>
-            <h3>CSV Research File</h3>
-            <span>
-              Pulled from the project repo and rendered into this private dashboard.
-            </span>
-          </aside>
-        </div>
-      </section>
+        <section class="investor-dashboard" id="investorDashboard" hidden>
+            <section class="investor-hero">
+                <div class="wrap investor-hero-inner">
+                    <div class="investor-hero-main">
+                        <p class="section-kicker">Investor Research</p>
 
-      <section class="investor-command">
-        <div class="wrap">
-          <div class="investor-command-top">
+                        <h1>Land Acquisition Dashboard</h1>
+
+                        <p class="lead">
+                            A visual view of potential land opportunities being evaluated for polo fields,
+                            equestrian programming, event use, investor relevance, and long-term regional growth.
+                        </p>
+
+                        <div class="investor-hero-pills">
+                            <span>Charlotte Region</span>
+                            <span>Uptown Drive-Time Lens</span>
+                            <span>Land Search</span>
+                            <span>Investor Review</span>
+                        </div>
+                    </div>
+
+                    <aside class="investor-hero-panel" aria-label="Dashboard summary">
+                        <p>Data Source</p>
+                        <h3>CSV Research File</h3>
+                        <span>
+                            Pulled from the project repo and rendered into a private,
+                            Zillow-style investor dashboard.
+                        </span>
+                    </aside>
+                </div>
+            </section>
+
+            <section class="investor-map-section">
+                <div class="wrap">
+                    <div class="investor-map-head">
+                        <div>
+                            <p class="section-kicker">Regional View</p>
+                            <h2>Actual Property Map</h2>
+                        </div>
+
+                        <p>
+                            Property pins are plotted on a real interactive map using latitude and longitude
+                            from the CSV. Click any pin to review the listing, open the map, or jump to the
+                            full property card.
+                        </p>
+                    </div>
+
+                    <div class="investor-map-layout">
+                        <div class="investor-map-card investor-map-card-live"
+                            aria-label="Interactive property map around Charlotte">
+                            <div class="actual-map" id="investorMap"></div>
+
+                            <div class="map-legend map-legend-live">
+                                <span><i class="legend-dot legend-priority"></i> Investor shortlist</span>
+                                <span><i class="legend-dot"></i> Active research</span>
+                                <span><i class="legend-ring"></i> Uptown Charlotte reference</span>
+                            </div>
+                        </div>
+
+                        <aside class="drive-panel">
+                            <div class="drive-panel-head">
+                                <p>Drive-Time Lens</p>
+                                <h3>From Uptown Charlotte</h3>
+                            </div>
+
+                            <div class="drive-band drive-band-primary">
+                                <span>0–35 min</span>
+                                <strong>Best for recurring use</strong>
+                                <p>Most compelling for lessons, club activity, events, and sponsor access.</p>
+                            </div>
+
+                            <div class="drive-band">
+                                <span>35–55 min</span>
+                                <strong>Viable destination property</strong>
+                                <p>Can work if acreage, pricing, road access, and event upside are strong.</p>
+                            </div>
+
+                            <div class="drive-band">
+                                <span>55+ min</span>
+                                <strong>Strategic / value review</strong>
+                                <p>Needs a strong land thesis or regional partnership angle to justify distance.</p>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </section>
+
+            <section class="investor-command">
+                <div class="wrap">
+                    <div class="investor-command-top">
+                        <div>
+                            <p class="section-kicker">Snapshot</p>
+                            <h2>Current Opportunities</h2>
+                        </div>
+
+                        <button class="button button-secondary investor-refresh" id="refreshInvestorData" type="button">
+                            Refresh Data
+                        </button>
+                    </div>
+
+                    <div class="investor-stats-grid" id="investorStats">
+                        <article class="investor-stat-card">
+                            <span>Total Sites</span>
+                            <strong>—</strong>
+                        </article>
+
+                        <article class="investor-stat-card">
+                            <span>Shortlist Sites</span>
+                            <strong>—</strong>
+                        </article>
+
+                        <article class="investor-stat-card">
+                            <span>Avg. Score</span>
+                            <strong>—</strong>
+                        </article>
+
+                        <article class="investor-stat-card">
+                            <span>Total Acres</span>
+                            <strong>—</strong>
+                        </article>
+                    </div>
+
+                    <div class="investor-filter-shell">
+                        <div class="investor-filter-heading">
+                            <div>
+                                <h3>Search Properties</h3>
+                                <p>
+                                    Filter the land pipeline by corridor, recommendation tier, acreage,
+                                    pricing, county, drive time, or diligence notes.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="investor-filters">
+                            <label class="investor-search-field">
+                                Search
+                                <input id="investorSearch" type="search"
+                                    placeholder="Search by property, county, notes, corridor..." />
+                            </label>
+
+                            <label>
+                                Corridor
+                                <select id="corridorFilter">
+                                    <option value="">All Corridors</option>
+                                </select>
+                            </label>
+
+                            <label>
+                                Tier
+                                <select id="tierFilter">
+                                    <option value="">All Tiers</option>
+                                </select>
+                            </label>
+
+                            <label>
+                                Sort
+                                <select id="sortFilter">
+                                    <option value="score-desc">Score: High to Low</option>
+                                    <option value="drive-asc">Drive Time: Low to High</option>
+                                    <option value="price-asc">Price: Low to High</option>
+                                    <option value="acres-desc">Acres: High to Low</option>
+                                    <option value="updated-desc">Recently Updated</option>
+                                </select>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="investor-list-section">
+                <div class="wrap">
+                    <div class="investor-results-head">
+                        <div>
+                            <p class="section-kicker">Property Pipeline</p>
+                            <h2>Land Candidates</h2>
+                        </div>
+
+                        <p>
+                            Each card summarizes acquisition relevance, price, acreage, location,
+                            drive-time position, listing access, and next diligence work.
+                        </p>
+                    </div>
+
+                    <div class="investor-loading" id="investorLoading">
+                        Loading investor dashboard...
+                    </div>
+
+                    <div class="investor-empty" id="investorEmpty" hidden>
+                        No matching properties found. Try clearing one of the filters.
+                    </div>
+
+                    <div class="property-grid" id="propertyGrid"></div>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap footer-grid">
             <div>
-              <p class="section-kicker">Snapshot</p>
-              <h2>Current Opportunities</h2>
-            </div>
-
-            <button class="button button-secondary investor-refresh" id="refreshInvestorData" type="button">
-              Refresh Data
-            </button>
-          </div>
-
-          <div class="investor-stats-grid" id="investorStats">
-            <article class="investor-stat-card">
-              <span>Total Sites</span>
-              <strong>—</strong>
-            </article>
-
-            <article class="investor-stat-card">
-              <span>Shortlist Sites</span>
-              <strong>—</strong>
-            </article>
-
-            <article class="investor-stat-card">
-              <span>Avg. Score</span>
-              <strong>—</strong>
-            </article>
-
-            <article class="investor-stat-card">
-              <span>Total Acres</span>
-              <strong>—</strong>
-            </article>
-          </div>
-
-          <div class="investor-filter-shell">
-            <div class="investor-filter-heading">
-              <div>
-                <h3>Search Properties</h3>
-                <p>
-                  Filter the land pipeline by corridor, recommendation tier, acreage,
-                  pricing, county, or diligence notes.
+                <a class="brand footer-brand" href="index.html">Charlotte Polo Club</a>
+                <p class="footer-copy">
+                    Charlotte Polo Club is an emerging club and event platform focused on the
+                    sustainable future of polo in the Charlotte region.
                 </p>
-              </div>
             </div>
 
-            <div class="investor-filters">
-              <label class="investor-search-field">
-                Search
-                <input
-                  id="investorSearch"
-                  type="search"
-                  placeholder="Search by property, county, notes, corridor..."
-                />
-              </label>
-
-              <label>
-                Corridor
-                <select id="corridorFilter">
-                  <option value="">All Corridors</option>
-                </select>
-              </label>
-
-              <label>
-                Tier
-                <select id="tierFilter">
-                  <option value="">All Tiers</option>
-                </select>
-              </label>
-
-              <label>
-                Sort
-                <select id="sortFilter">
-                  <option value="score-desc">Score: High to Low</option>
-                  <option value="price-asc">Price: Low to High</option>
-                  <option value="acres-desc">Acres: High to Low</option>
-                  <option value="updated-desc">Recently Updated</option>
-                </select>
-              </label>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="investor-list-section">
-        <div class="wrap">
-          <div class="investor-results-head">
             <div>
-              <p class="section-kicker">Property Pipeline</p>
-              <h2>Land Candidates</h2>
+                <h4>Navigation</h4>
+                <ul class="footer-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="events.html">Events</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
             </div>
 
-            <p>
-              Each card summarizes acquisition relevance, pricing, acreage, location,
-              and next diligence work.
-            </p>
-          </div>
-
-          <div class="investor-loading" id="investorLoading">
-            Loading investor dashboard...
-          </div>
-
-          <div class="investor-empty" id="investorEmpty" hidden>
-            No matching properties found. Try clearing one of the filters.
-          </div>
-
-          <div class="property-grid" id="propertyGrid"></div>
+            <div>
+                <h4>Resources</h4>
+                <ul class="footer-links">
+                    <li><a href="https://uspolo.org/" target="_blank" rel="noreferrer">USPA</a></li>
+                    <li><a href="https://watch.uspolo.org/" target="_blank" rel="noreferrer">Watch Polo</a></li>
+                </ul>
+            </div>
         </div>
-      </section>
-    </section>
-  </main>
+    </footer>
 
-  <footer class="site-footer">
-    <div class="wrap footer-grid">
-      <div>
-        <a class="brand footer-brand" href="index.html">Charlotte Polo Club</a>
-        <p class="footer-copy">
-          Charlotte Polo Club is an emerging club and event platform focused on the
-          sustainable future of polo in the Charlotte region.
-        </p>
-      </div>
-
-      <div>
-        <h4>Navigation</h4>
-        <ul class="footer-links">
-          <li><a href="index.html">Home</a></li>
-          <li><a href="events.html">Events</a></li>
-          <li><a href="about.html">About</a></li>
-          <li><a href="contact.html">Contact</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h4>Resources</h4>
-        <ul class="footer-links">
-          <li><a href="https://uspolo.org/" target="_blank" rel="noreferrer">USPA</a></li>
-          <li><a href="https://watch.uspolo.org/" target="_blank" rel="noreferrer">Watch Polo</a></li>
-        </ul>
-      </div>
-    </div>
-  </footer>
-
-  <script src="script.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
 </body>
 
 </html>

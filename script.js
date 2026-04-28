@@ -63,6 +63,38 @@ const INVESTOR_ACCESS_CODE = "cltpolo123!";
 const INVESTOR_ACCESS_KEY = "cltPoloInvestorAccess";
 const INVESTOR_API_URL = "./data/charlotte_polo_properties.csv";
 
+const UPTOWN_CHARLOTTE = {
+  latitude: 35.2271,
+  longitude: -80.8431
+};
+
+const PROPERTY_LINK_FIELDS = [
+  "Property URL",
+  "Property Link",
+  "Listing URL",
+  "Listing Link",
+  "Listing",
+  "URL",
+  "url",
+  "Website",
+  "Source URL",
+  "Zillow URL",
+  "LandWatch URL",
+  "Land.com URL",
+  "Realtor URL",
+  "LoopNet URL"
+];
+
+const MAP_LINK_FIELDS = [
+  "Map URL",
+  "Google Maps",
+  "Google Maps URL",
+  "Map Link",
+  "map_url",
+  "Maps URL",
+  "Directions URL"
+];
+
 const investorLock = document.getElementById("investorLock");
 const investorDashboard = document.getElementById("investorDashboard");
 const investorCodeForm = document.getElementById("investorCodeForm");
@@ -73,6 +105,7 @@ const investorEmpty = document.getElementById("investorEmpty");
 const propertyGrid = document.getElementById("propertyGrid");
 const investorStats = document.getElementById("investorStats");
 const refreshInvestorData = document.getElementById("refreshInvestorData");
+const investorMapElement = document.getElementById("investorMap");
 
 const investorSearch = document.getElementById("investorSearch");
 const corridorFilter = document.getElementById("corridorFilter");
@@ -80,6 +113,9 @@ const tierFilter = document.getElementById("tierFilter");
 const sortFilter = document.getElementById("sortFilter");
 
 let investorProperties = [];
+let investorMap = null;
+let investorMapLayer = null;
+let propertyMiniMaps = [];
 
 function normalizeInvestorValue(value) {
   return value === null || value === undefined ? "" : String(value).trim();
@@ -130,6 +166,112 @@ function getPropertyField(property, possibleKeys) {
   }
 
   return "";
+}
+
+function normalizeUrl(value) {
+  const rawUrl = normalizeInvestorValue(value);
+
+  if (!rawUrl) {
+    return "";
+  }
+
+  if (
+    rawUrl.startsWith("http://") ||
+    rawUrl.startsWith("https://") ||
+    rawUrl.startsWith("mailto:")
+  ) {
+    return rawUrl;
+  }
+
+  if (rawUrl.includes(".") && !rawUrl.includes(" ")) {
+    return `https://${rawUrl}`;
+  }
+
+  return "";
+}
+
+function getListingUrl(property) {
+  const url = normalizeUrl(getPropertyField(property, PROPERTY_LINK_FIELDS));
+
+  if (!url) {
+    return "";
+  }
+
+  const lowerUrl = url.toLowerCase();
+
+  const blockedListingFallbacks = [
+    "google.com/maps",
+    "maps.google.com",
+    "bing.com/maps",
+    "apple.com/maps",
+    "openstreetmap.org",
+    "google.com/search",
+    "duckduckgo.com",
+    "bing.com/search"
+  ];
+
+  if (blockedListingFallbacks.some((blocked) => lowerUrl.includes(blocked))) {
+    return "";
+  }
+
+  const isLandWatchUrl = lowerUrl.includes("landwatch.com");
+  const isDirectLandWatchListing = lowerUrl.includes("/pid/");
+
+  if (isLandWatchUrl && !isDirectLandWatchListing) {
+    return "";
+  }
+
+  return url;
+}
+
+function getMapUrl(property) {
+  const explicitMapUrl = normalizeUrl(getPropertyField(property, MAP_LINK_FIELDS));
+
+  if (explicitMapUrl) {
+    return explicitMapUrl;
+  }
+
+  const lat = getLatitude(property);
+  const lng = getLongitude(property);
+
+  if (lat && lng) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      `${lat},${lng}`
+    )}`;
+  }
+
+  const address = normalizeInvestorValue(
+    getPropertyField(property, [
+      "Address",
+      "Property Address",
+      "Location",
+      "Site Address",
+      "Full Address"
+    ])
+  );
+
+  if (address) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      address
+    )}`;
+  }
+
+  return "";
+}
+
+function getPropertyDisplayName(property, fallback = "Unnamed Property") {
+  return (
+    normalizeInvestorValue(
+      getPropertyField(property, [
+        "Property Name",
+        "Name",
+        "Address",
+        "Property Address",
+        "Location",
+        "property_name"
+      ])
+    ) || fallback
+  );
 }
 
 function parseCSV(csvText) {
@@ -200,13 +342,155 @@ function parseCSV(csvText) {
   });
 }
 
+function slugify(value) {
+  return normalizeInvestorValue(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function getLatitude(property) {
+  return parseInvestorNumber(
+    getPropertyField(property, ["Latitude", "Lat", "latitude", "lat"])
+  );
+}
+
+function getLongitude(property) {
+  return parseInvestorNumber(
+    getPropertyField(property, [
+      "Longitude",
+      "Lng",
+      "Lon",
+      "longitude",
+      "lng",
+      "lon"
+    ])
+  );
+}
+
+function estimateMilesFromCharlotte(property) {
+  const explicitMiles = parseInvestorNumber(
+    getPropertyField(property, [
+      "Miles From Charlotte",
+      "Distance From Charlotte",
+      "Distance Miles",
+      "Miles",
+      "miles_from_charlotte"
+    ])
+  );
+
+  if (explicitMiles) {
+    return explicitMiles;
+  }
+
+  const lat = getLatitude(property);
+  const lng = getLongitude(property);
+
+  if (!lat || !lng) {
+    return 0;
+  }
+
+  return haversineMiles(
+    UPTOWN_CHARLOTTE.latitude,
+    UPTOWN_CHARLOTTE.longitude,
+    lat,
+    lng
+  );
+}
+
+function getDriveTimeMinutes(property) {
+  const explicitDriveTime = parseInvestorNumber(
+    getPropertyField(property, [
+      "Drive Time From Charlotte",
+      "Drive Time",
+      "Drive Time Minutes",
+      "Estimated Drive Time",
+      "drive_time"
+    ])
+  );
+
+  if (explicitDriveTime) {
+    return explicitDriveTime;
+  }
+
+  const miles = estimateMilesFromCharlotte(property);
+
+  if (!miles) {
+    return 0;
+  }
+
+  return Math.round(Math.max(18, miles * 1.28 + 8));
+}
+
+function formatDriveTime(property) {
+  const minutes = getDriveTimeMinutes(property);
+
+  if (!minutes) {
+    return "Drive TBD";
+  }
+
+  return `${minutes} min`;
+}
+
+function getDriveBand(property) {
+  const minutes = getDriveTimeMinutes(property);
+
+  if (!minutes) {
+    return "Drive TBD";
+  }
+
+  if (minutes <= 35) {
+    return "Core access";
+  }
+
+  if (minutes <= 55) {
+    return "Destination fit";
+  }
+
+  return "Strategic distance";
+}
+
+function haversineMiles(lat1, lon1, lat2, lon2) {
+  const radius = 3958.8;
+  const toRad = (value) => (value * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+    Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return radius * c;
+}
+
+function isShortlistProperty(property) {
+  const tier = normalizeInvestorValue(
+    getPropertyField(property, ["Recommendation Tier", "Tier", "tier"])
+  ).toLowerCase();
+
+  return (
+    tier.includes("shortlist") ||
+    tier.includes("high") ||
+    tier.includes("priority") ||
+    tier.includes("tier 1")
+  );
+}
+
 function showInvestorDashboard() {
   if (!investorLock || !investorDashboard) {
     return;
   }
 
+  investorLock.style.display = "none";
   investorLock.hidden = true;
+
   investorDashboard.hidden = false;
+  investorDashboard.style.display = "block";
 
   loadInvestorProperties();
 }
@@ -365,6 +649,9 @@ function getFilteredInvestorProperties() {
       getPropertyField(b, ["Acreage", "Acres", "acres"])
     );
 
+    const driveA = getDriveTimeMinutes(a);
+    const driveB = getDriveTimeMinutes(b);
+
     const updatedA =
       new Date(
         getPropertyField(a, ["Last Updated", "Updated", "updated_at"])
@@ -374,6 +661,10 @@ function getFilteredInvestorProperties() {
       new Date(
         getPropertyField(b, ["Last Updated", "Updated", "updated_at"])
       ).getTime() || 0;
+
+    if (sortValue === "drive-asc") {
+      return driveA - driveB;
+    }
 
     if (sortValue === "price-asc") {
       return priceA - priceB;
@@ -397,6 +688,7 @@ function renderInvestorDashboard() {
   const filtered = getFilteredInvestorProperties();
 
   renderInvestorStats(filtered);
+  renderInvestorMap(filtered);
   renderInvestorCards(filtered);
 
   if (investorLoading) {
@@ -408,6 +700,163 @@ function renderInvestorDashboard() {
   }
 }
 
+function renderInvestorMap(properties) {
+  if (!investorMapElement || typeof L === "undefined") {
+    return;
+  }
+
+  const propertiesWithLocation = properties
+    .map((property, index) => {
+      const lat = getLatitude(property);
+      const lng = getLongitude(property);
+
+      if (!lat || !lng) {
+        return null;
+      }
+
+      return {
+        property,
+        index,
+        lat,
+        lng
+      };
+    })
+    .filter(Boolean);
+
+  if (!investorMap) {
+    investorMap = L.map(investorMapElement, {
+      scrollWheelZoom: false,
+      zoomControl: true
+    }).setView([UPTOWN_CHARLOTTE.latitude, UPTOWN_CHARLOTTE.longitude], 9);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 18,
+      attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(investorMap);
+
+    investorMapLayer = L.layerGroup().addTo(investorMap);
+  }
+
+  investorMapLayer.clearLayers();
+
+  const uptownIcon = L.divIcon({
+    className: "leaflet-clt-marker",
+    html: "<span>CLT</span>",
+    iconSize: [48, 48],
+    iconAnchor: [24, 24]
+  });
+
+  L.marker([UPTOWN_CHARLOTTE.latitude, UPTOWN_CHARLOTTE.longitude], {
+    icon: uptownIcon
+  })
+    .addTo(investorMapLayer)
+    .bindPopup("<strong>Uptown Charlotte</strong><br>Drive-time reference point");
+
+  L.circle([UPTOWN_CHARLOTTE.latitude, UPTOWN_CHARLOTTE.longitude], {
+    radius: 56327,
+    className: "leaflet-drive-ring leaflet-drive-ring-one",
+    fill: false
+  }).addTo(investorMapLayer);
+
+  L.circle([UPTOWN_CHARLOTTE.latitude, UPTOWN_CHARLOTTE.longitude], {
+    radius: 88514,
+    className: "leaflet-drive-ring leaflet-drive-ring-two",
+    fill: false
+  }).addTo(investorMapLayer);
+
+  propertiesWithLocation.forEach(({ property, index, lat, lng }) => {
+    const name = getPropertyDisplayName(property, `Site ${index + 1}`);
+    const corridor =
+      normalizeInvestorValue(getPropertyField(property, ["Corridor", "corridor"])) ||
+      "Corridor TBD";
+    const score =
+      normalizeInvestorValue(
+        getPropertyField(property, ["Weighted Polo Score", "Score", "score"])
+      ) || "—";
+    const driveTime = formatDriveTime(property);
+    const acres = getPropertyField(property, ["Acreage", "Acres", "acres"]);
+    const price = getPropertyField(property, ["List Price", "Price", "price"]);
+    const listingUrl = getListingUrl(property);
+    const cardId = slugify(name) || `property-${index + 1}`;
+
+    const icon = L.divIcon({
+      className: isShortlistProperty(property)
+        ? "leaflet-property-marker leaflet-property-marker-priority"
+        : "leaflet-property-marker",
+      html: "<span></span>",
+      iconSize: [28, 28],
+      iconAnchor: [14, 14]
+    });
+
+    const listingAction = listingUrl
+      ? `<a href="${escapeAttribute(listingUrl)}" target="_blank" rel="noopener noreferrer">Open Listing</a>`
+      : "";
+
+    const popup = `
+      <div class="map-popup">
+        <strong>${escapeHtml(name)}</strong>
+        <span>${escapeHtml(corridor)} · ${escapeHtml(driveTime)} · Score ${escapeHtml(score)}</span>
+        <div class="map-popup-meta">
+          <small>${formatNumber(acres, 1)} acres</small>
+          <small>${formatCurrency(price)}</small>
+        </div>
+        <div class="map-popup-actions">
+          <button type="button" data-target="${escapeAttribute(cardId)}">View Card</button>
+          ${listingAction}
+        </div>
+      </div>
+    `;
+
+    const marker = L.marker([lat, lng], { icon })
+      .addTo(investorMapLayer)
+      .bindPopup(popup);
+
+    marker.on("popupopen", () => {
+      const popupElement = document.querySelector(".leaflet-popup-content");
+      const button = popupElement
+        ? popupElement.querySelector(`button[data-target="${cardId}"]`)
+        : null;
+
+      if (button) {
+        button.addEventListener("click", () => {
+          const target = document.getElementById(cardId);
+
+          if (target) {
+            target.scrollIntoView({
+              behavior: "smooth",
+              block: "center"
+            });
+
+            target.classList.add("property-card-highlight");
+
+            window.setTimeout(() => {
+              target.classList.remove("property-card-highlight");
+            }, 1400);
+          }
+        });
+      }
+    });
+  });
+
+  const boundsItems = [
+    [UPTOWN_CHARLOTTE.latitude, UPTOWN_CHARLOTTE.longitude],
+    ...propertiesWithLocation.map((item) => [item.lat, item.lng])
+  ];
+
+  if (boundsItems.length > 1) {
+    investorMap.fitBounds(boundsItems, {
+      padding: [42, 42],
+      maxZoom: 10
+    });
+  } else {
+    investorMap.setView([UPTOWN_CHARLOTTE.latitude, UPTOWN_CHARLOTTE.longitude], 9);
+  }
+
+  window.setTimeout(() => {
+    investorMap.invalidateSize();
+  }, 150);
+}
+
 function renderInvestorStats(properties) {
   if (!investorStats) {
     return;
@@ -416,15 +865,7 @@ function renderInvestorStats(properties) {
   const totalSites = properties.length;
 
   const shortlistSites = properties.filter((property) => {
-    const tier = normalizeInvestorValue(
-      getPropertyField(property, ["Recommendation Tier", "Tier", "tier"])
-    ).toLowerCase();
-
-    return (
-      tier.includes("shortlist") ||
-      tier.includes("high") ||
-      tier.includes("priority")
-    );
+    return isShortlistProperty(property);
   }).length;
 
   const scores = properties
@@ -471,22 +912,26 @@ function renderInvestorStats(properties) {
   `;
 }
 
+function destroyPropertyMiniMaps() {
+  propertyMiniMaps.forEach((miniMap) => {
+    if (miniMap && typeof miniMap.remove === "function") {
+      miniMap.remove();
+    }
+  });
+
+  propertyMiniMaps = [];
+}
+
 function renderInvestorCards(properties) {
   if (!propertyGrid) {
     return;
   }
 
+  destroyPropertyMiniMaps();
+
   propertyGrid.innerHTML = properties
-    .map((property) => {
-      const name =
-        normalizeInvestorValue(
-          getPropertyField(property, [
-            "Property Name",
-            "Name",
-            "Address",
-            "property_name"
-          ])
-        ) || "Unnamed Property";
+    .map((property, index) => {
+      const name = getPropertyDisplayName(property);
 
       const corridor =
         normalizeInvestorValue(
@@ -547,33 +992,34 @@ function renderInvestorCards(properties) {
         ) ||
         "Confirm listing status, zoning, utilities, access, and field development feasibility.";
 
-      const listingUrl = normalizeInvestorValue(
-        getPropertyField(property, [
-          "Listing URL",
-          "Listing Link",
-          "URL",
-          "url"
-        ])
-      );
+      const listingUrl = getListingUrl(property);
 
-      const mapUrl = normalizeInvestorValue(
-        getPropertyField(property, [
-          "Map URL",
-          "Google Maps",
-          "Map Link",
-          "map_url"
-        ])
-      );
+      const driveTime = formatDriveTime(property);
+      const driveBand = getDriveBand(property);
+      const miles = estimateMilesFromCharlotte(property);
+      const cardId = slugify(name) || `property-${index + 1}`;
+      const miniMapId = `property-mini-map-${cardId}-${index}`;
 
       return `
-        <article class="property-card">
-          <div class="property-card-top">
-            <div class="property-card-kicker">
-              <span>${escapeHtml(corridor)}</span>
-              <span class="property-score">${escapeHtml(score)}</span>
+        <article class="property-card" id="${escapeAttribute(cardId)}">
+          <div class="property-card-visual">
+            <div class="property-card-map property-card-map-real">
+              <div class="property-mini-map" id="${escapeAttribute(miniMapId)}"></div>
+
+              <div class="property-map-chips">
+                <span>${escapeHtml(corridor)}</span>
+                <span class="property-score">${escapeHtml(score)}</span>
+              </div>
             </div>
 
-            <h3>${escapeHtml(name)}</h3>
+            <div class="property-map-summary">
+              <h3>${escapeHtml(name)}</h3>
+
+              <div class="drive-badge">
+                <strong>${escapeHtml(driveTime)}</strong>
+                <span>${escapeHtml(driveBand)}</span>
+              </div>
+            </div>
           </div>
 
           <div class="property-card-body">
@@ -607,6 +1053,11 @@ function renderInvestorCards(properties) {
                 <span>Price / Acre</span>
                 <strong>${formatCurrency(pricePerAcre)}</strong>
               </div>
+
+              <div class="property-meta property-meta-wide">
+                <span>From Uptown Charlotte</span>
+                <strong>${escapeHtml(driveTime)}${miles ? ` · ${formatNumber(miles, 1)} mi` : ""}</strong>
+              </div>
             </div>
 
             <p class="property-note">${escapeHtml(notes)}</p>
@@ -616,28 +1067,84 @@ function renderInvestorCards(properties) {
               <p>${escapeHtml(diligence)}</p>
             </div>
 
-            <div class="property-actions">
-              ${
-                listingUrl
-                  ? `<a class="button button-primary" href="${escapeAttribute(
-                      listingUrl
-                    )}" target="_blank" rel="noopener noreferrer">View Listing</a>`
-                  : ""
-              }
-
-              ${
-                mapUrl
-                  ? `<a class="button button-secondary" href="${escapeAttribute(
-                      mapUrl
-                    )}" target="_blank" rel="noopener noreferrer">View Map</a>`
-                  : ""
-              }
+            <div class="property-actions property-actions-single">
+              ${listingUrl
+          ? `<a class="button button-primary" href="${escapeAttribute(
+            listingUrl
+          )}" target="_blank" rel="noopener noreferrer">View Property Listing</a>`
+          : `<span class="button button-disabled">No Direct Listing Available</span>`
+        }
             </div>
           </div>
         </article>
       `;
     })
     .join("");
+
+  renderPropertyMiniMaps(properties);
+}
+
+function renderPropertyMiniMaps(properties) {
+  if (typeof L === "undefined") {
+    return;
+  }
+
+  properties.forEach((property, index) => {
+    const name = getPropertyDisplayName(property);
+    const cardId = slugify(name) || `property-${index + 1}`;
+    const miniMapId = `property-mini-map-${cardId}-${index}`;
+    const mapElement = document.getElementById(miniMapId);
+
+    if (!mapElement) {
+      return;
+    }
+
+    const lat = getLatitude(property);
+    const lng = getLongitude(property);
+
+    if (!lat || !lng) {
+      mapElement.innerHTML = `
+        <div class="mini-map-missing">
+          <span>Coordinates needed</span>
+          <strong>Add Latitude + Longitude</strong>
+        </div>
+      `;
+      return;
+    }
+
+    const miniMap = L.map(mapElement, {
+      attributionControl: false,
+      zoomControl: false,
+      dragging: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      boxZoom: false,
+      keyboard: false,
+      tap: false,
+      touchZoom: false
+    }).setView([lat, lng], 11);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 18
+    }).addTo(miniMap);
+
+    const icon = L.divIcon({
+      className: isShortlistProperty(property)
+        ? "leaflet-property-marker leaflet-property-marker-priority"
+        : "leaflet-property-marker",
+      html: "<span></span>",
+      iconSize: [28, 28],
+      iconAnchor: [14, 14]
+    });
+
+    L.marker([lat, lng], { icon }).addTo(miniMap);
+
+    propertyMiniMaps.push(miniMap);
+
+    window.setTimeout(() => {
+      miniMap.invalidateSize();
+    }, 160);
+  });
 }
 
 function escapeHtml(value) {
@@ -663,16 +1170,28 @@ if (investorCodeForm) {
   investorCodeForm.addEventListener("submit", (event) => {
     event.preventDefault();
 
-    const enteredCode = investorCodeInput ? investorCodeInput.value : "";
+    const enteredCode = investorCodeInput ? investorCodeInput.value.trim() : "";
 
     if (enteredCode === INVESTOR_ACCESS_CODE) {
       sessionStorage.setItem(INVESTOR_ACCESS_KEY, "true");
-      showInvestorDashboard();
+
+      if (investorLock) {
+        investorLock.style.display = "none";
+        investorLock.hidden = true;
+      }
+
+      if (investorDashboard) {
+        investorDashboard.hidden = false;
+        investorDashboard.style.display = "block";
+      }
+
+      loadInvestorProperties();
       return;
     }
 
     if (investorCodeError) {
       investorCodeError.hidden = false;
+      investorCodeError.style.display = "block";
     }
 
     if (investorCodeInput) {
