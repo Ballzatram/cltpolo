@@ -30,8 +30,36 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Run property update script
+      - name: Run property update agent
         run: python scripts/update_properties.py
+
+      - name: Validate investor data quality gate
+        run: |
+          python - <<'PY'
+          import csv
+          from pathlib import Path
+
+          rows = list(csv.DictReader(Path("data/charlotte_polo_properties.csv").open()))
+          visible_rows = [
+              row for row in rows
+              if row.get("Dashboard Include", "").strip().lower() not in {"no", "false", "0"}
+          ]
+          bad_rows = [
+              row for row in visible_rows
+              if float((row.get("Acres") or "0").replace(",", "")) < 100
+          ]
+          missing_sources = [
+              row for row in visible_rows
+              if not row.get("Property URL") or not row.get("Listing Verification Status")
+          ]
+          if bad_rows or missing_sources:
+              raise SystemExit(
+                  f"Investor data quality gate failed: "
+                  f"{len(bad_rows)} sub-100-acre rows, "
+                  f"{len(missing_sources)} rows missing source/verification"
+              )
+          print(f"Validated {len(visible_rows)} visible investor rows at 100+ acres.")
+          PY
 
       - name: Commit changes
         run: |

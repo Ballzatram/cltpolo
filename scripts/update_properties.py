@@ -29,8 +29,8 @@ NOW_ISO = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 UPTOWN_CHARLOTTE = (35.2271, -80.8431)
 TARGET_MIN_ACRES = 100.0
 TARGET_MIN_DRIVE_MIN = 30
-TARGET_MAX_DRIVE_MIN = 45
-MAX_TARGET_I77_MINUTES = 15
+TARGET_MAX_DRIVE_MIN = 75
+MAX_TARGET_I77_MINUTES = 50
 REQUEST_TIMEOUT_SECONDS = 18
 REQUEST_PAUSE_SECONDS = 0.8
 
@@ -50,9 +50,15 @@ TARGET_COUNTIES = {
     "chester county",
     "lancaster county",
     "union county",
+    "iredell county",
 }
 
 TARGET_CITIES = {
+    "statesville",
+    "hickory grove",
+    "sharon",
+    "smyrna",
+    "york",
     "rock hill",
     "fort mill",
     "catawba",
@@ -80,6 +86,11 @@ SEARCH_SOURCES = [
         "name": "LandSearch Lancaster County SC 100+ acres",
         "source": "LandSearch",
         "url": "https://www.landsearch.com/properties/lancaster-county-sc/filter/100-minacres",
+    },
+    {
+        "name": "LandSearch Iredell County NC 100+ acres",
+        "source": "LandSearch",
+        "url": "https://www.landsearch.com/properties/iredell-county-nc/filter/100-minacres",
     },
     {
         "name": "Land.com York County SC 100+ acres",
@@ -255,7 +266,7 @@ def fetch_url(url: str) -> FetchResult:
         headers={
             "User-Agent": (
                 "CharlottePoloPropertyResearch/1.0 "
-                "(+https://www.cltpolo.com/investors.html)"
+                "(+https://www.cltpolo.com/investors)"
             ),
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.9",
@@ -476,7 +487,7 @@ def infer_location(candidate: ListingCandidate) -> None:
 
 
 def is_target_candidate(candidate: ListingCandidate) -> bool:
-    if candidate.acres is not None and candidate.acres < TARGET_MIN_ACRES:
+    if candidate.acres is None or candidate.acres < TARGET_MIN_ACRES:
         return False
 
     location_blob = " ".join([candidate.city, candidate.county, candidate.address, candidate.title, candidate.url]).lower()
@@ -557,6 +568,15 @@ def normalize_row(row: dict[str, str]) -> dict[str, str]:
     return normalized
 
 
+def is_dashboard_eligible(row: dict[str, str]) -> bool:
+    """Return True only for visible investor rows that satisfy the 100-acre mandate."""
+    include = first_value(row.get("Dashboard Include")).lower()
+    if include in {"no", "false", "0"}:
+        return True
+    acres = clean_number(row.get("Acres"))
+    return bool(acres is not None and acres >= TARGET_MIN_ACRES)
+
+
 def row_key(row: dict[str, str]) -> str:
     for field in URL_FIELDS:
         value = normalize_url(row.get(field, ""))
@@ -598,7 +618,12 @@ def apply_candidate(row: dict[str, str], candidate: ListingCandidate, discovered
             "Address / Property": address,
             "City": first_value(candidate.city, row.get("City")),
             "County": first_value(candidate.county, row.get("County")),
-            "State": first_value(candidate.state, row.get("State"), "SC"),
+            "State": first_value(
+                candidate.state if candidate.verified else "",
+                row.get("State"),
+                candidate.state,
+                "SC",
+            ),
             "Acres": format_number(acres),
             "List Price": format_number(price, 0),
             "Price / Acre": format_money(price / acres) if acres and price else row.get("Price / Acre", ""),
@@ -629,10 +654,23 @@ def apply_candidate(row: dict[str, str], candidate: ListingCandidate, discovered
             "Miles From Charlotte": format_number(miles, 1),
             "Listing Verified At": NOW_ISO if candidate.verified else row.get("Listing Verified At", ""),
             "Listing External ID": first_value(candidate.external_id, row.get("Listing External ID")),
-            "Listing Verification Status": candidate.verification_status,
+            "Listing Verification Status": (
+                candidate.verification_status
+                if candidate.verified
+                else row.get("Listing Verification Status")
+                or f"Latest automated check unavailable: {candidate.verification_status}; manual broker/source verification required."
+            ),
             "Nearest I-77 Reference": i77_ref,
-            "Scrape Source Name": first_value(candidate.source_name, row.get("Scrape Source Name")),
-            "Scrape Source URL": first_value(candidate.source_url, row.get("Scrape Source URL")),
+            "Scrape Source Name": (
+                first_value(candidate.source_name, row.get("Scrape Source Name"))
+                if candidate.verified
+                else row.get("Scrape Source Name", "")
+            ),
+            "Scrape Source URL": (
+                first_value(candidate.source_url, row.get("Scrape Source URL"))
+                if candidate.verified
+                else row.get("Scrape Source URL", "")
+            ),
         }
     )
 
@@ -688,7 +726,7 @@ def scrape_candidates(rows: list[dict[str, str]]) -> tuple[list[ListingCandidate
 
 
 def update_no_results_audit_row(rows: list[dict[str, str]], audit_messages: list[str], qualifying_count: int) -> None:
-    audit_id = "SEARCH-I77S-100AC"
+    audit_id = "SEARCH-100AC-AUDIT"
     message = "; ".join(audit_messages)[:900]
     status = (
         f"Daily search completed - {qualifying_count} qualifying/tracked listing(s) processed"
@@ -702,16 +740,16 @@ def update_no_results_audit_row(rows: list[dict[str, str]], audit_messages: list
     audit_row.update(
         {
             "ID": audit_id,
-            "Dashboard Slug": "daily-i77-south-100-acre-search-audit",
+            "Dashboard Slug": "daily-100-acre-land-search-audit",
             "Dashboard Include": "No",
             "Priority": "Audit",
             "Recommendation Tier": "Search Audit",
-            "Corridor": "I-77 South",
-            "Corridor Fit": "Primary",
-            "Address / Property": "Daily south-of-Charlotte 100+ acre I-77 search audit",
-            "City": "Charlotte South Metro",
-            "County": "York / Chester / Lancaster County",
-            "State": "SC",
+            "Corridor": "Charlotte Region",
+            "Corridor Fit": "Data Quality",
+            "Address / Property": "Daily 100+ acre land-source search audit",
+            "City": "Charlotte Region",
+            "County": "York / Chester / Lancaster / Iredell",
+            "State": "NC / SC",
             "Status": status,
             "Source": "Automated search sources",
             "Listing Link Label": "Search Sources",
@@ -722,7 +760,7 @@ def update_no_results_audit_row(rows: list[dict[str, str]], audit_messages: list
             "Investor Narrative": status,
             "Next Due Diligence": "Review audit status, any source failures, and newly discovered URLs before investor distribution.",
             "Last Researched": TODAY,
-            "Property Name": "Daily I-77 South 100+ Acre Search Audit",
+            "Property Name": "Daily 100+ Acre Search Audit",
             "Property URL": SEARCH_SOURCES[0]["url"],
             "Listing Verified At": NOW_ISO,
             "Listing Verification Status": status,
@@ -758,7 +796,7 @@ def main() -> None:
         touched_keys.add(row_key(row))
 
     for row in rows:
-        if row.get("ID") == "SEARCH-I77S-100AC":
+        if row.get("ID") == "SEARCH-100AC-AUDIT":
             continue
         if row_key(row) not in touched_keys:
             row["Last Researched"] = TODAY
@@ -767,6 +805,7 @@ def main() -> None:
 
     update_no_results_audit_row(rows, audit_messages, len(candidates))
     rows = [normalize_row(row) for row in rows]
+    rows = [row for row in rows if is_dashboard_eligible(row)]
     write_rows(rows)
 
     print(f"Updated {DATA_PATH}")
