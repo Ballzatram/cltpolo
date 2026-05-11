@@ -992,6 +992,41 @@ function renderInvestorCards(properties) {
         ) ||
         "Confirm listing status, zoning, utilities, access, and field development feasibility.";
 
+      const verificationStatus =
+        normalizeInvestorValue(
+          getPropertyField(property, [
+            "Listing Verification Status",
+            "Verification Status",
+            "verification_status"
+          ])
+        ) || "Verification status pending.";
+
+      const listingExternalId = normalizeInvestorValue(
+        getPropertyField(property, [
+          "Listing External ID",
+          "External Listing ID",
+          "Listing ID",
+          "listing_id"
+        ])
+      );
+
+      const lastResearched = normalizeInvestorValue(
+        getPropertyField(property, [
+          "Last Researched",
+          "Listing Verified At",
+          "Last Updated",
+          "Updated"
+        ])
+      );
+
+      const nearestI77 = normalizeInvestorValue(
+        getPropertyField(property, [
+          "Nearest I-77 Reference",
+          "I-77 Reference",
+          "Nearest Interstate"
+        ])
+      );
+
       const listingUrl = getListingUrl(property);
 
       const driveTime = formatDriveTime(property);
@@ -1061,6 +1096,16 @@ function renderInvestorCards(properties) {
             </div>
 
             <p class="property-note">${escapeHtml(notes)}</p>
+
+            <div class="property-diligence property-verification">
+              <span>Source Verification</span>
+              <p>${escapeHtml(verificationStatus)}</p>
+              <small>
+                ${lastResearched ? `Last researched: ${escapeHtml(lastResearched)}` : "Last researched: daily agent pending"}
+                ${listingExternalId ? ` · Listing ID: ${escapeHtml(listingExternalId)}` : ""}
+                ${nearestI77 ? ` · ${escapeHtml(nearestI77)}` : ""}
+              </small>
+            </div>
 
             <div class="property-diligence">
               <span>Next Diligence</span>
