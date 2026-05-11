@@ -61,7 +61,8 @@ if (contactForm) {
 
 const INVESTOR_ACCESS_CODE = "cltpolo123!";
 const INVESTOR_ACCESS_KEY = "cltPoloInvestorAccess";
-const INVESTOR_API_URL = "./data/charlotte_polo_properties.csv";
+const INVESTOR_API_URL = "/data/charlotte_polo_properties.csv";
+const INVESTOR_MIN_ACRES = 100;
 
 const UPTOWN_CHARLOTTE = {
   latitude: 35.2271,
@@ -111,6 +112,10 @@ const investorSearch = document.getElementById("investorSearch");
 const corridorFilter = document.getElementById("corridorFilter");
 const tierFilter = document.getElementById("tierFilter");
 const sortFilter = document.getElementById("sortFilter");
+
+if (window.location.pathname.endsWith("/investors.html")) {
+  window.history.replaceState(null, "", "/investors");
+}
 
 let investorProperties = [];
 let investorMap = null;
@@ -607,6 +612,14 @@ function getFilteredInvestorProperties() {
       return false;
     }
 
+    const acres = parseInvestorNumber(
+      getPropertyField(property, ["Acreage", "Acres", "acres"])
+    );
+
+    if (acres < INVESTOR_MIN_ACRES) {
+      return false;
+    }
+
     const corridor = normalizeInvestorValue(
       getPropertyField(property, ["Corridor", "corridor"])
     );
@@ -654,12 +667,12 @@ function getFilteredInvestorProperties() {
 
     const updatedA =
       new Date(
-        getPropertyField(a, ["Last Updated", "Updated", "updated_at"])
+        getPropertyField(a, ["Listing Verified At", "Last Researched", "Last Updated", "Updated", "updated_at"])
       ).getTime() || 0;
 
     const updatedB =
       new Date(
-        getPropertyField(b, ["Last Updated", "Updated", "updated_at"])
+        getPropertyField(b, ["Listing Verified At", "Last Researched", "Last Updated", "Updated", "updated_at"])
       ).getTime() || 0;
 
     if (sortValue === "drive-asc") {
@@ -891,7 +904,7 @@ function renderInvestorStats(properties) {
 
   investorStats.innerHTML = `
     <article class="investor-stat-card">
-      <span>Total Sites</span>
+      <span>100+ Acre Sites</span>
       <strong>${totalSites}</strong>
     </article>
 
@@ -906,7 +919,7 @@ function renderInvestorStats(properties) {
     </article>
 
     <article class="investor-stat-card">
-      <span>Total Acres</span>
+      <span>Total 100+ Acres</span>
       <strong>${formatNumber(totalAcres)}</strong>
     </article>
   `;
@@ -957,6 +970,7 @@ function renderInvestorCards(properties) {
       ]);
 
       const pricePerAcre = getPropertyField(property, [
+        "Price / Acre",
         "Price Per Acre",
         "Price/Acre",
         "price_per_acre"
@@ -975,6 +989,9 @@ function renderInvestorCards(properties) {
       const notes =
         normalizeInvestorValue(
           getPropertyField(property, [
+            "Polo / Investor Notes",
+            "Investor Narrative",
+            "Listing Notes",
             "Investor Notes",
             "Notes",
             "notes",
@@ -1025,6 +1042,10 @@ function renderInvestorCards(properties) {
           "I-77 Reference",
           "Nearest Interstate"
         ])
+      );
+
+      const sourceName = normalizeInvestorValue(
+        getPropertyField(property, ["Source", "Scrape Source Name", "source"])
       );
 
       const listingUrl = getListingUrl(property);
@@ -1102,6 +1123,7 @@ function renderInvestorCards(properties) {
               <p>${escapeHtml(verificationStatus)}</p>
               <small>
                 ${lastResearched ? `Last researched: ${escapeHtml(lastResearched)}` : "Last researched: daily agent pending"}
+                ${sourceName ? ` · Source: ${escapeHtml(sourceName)}` : ""}
                 ${listingExternalId ? ` · Listing ID: ${escapeHtml(listingExternalId)}` : ""}
                 ${nearestI77 ? ` · ${escapeHtml(nearestI77)}` : ""}
               </small>
