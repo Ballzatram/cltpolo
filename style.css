@@ -1988,6 +1988,18 @@ button:disabled,
   line-height: 1.58;
 }
 
+.property-verification {
+  margin-top: 18px;
+}
+
+.property-verification small {
+  display: block;
+  margin-top: 10px;
+  color: rgba(245, 241, 232, 0.58);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
 .property-actions {
   display: grid;
   grid-template-columns: 1fr;
