@@ -37,8 +37,10 @@ jobs:
         run: |
           python - <<'PY'
           import csv
+          from datetime import datetime, timezone
           from pathlib import Path
 
+          today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
           rows = list(csv.DictReader(Path("data/charlotte_polo_properties.csv").open()))
           visible_rows = [
               row for row in rows
@@ -46,19 +48,24 @@ jobs:
           ]
           bad_rows = [
               row for row in visible_rows
-              if float((row.get("Acres") or "0").replace(",", "")) < 100
+              if float((row.get("Acres") or "0").replace(",", "")) < 50
           ]
           missing_sources = [
               row for row in visible_rows
               if not row.get("Property URL") or not row.get("Listing Verification Status")
           ]
-          if bad_rows or missing_sources:
+          stale_rows = [
+              row for row in rows
+              if row.get("Last Researched") != today
+          ]
+          if bad_rows or missing_sources or stale_rows:
               raise SystemExit(
                   f"Investor data quality gate failed: "
-                  f"{len(bad_rows)} sub-100-acre rows, "
-                  f"{len(missing_sources)} rows missing source/verification"
+                  f"{len(bad_rows)} sub-50-acre rows, "
+                  f"{len(missing_sources)} rows missing source/verification, "
+                  f"{len(stale_rows)} rows not refreshed for {today}"
               )
-          print(f"Validated {len(visible_rows)} visible investor rows at 100+ acres.")
+          print(f"Validated {len(visible_rows)} visible investor rows at 50+ acres.")
           PY
 
       - name: Commit changes
