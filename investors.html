@@ -165,8 +165,9 @@
 
                         <div class="investor-command-actions" aria-label="Investor data actions">
                             <button class="button button-primary investor-agent-refresh" id="runPropertyAgent"
-                                type="button" data-github-repo="Ballzatram/cltpolo"
-                                data-github-workflow="update-properties.yml" data-github-ref="main">
+                                type="button"
+                                data-refresh-endpoint="https://refresh-properties.charlottepolo-refresh.workers.dev"
+                                data-vote-endpoint="https://refresh-properties.charlottepolo-refresh.workers.dev/votes">
                                 Run CSV Refresh Agent
                             </button>
 
@@ -181,12 +182,8 @@
                         <strong>Reliability standard:</strong> this view excludes sub-50-acre land, prioritizes
                         exact listing URLs over map/search fallbacks, and treats source pages as research inputs
                         rather than guaranteed investment facts. The refresh button calls a secure server-side
-                        endpoint that stores the owner GitHub credential outside the dashboard and starts the CSV
-                        update workflow immediately; setup is required before this button can run in production.
-                    </div>
-
-                    <div class="investor-agent-status" id="propertyAgentStatus" role="status" aria-live="polite"
-                        hidden>
+                        Cloudflare Worker that stores the owner GitHub credential outside the dashboard, starts the
+                        CSV update workflow immediately, and never asks dashboard users for a GitHub token.
                     </div>
 
                     <div class="investor-agent-status" id="propertyAgentStatus" role="status" aria-live="polite"
