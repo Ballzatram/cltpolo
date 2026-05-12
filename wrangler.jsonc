@@ -1,0 +1,5 @@
+{
+  "name": "refresh-properties",
+  "compatibility_date": "2026-05-12",
+  "main": "workers/refresh-properties.js"
+}
