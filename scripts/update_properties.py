@@ -28,9 +28,8 @@ NOW_ISO = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 UPTOWN_CHARLOTTE = (35.2271, -80.8431)
 TARGET_MIN_ACRES = 50.0
-TARGET_MIN_DRIVE_MIN = 30
-TARGET_MAX_DRIVE_MIN = 75
-MAX_TARGET_I77_MINUTES = 50
+TARGET_MIN_DRIVE_MIN = 35
+TARGET_MAX_DRIVE_MIN = 55
 REQUEST_TIMEOUT_SECONDS = 18
 REQUEST_PAUSE_SECONDS = 0.8
 
@@ -51,57 +50,80 @@ TARGET_COUNTIES = {
     "lancaster county",
     "union county",
     "iredell county",
+    "gaston county",
+    "lincoln county",
+    "cabarrus county",
+    "stanly county",
+    "rowan county",
+    "cleveland county",
 }
 
 TARGET_CITIES = {
-    "statesville",
+    "albemarle",
+    "belmont",
+    "catawba",
+    "charlotte region",
+    "chester",
+    "china grove",
+    "concord",
+    "dallas",
+    "denver",
+    "edgemoor",
+    "fort lawn",
+    "fort mill",
+    "gastonia",
     "hickory grove",
+    "indian trail",
+    "kannapolis",
+    "lancaster",
+    "lincolnton",
+    "locust",
+    "midland",
+    "monroe",
+    "mooresville",
+    "mount pleasant",
+    "norwood",
+    "richburg",
+    "rock hill",
+    "rockwell",
+    "salisbury",
     "sharon",
     "smyrna",
+    "statesville",
+    "troutman",
+    "waxhaw",
+    "weddington",
     "york",
-    "rock hill",
-    "fort mill",
-    "catawba",
-    "richburg",
-    "chester",
-    "fort lawn",
-    "lancaster",
-    "edgemoor",
-    "york",
-    "sharon",
 }
+
+SEARCH_MARKETS = [
+    ("York County SC", "LandSearch", "https://www.landsearch.com/properties/york-county-sc/filter/50-minacres"),
+    ("Chester County SC", "LandSearch", "https://www.landsearch.com/properties/chester-county-sc/filter/50-minacres"),
+    ("Lancaster County SC", "LandSearch", "https://www.landsearch.com/properties/lancaster-county-sc/filter/50-minacres"),
+    ("Union County NC", "LandSearch", "https://www.landsearch.com/properties/union-county-nc/filter/50-minacres"),
+    ("Gaston County NC", "LandSearch", "https://www.landsearch.com/properties/gaston-county-nc/filter/50-minacres"),
+    ("Lincoln County NC", "LandSearch", "https://www.landsearch.com/properties/lincoln-county-nc/filter/50-minacres"),
+    ("Iredell County NC", "LandSearch", "https://www.landsearch.com/properties/iredell-county-nc/filter/50-minacres"),
+    ("Cabarrus County NC", "LandSearch", "https://www.landsearch.com/properties/cabarrus-county-nc/filter/50-minacres"),
+    ("Stanly County NC", "LandSearch", "https://www.landsearch.com/properties/stanly-county-nc/filter/50-minacres"),
+    ("Rowan County NC", "LandSearch", "https://www.landsearch.com/properties/rowan-county-nc/filter/50-minacres"),
+    ("Cleveland County NC", "LandSearch", "https://www.landsearch.com/properties/cleveland-county-nc/filter/50-minacres"),
+    ("York County SC", "Land.com", "https://www.land.com/York-County-SC/all-land/50-100000-acres/"),
+    ("Chester County SC", "Land.com", "https://www.land.com/Chester-County-SC/all-land/50-100000-acres/"),
+    ("Lancaster County SC", "Land.com", "https://www.land.com/Lancaster-County-SC/all-land/50-100000-acres/"),
+    ("Union County NC", "Land.com", "https://www.land.com/Union-County-NC/all-land/50-100000-acres/"),
+    ("Gaston County NC", "Land.com", "https://www.land.com/Gaston-County-NC/all-land/50-100000-acres/"),
+    ("Lincoln County NC", "Land.com", "https://www.land.com/Lincoln-County-NC/all-land/50-100000-acres/"),
+    ("Cabarrus County NC", "Land.com", "https://www.land.com/Cabarrus-County-NC/all-land/50-100000-acres/"),
+]
 
 SEARCH_SOURCES = [
     {
-        "name": "LandSearch York County SC 50+ acres",
-        "source": "LandSearch",
-        "url": "https://www.landsearch.com/properties/york-county-sc/filter/50-minacres",
-    },
-    {
-        "name": "LandSearch Chester County SC 50+ acres",
-        "source": "LandSearch",
-        "url": "https://www.landsearch.com/properties/chester-county-sc/filter/50-minacres",
-    },
-    {
-        "name": "LandSearch Lancaster County SC 50+ acres",
-        "source": "LandSearch",
-        "url": "https://www.landsearch.com/properties/lancaster-county-sc/filter/50-minacres",
-    },
-    {
-        "name": "LandSearch Iredell County NC 50+ acres",
-        "source": "LandSearch",
-        "url": "https://www.landsearch.com/properties/iredell-county-nc/filter/50-minacres",
-    },
-    {
-        "name": "Land.com York County SC 50+ acres",
-        "source": "Land.com",
-        "url": "https://www.land.com/York-County-SC/all-land/50-100000-acres/",
-    },
-    {
-        "name": "Land.com Chester County SC 50+ acres",
-        "source": "Land.com",
-        "url": "https://www.land.com/Chester-County-SC/all-land/50-100000-acres/",
-    },
+        "name": f"{source} {market} 35-55 min from Charlotte 50+ acres",
+        "source": source,
+        "url": url,
+    }
+    for market, source, url in SEARCH_MARKETS
 ]
 
 TARGET_COLUMNS = [
@@ -502,11 +524,9 @@ def is_target_candidate(candidate: ListingCandidate) -> bool:
             UPTOWN_CHARLOTTE[0], UPTOWN_CHARLOTTE[1], candidate.latitude, candidate.longitude
         )
         drive = estimate_drive_minutes(miles)
-        _, i77_minutes = nearest_i77_reference(candidate.latitude, candidate.longitude)
         return bool(
             drive is not None
-            and TARGET_MIN_DRIVE_MIN <= drive <= TARGET_MAX_DRIVE_MIN + 10
-            and (i77_minutes is None or i77_minutes <= MAX_TARGET_I77_MINUTES)
+            and TARGET_MIN_DRIVE_MIN <= drive <= TARGET_MAX_DRIVE_MIN
         )
 
     return True
@@ -613,7 +633,7 @@ def apply_candidate(row: dict[str, str], candidate: ListingCandidate, discovered
             "Priority": row.get("Priority") or ("Primary" if acres and acres >= TARGET_MIN_ACRES else "Research"),
             "Recommendation Tier": row.get("Recommendation Tier") or "Tier 1 - Investor Shortlist" if acres and acres >= TARGET_MIN_ACRES else row.get("Recommendation Tier") or "Active Research",
             "Weighted Polo Score": row.get("Weighted Polo Score") or str(score_candidate(candidate)),
-            "Corridor": row.get("Corridor") or "I-77 South",
+            "Corridor": row.get("Corridor") or "35-55 Min Charlotte Ring",
             "Corridor Fit": row.get("Corridor Fit") or "Primary",
             "Address / Property": address,
             "City": first_value(candidate.city, row.get("City")),
@@ -639,8 +659,8 @@ def apply_candidate(row: dict[str, str], candidate: ListingCandidate, discovered
             "Geo Status": row.get("Geo Status") or ("Listing coordinates available / confirm in GIS" if lat and lng else "Needs parcel/geocode verification"),
             "Research Confidence": "High" if candidate.verified and lat and lng else row.get("Research Confidence") or "Medium",
             "Listing Notes": notes,
-            "Polo / Investor Notes": row.get("Polo / Investor Notes") or "Daily agent match for the south Charlotte / I-77 large-acreage thesis.",
-            "Investor Narrative": row.get("Investor Narrative") or f"{format_number(acres)} acres near {first_value(candidate.city, candidate.county, 'the I-77 South corridor')}; confirm access, frontage, topography, and listing status.",
+            "Polo / Investor Notes": row.get("Polo / Investor Notes") or "Daily agent match for the 35-55 minute Charlotte large-acreage thesis.",
+            "Investor Narrative": row.get("Investor Narrative") or f"{format_number(acres)} acres near {first_value(candidate.city, candidate.county, 'the 35-55 minute Charlotte ring')}; confirm access, frontage, topography, and listing status.",
             "Est. Drive Min to Charlotte": format_number(drive, 0),
             "Est. Min to I-77": format_number(i77_minutes, 0),
             "Next Due Diligence": row.get("Next Due Diligence") or "Confirm active status with broker; pull parcel/GIS boundary; verify zoning, utilities, road frontage, wetlands/floodplain, and polo-field grading feasibility.",
@@ -732,7 +752,7 @@ def update_no_results_audit_row(rows: list[dict[str, str]], audit_messages: list
     status = (
         f"Daily search completed - {qualifying_count} qualifying/tracked listing(s) processed"
         if qualifying_count
-        else "Daily search completed - no qualifying 50+ acre I-77 South listings discovered"
+        else "Daily search completed - no qualifying 50+ acre listings discovered 35-55 minutes from Charlotte"
     )
     audit_row = next((row for row in rows if row.get("ID") in previous_audit_ids), None)
     if audit_row is None:
@@ -749,7 +769,7 @@ def update_no_results_audit_row(rows: list[dict[str, str]], audit_messages: list
             "Corridor Fit": "Data Quality",
             "Address / Property": "Daily 50+ acre land-source search audit",
             "City": "Charlotte Region",
-            "County": "York / Chester / Lancaster / Iredell",
+            "County": "35-55 min Charlotte ring",
             "State": "NC / SC",
             "Status": status,
             "Source": "Automated search sources",
@@ -757,7 +777,7 @@ def update_no_results_audit_row(rows: list[dict[str, str]], audit_messages: list
             "Source URL": SEARCH_SOURCES[0]["url"],
             "Research Confidence": "System Audit",
             "Listing Notes": message or "No source responses recorded.",
-            "Polo / Investor Notes": "Hidden dashboard audit row that proves the daily search ran even when no new investor-grade listings are found.",
+            "Polo / Investor Notes": "Hidden dashboard audit row that proves the 35-55 minute / 50+ acre search ran even when no new investor-grade listings are found.",
             "Investor Narrative": status,
             "Next Due Diligence": "Review audit status, any source failures, and newly discovered URLs before investor distribution.",
             "Last Researched": TODAY,
