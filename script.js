@@ -63,6 +63,7 @@ const INVESTOR_ACCESS_CODE = "cltpolo123!";
 const INVESTOR_ACCESS_KEY = "cltPoloInvestorAccess";
 const INVESTOR_API_URL = "/data/charlotte_polo_properties.csv";
 const INVESTOR_MIN_ACRES = 50;
+const PROPERTY_VOTES_STORAGE_KEY = "cltPoloPropertyVotes";
 
 const UPTOWN_CHARLOTTE = {
   latitude: 35.2271,
@@ -123,6 +124,8 @@ let investorProperties = [];
 let investorMap = null;
 let investorMapLayer = null;
 let propertyMiniMaps = [];
+let propertyVoteTallies = {};
+let propertyUserVotes = readStoredPropertyVotes();
 
 function normalizeInvestorValue(value) {
   return value === null || value === undefined ? "" : String(value).trim();
@@ -502,6 +505,229 @@ function showInvestorDashboard() {
   loadInvestorProperties();
 }
 
+
+function getPropertyVoteEndpoint() {
+  if (runPropertyAgent && runPropertyAgent.dataset.voteEndpoint) {
+    return runPropertyAgent.dataset.voteEndpoint;
+  }
+
+  if (runPropertyAgent && runPropertyAgent.dataset.refreshEndpoint) {
+    return `${runPropertyAgent.dataset.refreshEndpoint.replace(/\/$/, "")}/votes`;
+  }
+
+  return "";
+}
+
+function readStoredPropertyVotes() {
+  try {
+    const storedVotes = window.localStorage.getItem(PROPERTY_VOTES_STORAGE_KEY);
+    const parsedVotes = storedVotes ? JSON.parse(storedVotes) : {};
+
+    return parsedVotes && typeof parsedVotes === "object" ? parsedVotes : {};
+  } catch (error) {
+    return {};
+  }
+}
+
+function storePropertyUserVotes() {
+  try {
+    window.localStorage.setItem(
+      PROPERTY_VOTES_STORAGE_KEY,
+      JSON.stringify(propertyUserVotes)
+    );
+  } catch (error) {
+    // Voting should still work for this page view if local storage is unavailable.
+  }
+}
+
+function normalizeVoteTally(tally) {
+  const up = Number(tally && tally.up);
+  const down = Number(tally && tally.down);
+
+  return {
+    up: Number.isFinite(up) && up > 0 ? up : 0,
+    down: Number.isFinite(down) && down > 0 ? down : 0
+  };
+}
+
+function getPropertyVoteId(property) {
+  const rawId = normalizeInvestorValue(
+    getPropertyField(property, [
+      "ID",
+      "Listing External ID",
+      "Dashboard Slug",
+      "Property URL",
+      "Source URL"
+    ])
+  ) || getPropertyDisplayName(property);
+
+  return slugify(rawId) || "property";
+}
+
+function getPropertyVoteTally(propertyVoteId) {
+  return normalizeVoteTally(propertyVoteTallies[propertyVoteId]);
+}
+
+function setPropertyVoteTally(propertyVoteId, tally) {
+  propertyVoteTallies[propertyVoteId] = normalizeVoteTally(tally);
+}
+
+function getVoteScore(tally) {
+  return normalizeVoteTally(tally).up - normalizeVoteTally(tally).down;
+}
+
+function renderVoteSummary(propertyVoteId) {
+  const tally = getPropertyVoteTally(propertyVoteId);
+  const score = getVoteScore(tally);
+
+  return `${score >= 0 ? "+" : ""}${score} score · ${tally.up} up · ${tally.down} down`;
+}
+
+async function loadPropertyVoteTallies() {
+  const voteEndpoint = getPropertyVoteEndpoint();
+
+  if (!voteEndpoint) {
+    propertyVoteTallies = {};
+    return;
+  }
+
+  try {
+    const response = await fetch(voteEndpoint, {
+      method: "GET",
+      headers: {
+        Accept: "application/json"
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Vote totals are not available yet.");
+    }
+
+    const data = await response.json();
+    propertyVoteTallies = data && data.votes && typeof data.votes === "object"
+      ? data.votes
+      : {};
+  } catch (error) {
+    propertyVoteTallies = {};
+  }
+}
+
+function applyLocalVoteChange(propertyVoteId, previousVote, nextVote) {
+  const tally = getPropertyVoteTally(propertyVoteId);
+
+  if (previousVote === 1) {
+    tally.up = Math.max(0, tally.up - 1);
+  } else if (previousVote === -1) {
+    tally.down = Math.max(0, tally.down - 1);
+  }
+
+  if (nextVote === 1) {
+    tally.up += 1;
+  } else if (nextVote === -1) {
+    tally.down += 1;
+  }
+
+  setPropertyVoteTally(propertyVoteId, tally);
+}
+
+function updatePropertyVoteCard(propertyVoteId) {
+  const votePanel = propertyGrid
+    ? propertyGrid.querySelector(`[data-property-vote-panel="${propertyVoteId}"]`)
+    : null;
+
+  if (!votePanel) {
+    return;
+  }
+
+  const currentVote = Number(propertyUserVotes[propertyVoteId] || 0);
+  const summary = votePanel.querySelector("[data-vote-summary]");
+
+  if (summary) {
+    summary.textContent = renderVoteSummary(propertyVoteId);
+  }
+
+  votePanel.querySelectorAll("[data-vote-value]").forEach((button) => {
+    const voteValue = Number(button.dataset.voteValue);
+    button.classList.toggle("is-selected", voteValue === currentVote);
+    button.setAttribute("aria-pressed", voteValue === currentVote ? "true" : "false");
+  });
+}
+
+async function submitPropertyVote(button) {
+  const voteEndpoint = getPropertyVoteEndpoint();
+  const propertyVoteId = button.dataset.propertyVoteId;
+  const voteValue = Number(button.dataset.voteValue);
+
+  if (!voteEndpoint || !propertyVoteId || ![1, -1].includes(voteValue)) {
+    setPropertyAgentStatus("Voting is not configured yet.", "error");
+    return;
+  }
+
+  const previousVote = Number(propertyUserVotes[propertyVoteId] || 0);
+  const nextVote = previousVote === voteValue ? 0 : voteValue;
+
+  button.closest(".property-vote")
+    ?.querySelectorAll("button")
+    .forEach((voteButton) => {
+      voteButton.disabled = true;
+    });
+
+  applyLocalVoteChange(propertyVoteId, previousVote, nextVote);
+
+  if (nextVote) {
+    propertyUserVotes[propertyVoteId] = nextVote;
+  } else {
+    delete propertyUserVotes[propertyVoteId];
+  }
+
+  storePropertyUserVotes();
+  updatePropertyVoteCard(propertyVoteId);
+
+  try {
+    const response = await fetch(voteEndpoint, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        propertyId: propertyVoteId,
+        vote: nextVote,
+        previousVote
+      })
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      throw new Error(data && data.message ? data.message : "Vote could not be saved.");
+    }
+
+    if (data && data.votes && data.votes[propertyVoteId]) {
+      setPropertyVoteTally(propertyVoteId, data.votes[propertyVoteId]);
+      updatePropertyVoteCard(propertyVoteId);
+    }
+  } catch (error) {
+    applyLocalVoteChange(propertyVoteId, nextVote, previousVote);
+
+    if (previousVote) {
+      propertyUserVotes[propertyVoteId] = previousVote;
+    } else {
+      delete propertyUserVotes[propertyVoteId];
+    }
+
+    storePropertyUserVotes();
+    updatePropertyVoteCard(propertyVoteId);
+    setPropertyAgentStatus(`Vote could not be saved: ${error.message}`, "error");
+  } finally {
+    button.closest(".property-vote")
+      ?.querySelectorAll("button")
+      .forEach((voteButton) => {
+        voteButton.disabled = false;
+      });
+  }
+}
+
 async function loadInvestorProperties() {
   if (!propertyGrid || !investorLoading) {
     return;
@@ -528,6 +754,7 @@ async function loadInvestorProperties() {
     investorProperties = parseCSV(csvText);
 
     populateInvestorFilters(investorProperties);
+    await loadPropertyVoteTallies();
     renderInvestorDashboard();
   } catch (error) {
     investorLoading.hidden = false;
@@ -551,26 +778,12 @@ async function triggerPropertyAgentRefresh() {
     return;
   }
 
-  const repo = runPropertyAgent.dataset.githubRepo;
-  const workflow = runPropertyAgent.dataset.githubWorkflow;
-  const ref = runPropertyAgent.dataset.githubRef || "main";
+  const refreshEndpoint = runPropertyAgent.dataset.refreshEndpoint;
 
-  if (!repo || !workflow) {
+  if (!refreshEndpoint) {
     setPropertyAgentStatus(
-      "Agent refresh is not configured. Add the GitHub repository and workflow file to this button.",
+      "Agent refresh is not configured. Add the Cloudflare Worker refresh endpoint to this button.",
       "error"
-    );
-    return;
-  }
-
-  const token = window.prompt(
-    "Paste a GitHub token with Actions write access to start the property CSV refresh agent. The token is used once and is not stored."
-  );
-
-  if (!token) {
-    setPropertyAgentStatus(
-      "Agent refresh canceled. No GitHub token was provided.",
-      "warning"
     );
     return;
   }
@@ -579,36 +792,34 @@ async function triggerPropertyAgentRefresh() {
   runPropertyAgent.disabled = true;
   runPropertyAgent.textContent = "Starting Agent...";
   setPropertyAgentStatus(
-    "Starting the property CSV refresh agent in GitHub Actions...",
+    "Starting the property CSV refresh agent through the secure Cloudflare Worker...",
     "pending"
   );
 
   try {
-    const response = await fetch(
-      `https://api.github.com/repos/${repo}/actions/workflows/${workflow}/dispatches`,
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/vnd.github+json",
-          Authorization: `Bearer ${token.trim()}`,
-          "X-GitHub-Api-Version": "2022-11-28",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ ref })
-      }
-    );
+    const response = await fetch(refreshEndpoint, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ source: "investor-dashboard" })
+    });
 
-    if (response.status !== 204) {
-      const errorData = await response.json().catch(() => null);
-      const errorMessage = errorData && errorData.message
-        ? errorData.message
-        : "GitHub did not accept the workflow dispatch request.";
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const errorMessage = data && data.message
+        ? data.message
+        : "The refresh worker did not accept the workflow dispatch request.";
 
       throw new Error(errorMessage);
     }
 
     setPropertyAgentStatus(
-      "CSV refresh agent started. When the GitHub Actions run finishes and Pages redeploys, use Reload Committed Data to load the updated CSV.",
+      data && data.message
+        ? data.message
+        : "CSV refresh agent started. Reload committed data after GitHub Actions finishes and the site redeploys.",
       "success"
     );
   } catch (error) {
@@ -1143,6 +1354,7 @@ function renderInvestorCards(properties) {
       const miles = estimateMilesFromCharlotte(property);
       const cardId = slugify(name) || `property-${index + 1}`;
       const miniMapId = `property-mini-map-${cardId}-${index}`;
+      const propertyVoteId = getPropertyVoteId(property);
 
       return `
         <article class="property-card" id="${escapeAttribute(cardId)}">
@@ -1220,6 +1432,18 @@ function renderInvestorCards(properties) {
             <div class="property-diligence">
               <span>Next Diligence</span>
               <p>${escapeHtml(diligence)}</p>
+            </div>
+
+            <div class="property-vote" data-property-vote-panel="${escapeAttribute(propertyVoteId)}">
+              <div>
+                <span>Community Score</span>
+                <strong data-vote-summary>${escapeHtml(renderVoteSummary(propertyVoteId))}</strong>
+              </div>
+
+              <div class="property-vote-actions" aria-label="Vote on ${escapeAttribute(name)}">
+                <button type="button" data-property-vote-id="${escapeAttribute(propertyVoteId)}" data-vote-value="1" aria-pressed="${propertyUserVotes[propertyVoteId] === 1 ? "true" : "false"}" class="${propertyUserVotes[propertyVoteId] === 1 ? "is-selected" : ""}">👍 Like</button>
+                <button type="button" data-property-vote-id="${escapeAttribute(propertyVoteId)}" data-vote-value="-1" aria-pressed="${propertyUserVotes[propertyVoteId] === -1 ? "true" : "false"}" class="${propertyUserVotes[propertyVoteId] === -1 ? "is-selected" : ""}">👎 Pass</button>
+              </div>
             </div>
 
             <div class="property-actions property-actions-single">
@@ -1369,4 +1593,14 @@ if (refreshInvestorData) {
 
 if (runPropertyAgent) {
   runPropertyAgent.addEventListener("click", triggerPropertyAgentRefresh);
+}
+
+if (propertyGrid) {
+  propertyGrid.addEventListener("click", (event) => {
+    const voteButton = event.target.closest("[data-property-vote-id][data-vote-value]");
+
+    if (voteButton) {
+      submitPropertyVote(voteButton);
+    }
+  });
 }

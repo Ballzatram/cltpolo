@@ -1,27 +1,42 @@
 # Investor CSV refresh agent setup
 
-The land dashboard is a static page, so it cannot safely store an owner GitHub token in browser JavaScript. To make **Refresh CSV Now** work for investors without GitHub accounts, put the GitHub credential in a tiny server-side endpoint and let the dashboard call that endpoint.
+The land dashboard is a static page, so it cannot safely store an owner GitHub token in browser JavaScript. The dashboard calls a Cloudflare Worker instead. That Worker keeps the GitHub credential server-side, dispatches the property update workflow, and exposes a small shared voting API.
 
-This repository includes a Cloudflare Worker example at `workers/refresh-properties.js`.
+This repository includes the Worker at `workers/refresh-properties.js`.
 
-## One-time setup
+## One-time refresh setup
 
 1. Create a fine-grained GitHub personal access token for the repository.
    - Repository access: `Ballzatram/cltpolo` only.
    - Permissions: **Actions: Read and write**.
    - Set an expiration date and rotate it periodically.
-2. Deploy `workers/refresh-properties.js` as a Cloudflare Worker.
+2. Deploy `workers/refresh-properties.js` as the `refresh-properties` Cloudflare Worker.
 3. Add these Worker secrets / variables:
    - `GITHUB_TOKEN`: the fine-grained token from step 1. Store this as a secret, not a plain variable.
    - `GITHUB_REPOSITORY`: `Ballzatram/cltpolo`.
    - `GITHUB_WORKFLOW`: `update-properties.yml`.
-   - `GITHUB_REF`: the branch that runs the workflow, usually `main`.
+   - `GITHUB_REF`: `main`.
    - `ALLOWED_ORIGIN`: `https://charlottepolo.com`.
-4. Route the Worker to `https://charlottepolo.com/api/refresh-properties` or update the `data-refresh-endpoint` attribute on the dashboard button to the Worker URL.
-5. Test from the investor dashboard by clicking **Refresh CSV Now**. The button starts the GitHub Actions workflow immediately; the CSV appears after the workflow commits and the site redeploys.
+4. Confirm the investor dashboard button has `data-refresh-endpoint="https://refresh-properties.charlottepolo-refresh.workers.dev"`.
+5. Test from the investor dashboard by clicking **Run CSV Refresh Agent**. The browser sends a `POST` to the Worker; the browser never asks for, stores, or submits a GitHub token.
+
+## One-time shared voting setup
+
+The thumbs-up / thumbs-down counts persist for all users through Cloudflare Workers KV.
+
+1. Create a Workers KV namespace for property votes, for example `PROPERTY_VOTES`.
+2. Bind that namespace to the `refresh-properties` Worker with the binding name `PROPERTY_VOTES`.
+3. Redeploy the Worker.
+4. Confirm the investor dashboard button has `data-vote-endpoint="https://refresh-properties.charlottepolo-refresh.workers.dev/votes"`.
+5. Test from the investor dashboard by clicking a card vote. The browser stores only that visitor's current selection locally so the same visitor can toggle their vote; shared totals come from KV.
+
+## Data refresh behavior
+
+The GitHub workflow runs `scripts/update_properties.py`. The script reads the existing CSV, refreshes tracked listings and 50+ acre search pages across the 35-55 minute Charlotte ring, preserves existing rows, appends newly discovered eligible listings, stamps research dates, and commits `data/charlotte_polo_properties.csv` when the dataset changes. The search-source grid covers LandSearch, Land.com, LandWatch, Zillow, Realtor.com, Crexi, and LoopNet for each configured county market.
 
 ## Security notes
 
 - Do not put the GitHub token in `investors.html`, `script.js`, or any other browser-delivered file.
 - Do not ask investors to paste your GitHub credentials.
+- Keep the Worker `ALLOWED_ORIGIN` set to `https://charlottepolo.com` unless you intentionally add another production origin.
 - Consider adding Cloudflare rate limiting, Turnstile, or an authenticated access layer before sharing the dashboard widely.
