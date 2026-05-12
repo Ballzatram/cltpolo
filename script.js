@@ -106,6 +106,8 @@ const investorEmpty = document.getElementById("investorEmpty");
 const propertyGrid = document.getElementById("propertyGrid");
 const investorStats = document.getElementById("investorStats");
 const refreshInvestorData = document.getElementById("refreshInvestorData");
+const runPropertyAgent = document.getElementById("runPropertyAgent");
+const propertyAgentStatus = document.getElementById("propertyAgentStatus");
 const investorMapElement = document.getElementById("investorMap");
 
 const investorSearch = document.getElementById("investorSearch");
@@ -531,6 +533,78 @@ async function loadInvestorProperties() {
     investorLoading.hidden = false;
     investorLoading.textContent =
       "Investor data could not be loaded. Check that data/charlotte_polo_properties.csv exists and is committed to the repo.";
+  }
+}
+
+function setPropertyAgentStatus(message, statusType = "info") {
+  if (!propertyAgentStatus) {
+    return;
+  }
+
+  propertyAgentStatus.hidden = false;
+  propertyAgentStatus.textContent = message;
+  propertyAgentStatus.dataset.status = statusType;
+}
+
+async function triggerPropertyAgentRefresh() {
+  if (!runPropertyAgent) {
+    return;
+  }
+
+  const endpoint = runPropertyAgent.dataset.refreshEndpoint;
+
+  if (!endpoint) {
+    setPropertyAgentStatus(
+      "CSV refresh is not configured yet. Add the secure refresh endpoint URL to this button.",
+      "error"
+    );
+    return;
+  }
+
+  const originalButtonText = runPropertyAgent.textContent;
+  runPropertyAgent.disabled = true;
+  runPropertyAgent.textContent = "Refreshing...";
+  setPropertyAgentStatus(
+    "Starting the CSV refresh agent now. The updated CSV will appear after GitHub Actions finishes and the site redeploys.",
+    "pending"
+  );
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ source: "investor-dashboard" })
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const errorMessage = data && data.message
+        ? data.message
+        : "The refresh endpoint did not accept the request.";
+
+      throw new Error(errorMessage);
+    }
+
+    setPropertyAgentStatus(
+      data && data.message
+        ? data.message
+        : "CSV refresh agent started. The dashboard will reload committed data automatically in about a minute.",
+      "success"
+    );
+
+    window.setTimeout(loadInvestorProperties, 60000);
+  } catch (error) {
+    setPropertyAgentStatus(
+      `Could not start the CSV refresh agent: ${error.message}`,
+      "error"
+    );
+  } finally {
+    runPropertyAgent.disabled = false;
+    runPropertyAgent.textContent = originalButtonText;
   }
 }
 
@@ -1277,4 +1351,8 @@ if (investorCodeForm) {
 
 if (refreshInvestorData) {
   refreshInvestorData.addEventListener("click", loadInvestorProperties);
+}
+
+if (runPropertyAgent) {
+  runPropertyAgent.addEventListener("click", triggerPropertyAgentRefresh);
 }
