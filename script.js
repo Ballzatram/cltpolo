@@ -106,6 +106,8 @@ const investorEmpty = document.getElementById("investorEmpty");
 const propertyGrid = document.getElementById("propertyGrid");
 const investorStats = document.getElementById("investorStats");
 const refreshInvestorData = document.getElementById("refreshInvestorData");
+const runPropertyAgent = document.getElementById("runPropertyAgent");
+const propertyAgentStatus = document.getElementById("propertyAgentStatus");
 const investorMapElement = document.getElementById("investorMap");
 
 const investorSearch = document.getElementById("investorSearch");
@@ -531,6 +533,92 @@ async function loadInvestorProperties() {
     investorLoading.hidden = false;
     investorLoading.textContent =
       "Investor data could not be loaded. Check that data/charlotte_polo_properties.csv exists and is committed to the repo.";
+  }
+}
+
+function setPropertyAgentStatus(message, statusType = "info") {
+  if (!propertyAgentStatus) {
+    return;
+  }
+
+  propertyAgentStatus.hidden = false;
+  propertyAgentStatus.textContent = message;
+  propertyAgentStatus.dataset.status = statusType;
+}
+
+async function triggerPropertyAgentRefresh() {
+  if (!runPropertyAgent) {
+    return;
+  }
+
+  const repo = runPropertyAgent.dataset.githubRepo;
+  const workflow = runPropertyAgent.dataset.githubWorkflow;
+  const ref = runPropertyAgent.dataset.githubRef || "main";
+
+  if (!repo || !workflow) {
+    setPropertyAgentStatus(
+      "Agent refresh is not configured. Add the GitHub repository and workflow file to this button.",
+      "error"
+    );
+    return;
+  }
+
+  const token = window.prompt(
+    "Paste a GitHub token with Actions write access to start the property CSV refresh agent. The token is used once and is not stored."
+  );
+
+  if (!token) {
+    setPropertyAgentStatus(
+      "Agent refresh canceled. No GitHub token was provided.",
+      "warning"
+    );
+    return;
+  }
+
+  const originalButtonText = runPropertyAgent.textContent;
+  runPropertyAgent.disabled = true;
+  runPropertyAgent.textContent = "Starting Agent...";
+  setPropertyAgentStatus(
+    "Starting the property CSV refresh agent in GitHub Actions...",
+    "pending"
+  );
+
+  try {
+    const response = await fetch(
+      `https://api.github.com/repos/${repo}/actions/workflows/${workflow}/dispatches`,
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/vnd.github+json",
+          Authorization: `Bearer ${token.trim()}`,
+          "X-GitHub-Api-Version": "2022-11-28",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ ref })
+      }
+    );
+
+    if (response.status !== 204) {
+      const errorData = await response.json().catch(() => null);
+      const errorMessage = errorData && errorData.message
+        ? errorData.message
+        : "GitHub did not accept the workflow dispatch request.";
+
+      throw new Error(errorMessage);
+    }
+
+    setPropertyAgentStatus(
+      "CSV refresh agent started. When the GitHub Actions run finishes and Pages redeploys, use Reload Committed Data to load the updated CSV.",
+      "success"
+    );
+  } catch (error) {
+    setPropertyAgentStatus(
+      `Could not start the CSV refresh agent: ${error.message}`,
+      "error"
+    );
+  } finally {
+    runPropertyAgent.disabled = false;
+    runPropertyAgent.textContent = originalButtonText;
   }
 }
 
@@ -1277,4 +1365,8 @@ if (investorCodeForm) {
 
 if (refreshInvestorData) {
   refreshInvestorData.addEventListener("click", loadInvestorProperties);
+}
+
+if (runPropertyAgent) {
+  runPropertyAgent.addEventListener("click", triggerPropertyAgentRefresh);
 }

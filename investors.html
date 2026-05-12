@@ -163,15 +163,28 @@
                             <h2>Current Opportunities</h2>
                         </div>
 
-                        <button class="button button-secondary investor-refresh" id="refreshInvestorData" type="button">
-                            Reload Committed Data
-                        </button>
+                        <div class="investor-command-actions" aria-label="Investor data actions">
+                            <button class="button button-primary investor-agent-refresh" id="runPropertyAgent"
+                                type="button" data-github-repo="Ballzatram/cltpolo"
+                                data-github-workflow="update-properties.yml" data-github-ref="main">
+                                Run CSV Refresh Agent
+                            </button>
+
+                            <button class="button button-secondary investor-refresh" id="refreshInvestorData"
+                                type="button">
+                                Reload Committed Data
+                            </button>
+                        </div>
                     </div>
 
                     <div class="investor-data-alert" role="note">
                         <strong>Reliability standard:</strong> this view excludes sub-50-acre land, prioritizes
                         exact listing URLs over map/search fallbacks, and treats source pages as research inputs
                         rather than guaranteed investment facts.
+                    </div>
+
+                    <div class="investor-agent-status" id="propertyAgentStatus" role="status" aria-live="polite"
+                        hidden>
                     </div>
 
                     <div class="investor-stats-grid" id="investorStats">
