@@ -1620,8 +1620,18 @@ button:disabled,
   font-size: clamp(2rem, 3.5vw, 3.2rem);
 }
 
-.investor-refresh {
+.investor-command-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.investor-refresh,
+.investor-agent-refresh {
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .investor-data-alert {
@@ -1636,6 +1646,29 @@ button:disabled,
 
 .investor-data-alert strong {
   color: var(--ivory);
+}
+
+.investor-agent-status {
+  margin: -4px 0 22px;
+  padding: 13px 16px;
+  border: 1px solid rgba(157, 132, 86, 0.34);
+  background: rgba(157, 132, 86, 0.1);
+  color: rgba(245, 241, 232, 0.82);
+  font-size: 0.9rem;
+}
+
+.investor-agent-status[data-status="success"] {
+  border-color: rgba(122, 174, 126, 0.42);
+  background: rgba(122, 174, 126, 0.1);
+}
+
+.investor-agent-status[data-status="warning"] {
+  border-color: rgba(216, 204, 184, 0.34);
+}
+
+.investor-agent-status[data-status="error"] {
+  border-color: rgba(196, 86, 86, 0.48);
+  background: rgba(196, 86, 86, 0.11);
 }
 
 .investor-stats-grid {
@@ -2614,7 +2647,13 @@ button:disabled,
     gap: 16px;
   }
 
-  .investor-refresh {
+  .investor-command-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .investor-refresh,
+  .investor-agent-refresh {
     width: 100%;
   }
 
