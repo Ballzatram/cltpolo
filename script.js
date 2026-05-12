@@ -62,7 +62,7 @@ if (contactForm) {
 const INVESTOR_ACCESS_CODE = "cltpolo123!";
 const INVESTOR_ACCESS_KEY = "cltPoloInvestorAccess";
 const INVESTOR_API_URL = "/data/charlotte_polo_properties.csv";
-const INVESTOR_MIN_ACRES = 100;
+const INVESTOR_MIN_ACRES = 50;
 
 const UPTOWN_CHARLOTTE = {
   latitude: 35.2271,
@@ -904,7 +904,7 @@ function renderInvestorStats(properties) {
 
   investorStats.innerHTML = `
     <article class="investor-stat-card">
-      <span>100+ Acre Sites</span>
+      <span>50+ Acre Sites</span>
       <strong>${totalSites}</strong>
     </article>
 
@@ -919,7 +919,7 @@ function renderInvestorStats(properties) {
     </article>
 
     <article class="investor-stat-card">
-      <span>Total 100+ Acres</span>
+      <span>Total 50+ Acres</span>
       <strong>${formatNumber(totalAcres)}</strong>
     </article>
   `;

@@ -27,7 +27,7 @@ TODAY = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 NOW_ISO = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 UPTOWN_CHARLOTTE = (35.2271, -80.8431)
-TARGET_MIN_ACRES = 100.0
+TARGET_MIN_ACRES = 50.0
 TARGET_MIN_DRIVE_MIN = 30
 TARGET_MAX_DRIVE_MIN = 75
 MAX_TARGET_I77_MINUTES = 50
@@ -73,34 +73,34 @@ TARGET_CITIES = {
 
 SEARCH_SOURCES = [
     {
-        "name": "LandSearch York County SC 100+ acres",
+        "name": "LandSearch York County SC 50+ acres",
         "source": "LandSearch",
-        "url": "https://www.landsearch.com/properties/york-county-sc/filter/100-minacres",
+        "url": "https://www.landsearch.com/properties/york-county-sc/filter/50-minacres",
     },
     {
-        "name": "LandSearch Chester County SC 100+ acres",
+        "name": "LandSearch Chester County SC 50+ acres",
         "source": "LandSearch",
-        "url": "https://www.landsearch.com/properties/chester-county-sc/filter/100-minacres",
+        "url": "https://www.landsearch.com/properties/chester-county-sc/filter/50-minacres",
     },
     {
-        "name": "LandSearch Lancaster County SC 100+ acres",
+        "name": "LandSearch Lancaster County SC 50+ acres",
         "source": "LandSearch",
-        "url": "https://www.landsearch.com/properties/lancaster-county-sc/filter/100-minacres",
+        "url": "https://www.landsearch.com/properties/lancaster-county-sc/filter/50-minacres",
     },
     {
-        "name": "LandSearch Iredell County NC 100+ acres",
+        "name": "LandSearch Iredell County NC 50+ acres",
         "source": "LandSearch",
-        "url": "https://www.landsearch.com/properties/iredell-county-nc/filter/100-minacres",
+        "url": "https://www.landsearch.com/properties/iredell-county-nc/filter/50-minacres",
     },
     {
-        "name": "Land.com York County SC 100+ acres",
+        "name": "Land.com York County SC 50+ acres",
         "source": "Land.com",
-        "url": "https://www.land.com/York-County-SC/all-land/100-100000-acres/",
+        "url": "https://www.land.com/York-County-SC/all-land/50-100000-acres/",
     },
     {
-        "name": "Land.com Chester County SC 100+ acres",
+        "name": "Land.com Chester County SC 50+ acres",
         "source": "Land.com",
-        "url": "https://www.land.com/Chester-County-SC/all-land/100-100000-acres/",
+        "url": "https://www.land.com/Chester-County-SC/all-land/50-100000-acres/",
     },
 ]
 
@@ -569,7 +569,7 @@ def normalize_row(row: dict[str, str]) -> dict[str, str]:
 
 
 def is_dashboard_eligible(row: dict[str, str]) -> bool:
-    """Return True only for visible investor rows that satisfy the 100-acre mandate."""
+    """Return True only for visible investor rows that satisfy the 50-acre mandate."""
     include = first_value(row.get("Dashboard Include")).lower()
     if include in {"no", "false", "0"}:
         return True
@@ -726,27 +726,28 @@ def scrape_candidates(rows: list[dict[str, str]]) -> tuple[list[ListingCandidate
 
 
 def update_no_results_audit_row(rows: list[dict[str, str]], audit_messages: list[str], qualifying_count: int) -> None:
-    audit_id = "SEARCH-100AC-AUDIT"
+    audit_id = "SEARCH-50AC-AUDIT"
+    previous_audit_ids = {"SEARCH-100AC-AUDIT", audit_id}
     message = "; ".join(audit_messages)[:900]
     status = (
         f"Daily search completed - {qualifying_count} qualifying/tracked listing(s) processed"
         if qualifying_count
-        else "Daily search completed - no qualifying 100+ acre I-77 South listings discovered"
+        else "Daily search completed - no qualifying 50+ acre I-77 South listings discovered"
     )
-    audit_row = next((row for row in rows if row.get("ID") == audit_id), None)
+    audit_row = next((row for row in rows if row.get("ID") in previous_audit_ids), None)
     if audit_row is None:
         audit_row = {column: "" for column in TARGET_COLUMNS}
         rows.append(audit_row)
     audit_row.update(
         {
             "ID": audit_id,
-            "Dashboard Slug": "daily-100-acre-land-search-audit",
+            "Dashboard Slug": "daily-50-acre-land-search-audit",
             "Dashboard Include": "No",
             "Priority": "Audit",
             "Recommendation Tier": "Search Audit",
             "Corridor": "Charlotte Region",
             "Corridor Fit": "Data Quality",
-            "Address / Property": "Daily 100+ acre land-source search audit",
+            "Address / Property": "Daily 50+ acre land-source search audit",
             "City": "Charlotte Region",
             "County": "York / Chester / Lancaster / Iredell",
             "State": "NC / SC",
@@ -760,7 +761,7 @@ def update_no_results_audit_row(rows: list[dict[str, str]], audit_messages: list
             "Investor Narrative": status,
             "Next Due Diligence": "Review audit status, any source failures, and newly discovered URLs before investor distribution.",
             "Last Researched": TODAY,
-            "Property Name": "Daily 100+ Acre Search Audit",
+            "Property Name": "Daily 50+ Acre Search Audit",
             "Property URL": SEARCH_SOURCES[0]["url"],
             "Listing Verified At": NOW_ISO,
             "Listing Verification Status": status,
@@ -796,7 +797,7 @@ def main() -> None:
         touched_keys.add(row_key(row))
 
     for row in rows:
-        if row.get("ID") == "SEARCH-100AC-AUDIT":
+        if row.get("ID") in {"SEARCH-100AC-AUDIT", "SEARCH-50AC-AUDIT"}:
             continue
         if row_key(row) not in touched_keys:
             row["Last Researched"] = TODAY
