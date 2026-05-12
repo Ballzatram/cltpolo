@@ -551,52 +551,66 @@ async function triggerPropertyAgentRefresh() {
     return;
   }
 
-  const endpoint = runPropertyAgent.dataset.refreshEndpoint;
+  const repo = runPropertyAgent.dataset.githubRepo;
+  const workflow = runPropertyAgent.dataset.githubWorkflow;
+  const ref = runPropertyAgent.dataset.githubRef || "main";
 
-  if (!endpoint) {
+  if (!repo || !workflow) {
     setPropertyAgentStatus(
-      "CSV refresh is not configured yet. Add the secure refresh endpoint URL to this button.",
+      "Agent refresh is not configured. Add the GitHub repository and workflow file to this button.",
       "error"
+    );
+    return;
+  }
+
+  const token = window.prompt(
+    "Paste a GitHub token with Actions write access to start the property CSV refresh agent. The token is used once and is not stored."
+  );
+
+  if (!token) {
+    setPropertyAgentStatus(
+      "Agent refresh canceled. No GitHub token was provided.",
+      "warning"
     );
     return;
   }
 
   const originalButtonText = runPropertyAgent.textContent;
   runPropertyAgent.disabled = true;
-  runPropertyAgent.textContent = "Refreshing...";
+  runPropertyAgent.textContent = "Starting Agent...";
   setPropertyAgentStatus(
-    "Starting the CSV refresh agent now. The updated CSV will appear after GitHub Actions finishes and the site redeploys.",
+    "Starting the property CSV refresh agent in GitHub Actions...",
     "pending"
   );
 
   try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ source: "investor-dashboard" })
-    });
+    const response = await fetch(
+      `https://api.github.com/repos/${repo}/actions/workflows/${workflow}/dispatches`,
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/vnd.github+json",
+          Authorization: `Bearer ${token.trim()}`,
+          "X-GitHub-Api-Version": "2022-11-28",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ ref })
+      }
+    );
 
-    const data = await response.json().catch(() => null);
-
-    if (!response.ok) {
-      const errorMessage = data && data.message
-        ? data.message
-        : "The refresh endpoint did not accept the request.";
+    if (response.status !== 204) {
+      const errorData = await response.json().catch(() => null);
+      const errorMessage = errorData && errorData.message
+        ? errorData.message
+        : "GitHub did not accept the workflow dispatch request.";
 
       throw new Error(errorMessage);
     }
 
     setPropertyAgentStatus(
-      data && data.message
-        ? data.message
-        : "CSV refresh agent started. The dashboard will reload committed data automatically in about a minute.",
+      "CSV refresh agent started. When the GitHub Actions run finishes and Pages redeploys, use Reload Committed Data to load the updated CSV.",
       "success"
     );
-
-    window.setTimeout(loadInvestorProperties, 60000);
   } catch (error) {
     setPropertyAgentStatus(
       `Could not start the CSV refresh agent: ${error.message}`,

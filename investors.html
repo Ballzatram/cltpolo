@@ -165,8 +165,9 @@
 
                         <div class="investor-command-actions" aria-label="Investor data actions">
                             <button class="button button-primary investor-agent-refresh" id="runPropertyAgent"
-                                type="button" data-refresh-endpoint="/api/refresh-properties">
-                                Refresh CSV Now
+                                type="button" data-github-repo="Ballzatram/cltpolo"
+                                data-github-workflow="update-properties.yml" data-github-ref="main">
+                                Run CSV Refresh Agent
                             </button>
 
                             <button class="button button-secondary investor-refresh" id="refreshInvestorData"
@@ -182,6 +183,10 @@
                         rather than guaranteed investment facts. The refresh button calls a secure server-side
                         endpoint that stores the owner GitHub credential outside the dashboard and starts the CSV
                         update workflow immediately; setup is required before this button can run in production.
+                    </div>
+
+                    <div class="investor-agent-status" id="propertyAgentStatus" role="status" aria-live="polite"
+                        hidden>
                     </div>
 
                     <div class="investor-agent-status" id="propertyAgentStatus" role="status" aria-live="polite"
