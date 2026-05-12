@@ -167,8 +167,19 @@
                             <a class="button button-primary investor-agent-refresh"
                                 href="https://github.com/Ballzatram/cltpolo/actions/workflows/update-properties.yml"
                                 target="_blank" rel="noopener noreferrer">
-                                Open CSV Refresh Agent
+                                Owner: Run CSV Agent
                             </a>
+
+                            <form class="investor-refresh-request" action="https://formspree.io/f/xaqlwbpy"
+                                method="POST" target="_blank">
+                                <input type="hidden" name="_subject"
+                                    value="Investor request: refresh property CSV" />
+                                <input type="hidden" name="message"
+                                    value="An investor requested a manual property CSV refresh from the land dashboard. Please run the Update Property Dataset GitHub Actions workflow." />
+                                <button class="button button-secondary investor-request-refresh" type="submit">
+                                    Investor: Request Refresh
+                                </button>
+                            </form>
 
                             <button class="button button-secondary investor-refresh" id="refreshInvestorData"
                                 type="button">
@@ -180,9 +191,9 @@
                     <div class="investor-data-alert" role="note">
                         <strong>Reliability standard:</strong> this view excludes sub-50-acre land, prioritizes
                         exact listing URLs over map/search fallbacks, and treats source pages as research inputs
-                        rather than guaranteed investment facts. Use <strong>Open CSV Refresh Agent</strong> to launch
-                        the GitHub Actions workflow and run it from an authorized GitHub session—no token is collected
-                        in the dashboard.
+                        rather than guaranteed investment facts. Authorized GitHub users can run the CSV agent
+                        directly; investors without GitHub access should request a refresh so the owner can run it
+                        without sharing credentials. No GitHub token or owner credential is collected in the dashboard.
                     </div>
 
                     <div class="investor-stats-grid" id="investorStats">
