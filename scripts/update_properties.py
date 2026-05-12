@@ -418,7 +418,34 @@ def is_listing_url(url: str) -> bool:
         return "/property/" in path
     if "landwatch.com" in host:
         return "/pid/" in path
+    if "zillow.com" in host:
+        return "/homedetails/" in path and ("_zpid" in path or re.search(r"/\d+_", path) is not None)
+    if "realtor.com" in host:
+        return "/realestateandhomes-detail/" in path
+    if "crexi.com" in host:
+        return re.search(r"/properties/\d+", path) is not None
+    if "loopnet.com" in host:
+        return "/listing/" in path and re.search(r"/\d+/?$", path) is not None
     return False
+
+
+def source_label_for_url(url: str) -> str:
+    host = urlparse(url).netloc.lower()
+    if "landsearch.com" in host:
+        return "LandSearch"
+    if "land.com" in host:
+        return "Land.com"
+    if "landwatch.com" in host:
+        return "LandWatch"
+    if "zillow.com" in host:
+        return "Zillow"
+    if "realtor.com" in host:
+        return "Realtor.com"
+    if "crexi.com" in host:
+        return "Crexi"
+    if "loopnet.com" in host:
+        return "LoopNet"
+    return "Listing Source"
 
 
 def parse_listing_page(result: FetchResult, source: str = "") -> ListingCandidate:
@@ -732,7 +759,7 @@ def scrape_candidates(rows: list[dict[str, str]]) -> tuple[list[ListingCandidate
 
     for url in sorted(listing_urls):
         result = fetch_url(url)
-        source = "LandSearch" if "landsearch.com" in urlparse(url).netloc else "Land.com" if "land.com" in urlparse(url).netloc else "Listing Source"
+        source = source_label_for_url(url)
         candidate = parse_listing_page(result, source=source)
         source_match = next((s for s in SEARCH_SOURCES if s["source"] == source), None)
         if source_match:
