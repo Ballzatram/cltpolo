@@ -1620,8 +1620,18 @@ button:disabled,
   font-size: clamp(2rem, 3.5vw, 3.2rem);
 }
 
-.investor-refresh {
+.investor-command-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.investor-refresh,
+.investor-agent-refresh {
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .investor-data-alert {
@@ -2614,7 +2624,13 @@ button:disabled,
     gap: 16px;
   }
 
-  .investor-refresh {
+  .investor-command-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .investor-refresh,
+  .investor-agent-refresh {
     width: 100%;
   }
 
