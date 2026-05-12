@@ -32,7 +32,7 @@ The thumbs-up / thumbs-down counts persist for all users through Cloudflare Work
 
 ## Data refresh behavior
 
-The GitHub workflow runs `scripts/update_properties.py`. The script reads the existing CSV, refreshes tracked listings and 50+ acre search pages across the 35-55 minute Charlotte ring, preserves existing rows, appends newly discovered eligible listings, stamps research dates, and commits `data/charlotte_polo_properties.csv` when the dataset changes.
+The GitHub workflow runs `scripts/update_properties.py`. The script reads the existing CSV, refreshes tracked listings and 50+ acre search pages, preserves existing rows, appends newly discovered eligible listings, stamps research dates, and commits `data/charlotte_polo_properties.csv` when the dataset changes.
 
 ## Security notes
 
