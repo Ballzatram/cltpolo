@@ -159,7 +159,7 @@ async function handleRefresh(request, env, corsHeaders) {
 
   return jsonResponse(
     {
-      message: "CSV refresh agent started. GitHub Actions will keep existing listings, append newly discovered listings, and commit the updated CSV before the site redeploys."
+      message: "CSV refresh agent started. It will keep existing listings, append newly discovered listings, update data/charlotte_polo_properties.csv, and publish the refreshed dashboard data after deployment."
     },
     202,
     corsHeaders

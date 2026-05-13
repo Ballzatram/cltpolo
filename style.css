@@ -1301,8 +1301,8 @@ button:disabled,
 .investor-map-head {
   display: flex;
   justify-content: space-between;
-  align-items: end;
-  gap: 30px;
+  align-items: start;
+  gap: clamp(22px, 4vw, 46px);
   margin-bottom: 30px;
 }
 
@@ -1312,11 +1312,11 @@ button:disabled,
 }
 
 .investor-map-head>p {
-  max-width: 500px;
+  max-width: 520px;
   margin: 0;
   color: var(--text-muted);
   line-height: 1.65;
-  text-align: right;
+  text-align: left;
 }
 
 .investor-map-layout {
@@ -1749,8 +1749,8 @@ button:disabled,
 .investor-results-head {
   display: flex;
   justify-content: space-between;
-  align-items: end;
-  gap: 28px;
+  align-items: start;
+  gap: clamp(22px, 4vw, 44px);
   margin-bottom: 30px;
 }
 
@@ -1759,11 +1759,11 @@ button:disabled,
 }
 
 .investor-results-head > p {
-  max-width: 460px;
+  max-width: 500px;
   margin: 0;
   color: var(--text-muted);
   line-height: 1.65;
-  text-align: right;
+  text-align: left;
 }
 
 .investor-loading,

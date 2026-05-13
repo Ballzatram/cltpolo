@@ -82,19 +82,19 @@
 
                         <div class="investor-hero-pills">
                             <span>50+ Acre Minimum</span>
-                            <span>Exact Listing URLs</span>
-                            <span>Daily Agent Refresh</span>
-                            <span>Broker / GIS Verification Required</span>
+                            <span>Listing Source Links</span>
+                            <span>Agentic Refresh</span>
+                            <span>Broker Verification Required</span>
                         </div>
                     </div>
 
                     <aside class="investor-hero-panel" aria-label="Dashboard summary">
                         <p>Data Discipline</p>
-                        <h3>Source-Checked 50+ Acre Land Only</h3>
+                        <h3>50+ Acre Land, Reviewed Before It Shows</h3>
                         <span>
-                            The dashboard renders exact listing-source records from the committed CSV.
-                            The daily agent refreshes 50+ acre search pages and tracked listings; broker,
-                            MLS, and county GIS confirmation remain required before investor reliance.
+                            Every visible property comes from the dashboard CSV and meets the 50+ acre screen.
+                            When prompted, the agent starts a refresh of that CSV so new or changed opportunities
+                            can be reviewed before investor decisions.
                         </span>
                     </aside>
                 </div>
@@ -109,9 +109,9 @@
                         </div>
 
                         <p>
-                            Only land records at or above 50 acres are shown. Pins use source-provided
-                            coordinates from exact listing URLs; every card surfaces the verification status
-                            and the next diligence needed before investor reliance.
+                            Only 50+ acre candidates are shown. Map pins and cards are research aids, with
+                            source links or property addresses included so each site can be verified on the
+                            relevant listing or broker platform.
                         </p>
                     </div>
 
@@ -179,11 +179,11 @@
                     </div>
 
                     <div class="investor-data-alert" role="note">
-                        <strong>Reliability standard:</strong> this view excludes sub-50-acre land, prioritizes
-                        exact listing URLs over map/search fallbacks, and treats source pages as research inputs
-                        rather than guaranteed investment facts. The refresh button calls a secure server-side
-                        Cloudflare Worker that stores the owner GitHub credential outside the dashboard, starts the
-                        CSV update workflow immediately, and never asks dashboard users for a GitHub token.
+                        <strong>Reliability standard:</strong> this view excludes sub-50-acre land and treats every
+                        source page as a research input, not a guaranteed investment fact. Exact listing links are
+                        preferred, but a property address on the card is enough to search and verify the site on
+                        the relevant broker, land, or listing platform. The refresh button starts the CSV update
+                        agent when prompted.
                     </div>
 
                     <div class="investor-agent-status" id="propertyAgentStatus" role="status" aria-live="polite"
@@ -268,8 +268,8 @@
                         </div>
 
                         <p>
-                            Each card summarizes source-checked acreage, price, location, drive-time position,
-                            listing access, verification status, and broker/GIS diligence still required.
+                            Each card highlights the essentials: acreage, price, location, drive time, source
+                            access, address, verification status, and the next diligence step.
                         </p>
                     </div>
 
