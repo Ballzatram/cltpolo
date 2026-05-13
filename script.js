@@ -792,7 +792,7 @@ async function triggerPropertyAgentRefresh() {
   runPropertyAgent.disabled = true;
   runPropertyAgent.textContent = "Starting Agent...";
   setPropertyAgentStatus(
-    "Starting the property CSV refresh agent through the secure Cloudflare Worker...",
+    "Starting the property CSV refresh agent. When it finishes, data/charlotte_polo_properties.csv will be updated and the live dashboard will pick up the new data after deployment.",
     "pending"
   );
 
@@ -819,7 +819,7 @@ async function triggerPropertyAgentRefresh() {
     setPropertyAgentStatus(
       data && data.message
         ? data.message
-        : "CSV refresh agent started. Reload committed data after GitHub Actions finishes and the site redeploys.",
+        : "CSV refresh agent started. It updates data/charlotte_polo_properties.csv, then the live dashboard picks up the refreshed data after deployment.",
       "success"
     );
   } catch (error) {
@@ -1275,6 +1275,9 @@ function renderInvestorCards(properties) {
         "price_per_acre"
       ]);
 
+      const city = normalizeInvestorValue(getPropertyField(property, ["City", "city"]));
+      const state = normalizeInvestorValue(getPropertyField(property, ["State", "state"]));
+
       const county =
         normalizeInvestorValue(
           getPropertyField(property, ["County", "county"])
@@ -1348,6 +1351,18 @@ function renderInvestorCards(properties) {
       );
 
       const listingUrl = getListingUrl(property);
+      const propertyAddressBase = normalizeInvestorValue(
+        getPropertyField(property, [
+          "Address / Property",
+          "Address",
+          "Property Address",
+          "Location",
+          "Site Address",
+          "Full Address"
+        ])
+      );
+      const propertyAddressParts = [propertyAddressBase, city, state].filter(Boolean);
+      const propertyAddress = propertyAddressParts.join(", ");
 
       const driveTime = formatDriveTime(property);
       const driveBand = getDriveBand(property);
@@ -1414,6 +1429,14 @@ function renderInvestorCards(properties) {
                 <span>From Uptown Charlotte</span>
                 <strong>${escapeHtml(driveTime)}${miles ? ` · ${formatNumber(miles, 1)} mi` : ""}</strong>
               </div>
+
+              ${propertyAddress
+          ? `<div class="property-meta property-meta-wide">
+                <span>Property Address</span>
+                <strong>${escapeHtml(propertyAddress)}</strong>
+              </div>`
+          : ""
+        }
             </div>
 
             <p class="property-note">${escapeHtml(notes)}</p>
@@ -1451,7 +1474,9 @@ function renderInvestorCards(properties) {
           ? `<a class="button button-primary" href="${escapeAttribute(
             listingUrl
           )}" target="_blank" rel="noopener noreferrer">View Property Listing</a>`
-          : `<span class="button button-disabled">No Direct Listing Available</span>`
+          : propertyAddress
+            ? `<span class="button button-disabled">Address Available — Search Relevant Site</span>`
+            : `<span class="button button-disabled">Source Search Required</span>`
         }
             </div>
           </div>
