@@ -792,7 +792,7 @@ async function triggerPropertyAgentRefresh() {
   runPropertyAgent.disabled = true;
   runPropertyAgent.textContent = "Starting Agent...";
   setPropertyAgentStatus(
-    "Starting the property CSV refresh agent. When it finishes, data/charlotte_polo_properties.csv will be updated and the live dashboard will pick up the new data after deployment.",
+    "Refresh started: requesting the GitHub Actions CSV workflow. This only starts the job; it does not prove new listings were found. Check Actions/logs, then use Reload Committed Data after the workflow completes and commits listing changes.",
     "pending"
   );
 
@@ -816,10 +816,14 @@ async function triggerPropertyAgentRefresh() {
       throw new Error(errorMessage);
     }
 
+    const actionsHint = runPropertyAgent.dataset.actionsUrl
+      ? ` Check workflow logs: ${runPropertyAgent.dataset.actionsUrl}`
+      : " Check the GitHub Actions update-properties workflow logs.";
+
     setPropertyAgentStatus(
       data && data.message
-        ? data.message
-        : "CSV refresh agent started. It updates data/charlotte_polo_properties.csv, then the live dashboard picks up the refreshed data after deployment.",
+        ? `${data.message}${actionsHint}`
+        : `CSV refresh workflow started. This means GitHub accepted the workflow_dispatch request, not that committed listing data changed.${actionsHint} After it completes, use Reload Committed Data to load any committed CSV changes.`,
       "success"
     );
   } catch (error) {

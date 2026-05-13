@@ -167,7 +167,8 @@
                             <button class="button button-primary investor-agent-refresh" id="runPropertyAgent"
                                 type="button"
                                 data-refresh-endpoint="https://refresh-properties.charlottepolo-refresh.workers.dev"
-                                data-vote-endpoint="https://refresh-properties.charlottepolo-refresh.workers.dev/votes">
+                                data-vote-endpoint="https://refresh-properties.charlottepolo-refresh.workers.dev/votes"
+                                data-actions-url="https://github.com/Ballzatram/cltpolo/actions/workflows/update-properties.yml">
                                 Run CSV Refresh Agent
                             </button>
 
@@ -182,8 +183,9 @@
                         <strong>Reliability standard:</strong> this view excludes sub-50-acre land and treats every
                         source page as a research input, not a guaranteed investment fact. Exact listing links are
                         preferred, but a property address on the card is enough to search and verify the site on
-                        the relevant broker, land, or listing platform. The refresh button starts the CSV update
-                        agent when prompted.
+                        the relevant broker, land, or listing platform. The refresh button only starts the GitHub
+                        Actions CSV workflow; use Reload Committed Data after that workflow finishes and commits real
+                        listing changes.
                     </div>
 
                     <div class="investor-agent-status" id="propertyAgentStatus" role="status" aria-live="polite"

@@ -32,7 +32,61 @@ The thumbs-up / thumbs-down counts persist for all users through Cloudflare Work
 
 ## Data refresh behavior
 
-The GitHub workflow runs `scripts/update_properties.py`. The script reads the existing CSV, refreshes tracked listings and 50+ acre search pages, preserves existing rows, appends newly discovered eligible listings, stamps research dates, and commits `data/charlotte_polo_properties.csv` when the dataset changes.
+The button starts the GitHub Actions workflow; it does **not** mean new property data was found or committed. The honest success path is:
+
+1. `investors.html` calls `script.js` when **Run CSV Refresh Agent** is clicked.
+2. `script.js` sends a `POST` to the Cloudflare Worker refresh endpoint.
+3. `workers/refresh-properties.js` dispatches `.github/workflows/update-properties.yml` through GitHub's workflow dispatch API.
+4. The workflow runs `python scripts/update_properties.py --summary-path property-refresh-summary.json`.
+5. The script attempts public 50+ acre search pages and tracked listing URLs, prints a source/listing/row summary, and writes `data/charlotte_polo_properties.csv` only when listing rows were added or meaningfully updated. Audit-only timestamp changes are skipped unless the script is intentionally run with `--allow-audit-only`.
+
+## Troubleshooting
+
+### How to tell whether the Worker dispatched correctly
+
+- In the browser, a successful button click means the Worker returned HTTP `202` after GitHub accepted `workflow_dispatch`.
+- That response only proves the workflow was queued. It does not prove the workflow completed, found listings, or committed CSV changes.
+- If the button reports an error, check the Worker logs and verify `GITHUB_TOKEN`, `GITHUB_REPOSITORY`, `GITHUB_WORKFLOW`, `GITHUB_REF`, and `ALLOWED_ORIGIN`.
+
+### Where to check GitHub Actions
+
+- Open `https://github.com/Ballzatram/cltpolo/actions/workflows/update-properties.yml`.
+- Open the newest **Update Property Dataset** run.
+- Review the **Run property update agent** step for the printed refresh summary:
+  - sources attempted
+  - sources succeeded
+  - sources failed
+  - blocked/unavailable sources
+  - listing URLs discovered
+  - candidates processed
+  - rows added
+  - rows updated
+  - whether the run was audit-only
+- Download the `property-refresh-summary` artifact when present for machine-readable details.
+
+### How to tell whether the CSV actually changed
+
+- In the workflow log, the commit step prints either `No listing-data changes to commit` or a commit hash.
+- In GitHub, inspect `data/charlotte_polo_properties.csv` history. A real dataset refresh should add a new listing row or change listing fields such as source URL, acreage, price, verification status, coordinates, or listing notes.
+- The dashboard's **Reload Committed Data** button only reloads the CSV currently deployed/served by the site. Use it after the workflow finishes and a deployment has picked up any commit.
+
+### What 403 source failures mean
+
+- `HTTP Error 403: Forbidden`, `429`, CAPTCHA, or similar blocked/unavailable responses mean the public source refused automated fetching from the GitHub Actions runner or network path.
+- The agent does not bypass paywalls, logins, CAPTCHA, or anti-bot protections. It records the failure and moves to alternate public sources such as Land.com, LandWatch, Realtor.com, Zillow, LoopNet, and Crexi search pages when publicly reachable.
+- If most search sources fail and no new listing rows are added, the script exits non-zero by default so the Action does not silently commit an audit-only refresh that looks like fresh listing data.
+- Existing valid rows are preserved even when sources fail; they should be manually verified before investor decisions.
+
+## Local validation commands
+
+Run these before changing the workflow or CSV behavior:
+
+```bash
+python scripts/update_properties.py --validate-only
+python scripts/update_properties.py --dry-run --allow-source-failures
+```
+
+Use `--allow-source-failures` for local dry runs from networks where public listing sites block automated requests; omit it in CI when you want the reliability gate to fail on source-wide outages.
 
 ## Security notes
 

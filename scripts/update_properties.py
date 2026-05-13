@@ -1,20 +1,30 @@
-"""Update the investor property CSV from tracked listings and search pages.
+"""Update the investor property CSV from tracked listings and public search pages.
 
 The script is intentionally dependency-free so it can run reliably from GitHub
-Actions. It politely fetches public listing/search pages, extracts durable listing
-identifiers and investor-relevant fields when they are present in JSON-LD/meta
-markup, merges those findings into the existing research CSV, and still stamps the
-CSV when a source returns no qualifying results or the network is unavailable.
+Actions. It fetches only public pages, extracts durable listing identifiers and
+investor-relevant fields when they are present in page markup, and merges those
+findings into the existing research CSV.
+
+Operational guardrails:
+* source fetch failures are reported separately from "no new listings found";
+* blocked/403-heavy refreshes fail by default instead of committing a misleading
+  audit-only timestamp;
+* audit-only CSV writes are skipped unless --allow-audit-only is supplied; and
+* --dry-run prints the same summary without modifying the CSV.
 """
 
+from __future__ import annotations
+
+import argparse
 import csv
 import hashlib
 import html
 import json
 import math
 import re
+import sys
 import time
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -32,6 +42,8 @@ TARGET_MIN_DRIVE_MIN = 35
 TARGET_MAX_DRIVE_MIN = 55
 REQUEST_TIMEOUT_SECONDS = 18
 REQUEST_PAUSE_SECONDS = 0.8
+FAILURE_STATUSES = {401, 403, 429, 500, 502, 503, 504}
+AUDIT_ROW_IDS = {"SEARCH-100AC-AUDIT", "SEARCH-50AC-AUDIT"}
 
 # Approximate I-77 interchange coordinates south of Charlotte. These are used as
 # a transparent proximity signal; they never replace parcel-level diligence.
@@ -115,6 +127,16 @@ SEARCH_MARKETS = [
     ("Gaston County NC", "Land.com", "https://www.land.com/Gaston-County-NC/all-land/50-100000-acres/"),
     ("Lincoln County NC", "Land.com", "https://www.land.com/Lincoln-County-NC/all-land/50-100000-acres/"),
     ("Cabarrus County NC", "Land.com", "https://www.land.com/Cabarrus-County-NC/all-land/50-100000-acres/"),
+    ("York County SC", "LandWatch", "https://www.landwatch.com/south-carolina-land-for-sale/york-county/acres-over-50"),
+    ("Chester County SC", "LandWatch", "https://www.landwatch.com/south-carolina-land-for-sale/chester-county/acres-over-50"),
+    ("Lancaster County SC", "LandWatch", "https://www.landwatch.com/south-carolina-land-for-sale/lancaster-county/acres-over-50"),
+    ("Union County NC", "LandWatch", "https://www.landwatch.com/north-carolina-land-for-sale/union-county/acres-over-50"),
+    ("Gaston County NC", "LandWatch", "https://www.landwatch.com/north-carolina-land-for-sale/gaston-county/acres-over-50"),
+    ("Lincoln County NC", "LandWatch", "https://www.landwatch.com/north-carolina-land-for-sale/lincoln-county/acres-over-50"),
+    ("Charlotte region", "Realtor.com", "https://www.realtor.com/realestateandhomes-search/Charlotte_NC/type-land/lot-sqft-2178000"),
+    ("Charlotte region", "Zillow", "https://www.zillow.com/charlotte-nc/land_type/?searchQueryState=%7B%22filterState%22%3A%7B%22lot%22%3A%7B%22min%22%3A2178000%7D%7D%7D"),
+    ("Charlotte region", "LoopNet", "https://www.loopnet.com/search/land/charlotte-nc/for-sale/"),
+    ("Charlotte region", "Crexi", "https://www.crexi.com/properties/NC/Charlotte/Land"),
 ]
 
 SEARCH_SOURCES = [
@@ -211,6 +233,51 @@ class ListingCandidate:
     verification_status: str = "Discovered; verify with broker/source page"
 
 
+@dataclass
+class SourceAttempt:
+    name: str
+    source: str
+    url: str
+    ok: bool
+    status: int | None
+    discovered_links: int = 0
+    error: str = ""
+
+    @property
+    def failed(self) -> bool:
+        return not self.ok
+
+    @property
+    def blocked(self) -> bool:
+        return self.status in {401, 403, 429} or bool(re.search(r"forbidden|blocked|captcha|rate", self.error, re.I))
+
+
+@dataclass
+class RefreshSummary:
+    sources_attempted: int = 0
+    sources_succeeded: int = 0
+    sources_failed: int = 0
+    sources_blocked: int = 0
+    listing_urls_discovered: int = 0
+    tracked_listing_urls: int = 0
+    candidates_processed: int = 0
+    rows_added: int = 0
+    rows_updated: int = 0
+    audit_only_changes: bool = False
+    csv_written: bool = False
+    dry_run: bool = False
+    failure_rate: float = 0.0
+    source_attempts: list[SourceAttempt] = field(default_factory=list)
+
+    def finalize(self) -> None:
+        self.sources_attempted = len(self.source_attempts)
+        self.sources_succeeded = sum(1 for attempt in self.source_attempts if attempt.ok)
+        self.sources_failed = self.sources_attempted - self.sources_succeeded
+        self.sources_blocked = sum(1 for attempt in self.source_attempts if attempt.blocked)
+        self.listing_urls_discovered = sum(attempt.discovered_links for attempt in self.source_attempts)
+        self.failure_rate = (self.sources_failed / self.sources_attempted) if self.sources_attempted else 0.0
+
+
 def clean_money(value: Any) -> float | None:
     if value is None:
         return None
@@ -287,8 +354,8 @@ def fetch_url(url: str) -> FetchResult:
         url,
         headers={
             "User-Agent": (
-                "CharlottePoloPropertyResearch/1.0 "
-                "(+https://www.cltpolo.com/investors)"
+                "CharlottePoloPropertyResearch/1.1 "
+                "(+https://www.cltpolo.com/investors; public listing research)"
             ),
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.9",
@@ -417,7 +484,7 @@ def is_listing_url(url: str) -> bool:
     if "land.com" in host:
         return "/property/" in path
     if "landwatch.com" in host:
-        return "/pid/" in path
+        return "/pid/" in path or "/property/" in path
     if "zillow.com" in host:
         return "/homedetails/" in path and ("_zpid" in path or re.search(r"/\d+_", path) is not None)
     if "realtor.com" in host:
@@ -625,14 +692,22 @@ def is_dashboard_eligible(row: dict[str, str]) -> bool:
 
 
 def row_key(row: dict[str, str]) -> str:
-    for field in URL_FIELDS:
-        value = normalize_url(row.get(field, ""))
+    for field_name in URL_FIELDS:
+        value = normalize_url(row.get(field_name, ""))
         if value:
             return value.lower().rstrip("/")
     external_id = row.get("Listing External ID", "").strip()
     if external_id:
         return external_id.lower()
     return row.get("ID", "").lower()
+
+
+def meaningful_row_snapshot(row: dict[str, str]) -> dict[str, str]:
+    """Fields that indicate real listing data changed, excluding audit timestamps."""
+    ignored = {"Last Researched", "Listing Verified At"}
+    if row.get("ID") in AUDIT_ROW_IDS:
+        return {}
+    return {key: row.get(key, "") for key in TARGET_COLUMNS if key not in ignored}
 
 
 def apply_candidate(row: dict[str, str], candidate: ListingCandidate, discovered: bool = False) -> dict[str, str]:
@@ -658,7 +733,7 @@ def apply_candidate(row: dict[str, str], candidate: ListingCandidate, discovered
             "Dashboard Slug": row.get("Dashboard Slug") or slugify(property_name),
             "Dashboard Include": row.get("Dashboard Include") or "Yes",
             "Priority": row.get("Priority") or ("Primary" if acres and acres >= TARGET_MIN_ACRES else "Research"),
-            "Recommendation Tier": row.get("Recommendation Tier") or "Tier 1 - Investor Shortlist" if acres and acres >= TARGET_MIN_ACRES else row.get("Recommendation Tier") or "Active Research",
+            "Recommendation Tier": row.get("Recommendation Tier") or ("Tier 1 - Investor Shortlist" if acres and acres >= TARGET_MIN_ACRES else "Active Research"),
             "Weighted Polo Score": row.get("Weighted Polo Score") or str(score_candidate(candidate)),
             "Corridor": row.get("Corridor") or "35-55 Min Charlotte Ring",
             "Corridor Fit": row.get("Corridor Fit") or "Primary",
@@ -732,17 +807,19 @@ def apply_candidate(row: dict[str, str], candidate: ListingCandidate, discovered
 def tracked_listing_urls(rows: list[dict[str, str]]) -> list[str]:
     urls = set()
     for row in rows:
-        for field in URL_FIELDS:
-            url = normalize_url(row.get(field, ""))
+        for field_name in URL_FIELDS:
+            url = normalize_url(row.get(field_name, ""))
             if is_listing_url(url):
                 urls.add(url)
     return sorted(urls)
 
 
-def scrape_candidates(rows: list[dict[str, str]]) -> tuple[list[ListingCandidate], list[str]]:
+def scrape_candidates(rows: list[dict[str, str]], summary: RefreshSummary) -> tuple[list[ListingCandidate], list[str]]:
     candidates_by_url: dict[str, ListingCandidate] = {}
     audit_messages: list[str] = []
     listing_urls = set(tracked_listing_urls(rows))
+    existing_keys = {row_key(row) for row in rows}
+    summary.tracked_listing_urls = len(listing_urls)
 
     for source_config in SEARCH_SOURCES:
         result = fetch_url(source_config["url"])
@@ -750,38 +827,64 @@ def scrape_candidates(rows: list[dict[str, str]]) -> tuple[list[ListingCandidate
             found_links = extract_listing_links(result.text, result.url)
             for link in found_links:
                 listing_urls.add(link)
+            attempt = SourceAttempt(
+                name=source_config["name"],
+                source=source_config["source"],
+                url=source_config["url"],
+                ok=True,
+                status=result.status,
+                discovered_links=len(found_links),
+            )
             audit_messages.append(f"{source_config['name']}: {len(found_links)} listing links discovered")
         else:
-            audit_messages.append(
-                f"{source_config['name']}: source unavailable ({result.error or result.status})"
+            attempt = SourceAttempt(
+                name=source_config["name"],
+                source=source_config["source"],
+                url=source_config["url"],
+                ok=False,
+                status=result.status,
+                error=result.error or f"HTTP status {result.status}",
             )
+            audit_messages.append(
+                f"{source_config['name']}: source unavailable ({attempt.error})"
+            )
+        summary.source_attempts.append(attempt)
         time.sleep(REQUEST_PAUSE_SECONDS)
 
+    source_by_label = {source["source"]: source for source in SEARCH_SOURCES}
     for url in sorted(listing_urls):
         result = fetch_url(url)
         source = source_label_for_url(url)
         candidate = parse_listing_page(result, source=source)
-        source_match = next((s for s in SEARCH_SOURCES if s["source"] == source), None)
+        source_match = source_by_label.get(source)
         if source_match:
             candidate.source_name = source_match["name"]
             candidate.source_url = source_match["url"]
-        if is_target_candidate(candidate) or url.lower().rstrip("/") in {row_key(row) for row in rows}:
+        if is_target_candidate(candidate) or url.lower().rstrip("/") in existing_keys:
             candidates_by_url[candidate.url.lower().rstrip("/")] = candidate
         time.sleep(REQUEST_PAUSE_SECONDS)
 
     return list(candidates_by_url.values()), audit_messages
 
 
-def update_no_results_audit_row(rows: list[dict[str, str]], audit_messages: list[str], qualifying_count: int) -> None:
+def update_no_results_audit_row(
+    rows: list[dict[str, str]],
+    audit_messages: list[str],
+    qualifying_count: int,
+    summary: RefreshSummary,
+) -> None:
     audit_id = "SEARCH-50AC-AUDIT"
-    previous_audit_ids = {"SEARCH-100AC-AUDIT", audit_id}
-    message = "; ".join(audit_messages)[:900]
-    status = (
-        f"Daily search completed - {qualifying_count} qualifying/tracked listing(s) processed"
-        if qualifying_count
-        else "Daily search completed - no qualifying 50+ acre listings discovered 35-55 minutes from Charlotte"
-    )
-    audit_row = next((row for row in rows if row.get("ID") in previous_audit_ids), None)
+    message = "; ".join(audit_messages)[:1200]
+    if summary.sources_attempted and summary.sources_succeeded == 0:
+        status = "Daily search blocked/unavailable - no source succeeded; CSV listing data was not refreshed"
+    elif summary.sources_attempted and summary.failure_rate >= 0.75:
+        status = f"Daily search degraded - {summary.sources_failed}/{summary.sources_attempted} sources failed; review logs before treating data as refreshed"
+    elif qualifying_count:
+        status = f"Daily search completed - {qualifying_count} qualifying/tracked listing(s) processed"
+    else:
+        status = "Daily search completed - no qualifying 50+ acre listings discovered 35-55 minutes from Charlotte"
+
+    audit_row = next((row for row in rows if row.get("ID") in AUDIT_ROW_IDS), None)
     if audit_row is None:
         audit_row = {column: "" for column in TARGET_COLUMNS}
         rows.append(audit_row)
@@ -804,13 +907,14 @@ def update_no_results_audit_row(rows: list[dict[str, str]], audit_messages: list
             "Source URL": SEARCH_SOURCES[0]["url"],
             "Research Confidence": "System Audit",
             "Listing Notes": message or "No source responses recorded.",
-            "Polo / Investor Notes": "Hidden dashboard audit row that proves the 35-55 minute / 50+ acre search ran even when no new investor-grade listings are found.",
+            "Polo / Investor Notes": "Hidden dashboard audit row that separates source failures from no-result searches and does not prove new listings were found.",
             "Investor Narrative": status,
-            "Next Due Diligence": "Review audit status, any source failures, and newly discovered URLs before investor distribution.",
+            "Next Due Diligence": "Review GitHub Actions logs, source failures, and newly discovered URLs before investor distribution.",
             "Last Researched": TODAY,
             "Property Name": "Daily 50+ Acre Search Audit",
             "Property URL": SEARCH_SOURCES[0]["url"],
             "Listing Verified At": NOW_ISO,
+            "Listing External ID": f"sources={summary.sources_attempted};succeeded={summary.sources_succeeded};failed={summary.sources_failed};urls={summary.listing_urls_discovered}",
             "Listing Verification Status": status,
             "Scrape Source Name": " | ".join(source["name"] for source in SEARCH_SOURCES),
             "Scrape Source URL": " | ".join(source["url"] for source in SEARCH_SOURCES),
@@ -825,9 +929,86 @@ def write_rows(rows: list[dict[str, str]]) -> None:
         writer.writerows(rows)
 
 
+def validate_rows(rows: list[dict[str, str]]) -> list[str]:
+    errors: list[str] = []
+    visible_rows = [
+        row for row in rows
+        if first_value(row.get("Dashboard Include")).lower() not in {"no", "false", "0"}
+    ]
+    for row in visible_rows:
+        acres = clean_number(row.get("Acres"))
+        if acres is None or acres < TARGET_MIN_ACRES:
+            errors.append(f"{row.get('ID') or row.get('Property Name')}: visible row has {row.get('Acres') or 'missing'} acres")
+        if not row.get("Property URL") or not row.get("Listing Verification Status"):
+            errors.append(f"{row.get('ID') or row.get('Property Name')}: missing source URL or verification status")
+    return errors
+
+
+def print_summary(summary: RefreshSummary, audit_messages: list[str]) -> None:
+    summary.finalize()
+    print("Property refresh summary")
+    print(f"- sources attempted: {summary.sources_attempted}")
+    print(f"- sources succeeded: {summary.sources_succeeded}")
+    print(f"- sources failed: {summary.sources_failed}")
+    print(f"- sources blocked/unavailable: {summary.sources_blocked}")
+    print(f"- tracked listing URLs: {summary.tracked_listing_urls}")
+    print(f"- listing URLs discovered: {summary.listing_urls_discovered}")
+    print(f"- candidates processed: {summary.candidates_processed}")
+    print(f"- rows added: {summary.rows_added}")
+    print(f"- rows updated: {summary.rows_updated}")
+    print(f"- audit-only changes: {'yes' if summary.audit_only_changes else 'no'}")
+    print(f"- CSV written: {'yes' if summary.csv_written else 'no'}")
+    if summary.dry_run:
+        print("- mode: dry-run (no CSV write)")
+    print("Source results:")
+    for attempt in summary.source_attempts:
+        if attempt.ok:
+            print(f"  OK {attempt.status} {attempt.name}: {attempt.discovered_links} listing link(s)")
+        else:
+            print(f"  FAIL {attempt.status or 'network'} {attempt.name}: {attempt.error}")
+    if audit_messages:
+        print("Audit messages:")
+        for message in audit_messages:
+            print(f"  - {message}")
+
+
+def summary_json(summary: RefreshSummary) -> dict[str, Any]:
+    summary.finalize()
+    data = asdict(summary)
+    data["source_attempts"] = [asdict(attempt) for attempt in summary.source_attempts]
+    return data
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Refresh the Charlotte Polo investor property CSV.")
+    parser.add_argument("--dry-run", action="store_true", help="Run discovery and validation without writing the CSV.")
+    parser.add_argument("--allow-audit-only", action="store_true", help="Write the audit row even when no listing rows were added or meaningfully updated.")
+    parser.add_argument("--allow-source-failures", action="store_true", help="Do not fail the process when most search sources are blocked/unavailable.")
+    parser.add_argument("--max-source-failure-rate", type=float, default=0.75, help="Fail when this fraction of sources fail unless --allow-source-failures is set.")
+    parser.add_argument("--summary-path", type=Path, help="Optional JSON file for the refresh summary.")
+    parser.add_argument("--validate-only", action="store_true", help="Validate the existing CSV and exit without network discovery.")
+    return parser.parse_args()
+
+
 def main() -> None:
+    args = parse_args()
     rows = [normalize_row(row) for row in load_rows()]
-    candidates, audit_messages = scrape_candidates(rows)
+
+    if args.validate_only:
+        errors = validate_rows(rows)
+        if errors:
+            print("CSV validation failed:")
+            for error in errors:
+                print(f"- {error}")
+            raise SystemExit(1)
+        print(f"CSV validation passed: {len(rows)} total rows; visible rows are 50+ acres and have source status.")
+        return
+
+    original_snapshots = {row_key(row): meaningful_row_snapshot(row) for row in rows if row_key(row)}
+    summary = RefreshSummary(dry_run=args.dry_run)
+    candidates, audit_messages = scrape_candidates(rows, summary)
+    summary.finalize()
+    summary.candidates_processed = len(candidates)
 
     rows_by_key = {row_key(row): row for row in rows if row_key(row)}
     touched_keys = set()
@@ -840,28 +1021,72 @@ def main() -> None:
             row = {column: "" for column in TARGET_COLUMNS}
             rows.append(row)
             rows_by_key[key] = row
+        before_snapshot = meaningful_row_snapshot(row)
         apply_candidate(row, candidate, discovered=discovered)
-        touched_keys.add(row_key(row))
+        after_key = row_key(row)
+        after_snapshot = meaningful_row_snapshot(row)
+        touched_keys.add(after_key)
+        if discovered:
+            summary.rows_added += 1
+        elif before_snapshot != after_snapshot or original_snapshots.get(after_key) != after_snapshot:
+            summary.rows_updated += 1
 
+    # Preserve existing valid rows that were not reached. Do not stamp them as
+    # researched merely because the agent ran; that made audit-only refreshes look
+    # like successful data updates.
     for row in rows:
-        if row.get("ID") in {"SEARCH-100AC-AUDIT", "SEARCH-50AC-AUDIT"}:
+        if row.get("ID") in AUDIT_ROW_IDS:
             continue
-        if row_key(row) not in touched_keys:
-            row["Last Researched"] = TODAY
-            if row.get("Property URL"):
-                row["Listing Verification Status"] = row.get("Listing Verification Status") or "Not reached in latest scrape; preserve link and verify manually."
+        if row_key(row) not in touched_keys and row.get("Property URL"):
+            row["Listing Verification Status"] = row.get("Listing Verification Status") or "Not reached in latest scrape; preserve link and verify manually."
 
-    update_no_results_audit_row(rows, audit_messages, len(candidates))
+    update_no_results_audit_row(rows, audit_messages, len(candidates), summary)
     rows = [normalize_row(row) for row in rows]
     rows = [row for row in rows if is_dashboard_eligible(row)]
-    write_rows(rows)
 
-    print(f"Updated {DATA_PATH}")
-    print(f"Rows: {len(rows)}")
-    print(f"Columns: {len(TARGET_COLUMNS)}")
-    print(f"Candidates processed: {len(candidates)}")
-    for message in audit_messages:
-        print(f"- {message}")
+    validation_errors = validate_rows(rows)
+    if validation_errors:
+        print_summary(summary, audit_messages)
+        print("CSV validation failed:")
+        for error in validation_errors:
+            print(f"- {error}")
+        raise SystemExit(1)
+
+    summary.audit_only_changes = summary.rows_added == 0 and summary.rows_updated == 0
+    should_fail_sources = (
+        not args.allow_source_failures
+        and summary.sources_attempted > 0
+        and summary.failure_rate >= args.max_source_failure_rate
+        and summary.rows_added == 0
+    )
+
+    if should_fail_sources:
+        print_summary(summary, audit_messages)
+        print(
+            "Source reliability gate failed: "
+            f"{summary.sources_failed}/{summary.sources_attempted} sources failed and no new listing rows were added. "
+            "Use --allow-source-failures only for an intentional audit run."
+        )
+        if args.summary_path:
+            args.summary_path.write_text(json.dumps(summary_json(summary), indent=2), encoding="utf-8")
+        raise SystemExit(2)
+
+    if args.dry_run:
+        summary.csv_written = False
+    elif summary.audit_only_changes and not args.allow_audit_only:
+        summary.csv_written = False
+    else:
+        write_rows(rows)
+        summary.csv_written = True
+
+    if args.summary_path:
+        args.summary_path.write_text(json.dumps(summary_json(summary), indent=2), encoding="utf-8")
+
+    print_summary(summary, audit_messages)
+    if summary.audit_only_changes and not args.allow_audit_only:
+        print("Skipped CSV write: only the hidden audit row/timestamps would have changed.")
+    elif summary.csv_written:
+        print(f"Updated {DATA_PATH}")
 
 
 if __name__ == "__main__":
