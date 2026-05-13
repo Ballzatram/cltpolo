@@ -159,7 +159,7 @@ async function handleRefresh(request, env, corsHeaders) {
 
   return jsonResponse(
     {
-      message: "CSV refresh agent started. It will keep existing listings, append newly discovered listings, update data/charlotte_polo_properties.csv, and publish the refreshed dashboard data after deployment."
+      message: "CSV refresh workflow started. GitHub accepted the workflow_dispatch request; this does not mean new listings were found or committed. Check the Update Property Dataset workflow logs, then reload committed dashboard data after the workflow completes."
     },
     202,
     corsHeaders

@@ -31,44 +31,20 @@ jobs:
           python-version: "3.11"
 
       - name: Run property update agent
-        run: python scripts/update_properties.py
+        run: python scripts/update_properties.py --summary-path property-refresh-summary.json
+
+      - name: Upload refresh summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: property-refresh-summary
+          path: property-refresh-summary.json
+          if-no-files-found: ignore
 
       - name: Validate investor data quality gate
-        run: |
-          python - <<'PY'
-          import csv
-          from datetime import datetime, timezone
-          from pathlib import Path
+        run: python scripts/update_properties.py --validate-only
 
-          today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-          rows = list(csv.DictReader(Path("data/charlotte_polo_properties.csv").open()))
-          visible_rows = [
-              row for row in rows
-              if row.get("Dashboard Include", "").strip().lower() not in {"no", "false", "0"}
-          ]
-          bad_rows = [
-              row for row in visible_rows
-              if float((row.get("Acres") or "0").replace(",", "")) < 50
-          ]
-          missing_sources = [
-              row for row in visible_rows
-              if not row.get("Property URL") or not row.get("Listing Verification Status")
-          ]
-          stale_rows = [
-              row for row in rows
-              if row.get("Last Researched") != today
-          ]
-          if bad_rows or missing_sources or stale_rows:
-              raise SystemExit(
-                  f"Investor data quality gate failed: "
-                  f"{len(bad_rows)} sub-50-acre rows, "
-                  f"{len(missing_sources)} rows missing source/verification, "
-                  f"{len(stale_rows)} rows not refreshed for {today}"
-              )
-          print(f"Validated {len(visible_rows)} visible investor rows at 50+ acres.")
-          PY
-
-      - name: Commit changes
+      - name: Commit listing dataset changes
         run: |
           git config user.name "property-research-agent"
           git config user.email "actions@github.com"
@@ -76,8 +52,8 @@ jobs:
           git add data/charlotte_polo_properties.csv
 
           if git diff --cached --quiet; then
-            echo "No changes to commit"
+            echo "No listing-data changes to commit"
           else
-            git commit -m "Daily property dataset update"
+            git commit -m "Update property dataset from refresh agent"
             git push
           fi
