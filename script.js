@@ -33,7 +33,7 @@ if (contactForm) {
       });
 
       if (response.ok) {
-        window.location.href = "thank-you.html";
+        window.location.href = "/thank-you";
         return;
       }
 
@@ -115,10 +115,6 @@ const investorSearch = document.getElementById("investorSearch");
 const corridorFilter = document.getElementById("corridorFilter");
 const tierFilter = document.getElementById("tierFilter");
 const sortFilter = document.getElementById("sortFilter");
-
-if (window.location.pathname.endsWith("/investors.html")) {
-  window.history.replaceState(null, "", "/investors");
-}
 
 let investorProperties = [];
 let investorMap = null;

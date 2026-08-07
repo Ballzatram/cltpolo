@@ -1,0 +1,68 @@
+{
+  "name": "donations",
+  "compatibility_date": "2026-08-07",
+  "main": "workers/donations.js",
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "ratelimits": [
+    {
+      "name": "DONATION_CLIENT_RATE_LIMITER",
+      "namespace_id": "2026080701",
+      "simple": { "limit": 5, "period": 60 }
+    },
+    {
+      "name": "DONATION_ROUTE_RATE_LIMITER",
+      "namespace_id": "2026080702",
+      "simple": { "limit": 30, "period": 60 }
+    }
+  ],
+  "secrets": {
+    "required": [
+      "SQUARE_APPLICATION_ID",
+      "SQUARE_LOCATION_ID",
+      "SQUARE_ACCESS_TOKEN"
+    ]
+  },
+  "vars": {
+    "ALLOWED_ORIGINS": "https://cltpolo-donations.pages.dev",
+    "SQUARE_ENVIRONMENT": "production",
+    "MIN_DONATION_CENTS": "500",
+    "MAX_DONATION_CENTS": "500000"
+  },
+  "env": {
+    "sandbox": {
+      "name": "donations-sandbox",
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1
+      },
+      "ratelimits": [
+        {
+          "name": "DONATION_CLIENT_RATE_LIMITER",
+          "namespace_id": "2026080703",
+          "simple": { "limit": 20, "period": 60 }
+        },
+        {
+          "name": "DONATION_ROUTE_RATE_LIMITER",
+          "namespace_id": "2026080704",
+          "simple": { "limit": 100, "period": 60 }
+        }
+      ],
+      "secrets": {
+        "required": [
+          "SQUARE_APPLICATION_ID",
+          "SQUARE_LOCATION_ID",
+          "SQUARE_ACCESS_TOKEN"
+        ]
+      },
+      "vars": {
+        "ALLOWED_ORIGINS": "https://cltpolo-donations-sandbox.pages.dev",
+        "SQUARE_ENVIRONMENT": "sandbox",
+        "MIN_DONATION_CENTS": "500",
+        "MAX_DONATION_CENTS": "500000"
+      }
+    }
+  }
+}
