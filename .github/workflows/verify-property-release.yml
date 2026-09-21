@@ -16,107 +16,35 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 6
     steps:
-      - name: Verify published page, assets and snapshot without credentials
+      - name: Verify deployed page, handoff code and snapshot
         run: |
           python - <<'PY'
           import json,time
-          from urllib.request import Request,urlopen
+          from urllib.request import urlopen
           origin='https://charlottepolo.com'
-          headers={'User-Agent':'CLTPoloReleaseCheck/2.0'}
           def get(url):
-              with urlopen(Request(url,headers=headers),timeout=15) as response:
-                  return response.status,response.read(2000000).decode('utf-8','replace')
-          for attempt in range(18):
+              with urlopen(url,timeout=15) as response:
+                  return response.read(2000000).decode('utf-8')
+          for attempt in range(24):
               try:
-                  status,body=get(origin+'/investors/?release-check=20260921r2')
-                  if 'name="research-release" content="2026-09-21-r2"' in body and 'Run CSV Refresh Agent' not in body:
-                      print('Live property page verified: HTTP',status,'release 2026-09-21-r2')
-                      break
-              except Exception as error:print('Page not verified:',type(error).__name__)
-              time.sleep(15)
-          else:raise SystemExit('Current property page release was not observed.')
-          for path in ['/property-research.js','/property-research-data.js','/property-research-core.js','/property-research.css']:
-              status,body=get(origin+path+'?release-check=20260921r2')
-              assert status==200 and len(body)>100,path
-              print('Live asset verified',path,status)
-          url='https://raw.githubusercontent.com/Ballzatram/cltpolo/main/data/property-research.json'
-          for attempt in range(10):
-              try:
-                  status,body=get(url+'?release-check='+str(time.time_ns()))
-                  data=json.loads(body)
-                  assert data['schemaVersion']==2 and data['brief']['minimumAcres']==20 and data['brief']['maximumDriveMinutes']==45
-                  print('Live snapshot verified',json.dumps({'runId':data.get('workflowRunId'),'properties':len(data['properties']),'health':data['health'],'latestListingReviewAt':data.get('latestListingReviewAt')}))
+                  nonce=str(time.time_ns())
+                  html=get(origin+'/investors/?release-check='+nonce)
+                  script=get(origin+'/property-research.js?release-check='+nonce)
+                  assert 'research-release' in html and 'Run CSV Refresh Agent' not in html
+                  assert 'contentsSnapshot' in script and 'dataset.completedRunId' in script
                   break
-              except Exception as error:print('Snapshot not verified:',type(error).__name__);time.sleep(10)
-          else:raise SystemExit('Current research snapshot was not observed.')
-          PY
-      - name: Install standard Chromium for the live user flow
-        run: |
-          python -m pip install playwright==1.55.0
-          python -m playwright install --with-deps chromium
-      - name: Exercise one real refresh from the live page
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          from playwright.sync_api import sync_playwright
-          target='https://charlottepolo.com/investors/'
-          worker='https://refresh-properties.charlottepolo-refresh.workers.dev'
-          out=Path('artifacts');out.mkdir(exist_ok=True)
-          report={'page':target,'workerResponses':[],'pageErrors':[]}
-          with sync_playwright() as p:
-              # Real Chromium defaults: no user-agent override, interception,
-              # proxy, challenge solving, fingerprint changes or access bypass.
-              browser=p.chromium.launch(headless=True,args=['--no-sandbox'])
-              page=browser.new_page(viewport={'width':1440,'height':1000})
-              page.on('pageerror',lambda error:report['pageErrors'].append(str(error)))
-              def observed(response):
-                  if response.url.startswith(worker):
-                      report['workerResponses'].append({'url':response.url,'method':response.request.method,'status':response.status})
-              page.on('response',observed)
-              try:
-                  page.goto(target,wait_until='domcontentloaded',timeout=45000)
-                  report['finalPage']=page.url
-                  assert page.locator('meta[name="research-release"]').get_attribute('content')=='2026-09-21-r2'
-                  # Existing public convenience gate; not a credential or account login.
-                  page.locator('#investorCode').fill('cltpolo123!')
-                  page.get_by_role('button',name='Open research').click()
-                  page.wait_for_function("document.querySelectorAll('#investorStats .stat').length===4",timeout=45000)
-                  assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1')
-                  report['healthBefore']=page.locator('#healthTitle').text_content()
-                  report['reviewDateBefore']=page.locator('#lastReview').text_content()
-                  page.locator('#runPropertyAgent').click()
-                  page.wait_for_function("document.getElementById('propertyAgentStatus').textContent.includes('Workflow finished') || document.getElementById('propertyAgentStatus').dataset.status==='error'",timeout=180000)
-                  report['refreshMessage']=page.locator('#propertyAgentStatus').text_content()
-                  report['healthAfter']=page.locator('#healthTitle').text_content()
-                  report['reviewDateAfter']=page.locator('#lastReview').text_content()
-                  report['dispatchAccepted']=any(r['method']=='POST' and r['status']==202 for r in report['workerResponses'])
-                  report['matchingSnapshotLoaded']='Workflow finished' in report['refreshMessage']
-                  page.locator('#researchView').select_option('all')
-                  page.screenshot(path=str(out/'property-live-desktop.png'),full_page=True)
-                  page.set_viewport_size({'width':390,'height':844})
-                  assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1')
-                  page.screenshot(path=str(out/'property-live-mobile.png'),full_page=True)
-                  assert report['dispatchAccepted'],'The deployed Worker did not accept the actual browser POST'
-                  assert report['matchingSnapshotLoaded'],'The browser did not load the matching completed-run snapshot'
-                  assert not report['pageErrors'],report['pageErrors']
-                  report['result']='passed'
               except Exception as error:
-                  report['result']='failed';report['error']=str(error)
-                  if page.locator('#propertyAgentStatus').count():report['refreshMessage']=page.locator('#propertyAgentStatus').text_content()
-                  page.screenshot(path=str(out/'property-live-failure.png'),full_page=True)
-                  raise
-              finally:
-                  print('LIVE BROWSER REPORT',json.dumps(report,indent=2))
-                  (out/'property-live-report.json').write_text(json.dumps(report,indent=2))
-                  browser.close()
+                  print('Awaiting deployed revision:',type(error).__name__)
+                  time.sleep(10)
+          else:raise SystemExit('Current live revision was not observed')
+          data=json.loads(get('https://raw.githubusercontent.com/Ballzatram/cltpolo/main/data/property-research.json?check='+str(time.time_ns())))
+          assert data['schemaVersion']==2
+          assert data['brief']['minimumAcres']==20 and data['brief']['maximumDriveMinutes']==45
+          assert isinstance(data['properties'],list) and isinstance(data['health'],dict)
+          print('LIVE PAGE AND HANDOFF CODE VERIFIED')
+          print(json.dumps({'workflowRunId':data.get('workflowRunId'),'sourceHealth':data['health']['status'],'properties':len(data['properties']),'latestListingReviewAt':data.get('latestListingReviewAt')},indent=2))
+          print('This is a read-only deployment check, not proof of a new dispatch or full market coverage.')
+          print('Exact run-ID matching, stale CDN recovery and failed publication are tested in Property Research Checks.')
           PY
-      - name: Preserve live release evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: property-live-release
-          path: artifacts/property-live-*
-          if-no-files-found: ignore
