@@ -79,7 +79,13 @@
     $('emptyMessage').textContent=entries.length?'Saved records may be outside the brief, or your filters may hide them. No active matches is not proof that suitable land does not exist. Review the archive or browse the wider market below.':'No research records loaded yet. Source failures and empty searches are reported separately; the page will not invent a shortlist.';
     renderMap(items);
   }
-  async function load(){
+  async function contentsSnapshot(){
+    const data=await request(`https://api.github.com/repos/Ballzatram/cltpolo/contents/data/property-research.json?ref=main&t=${Date.now()}`);
+    if(data.encoding!=='base64'||typeof data.content!=='string')throw new Error('Snapshot content is unavailable');
+    const bytes=Uint8Array.from(atob(data.content.replace(/\s/g,'')),character=>character.charCodeAt(0));
+    return D.validate(JSON.parse(new TextDecoder().decode(bytes)));
+  }
+  async function load(expectedRunId=null){
     const ticket=++sequence;$('investorLoading').hidden=false;$('propertyGrid').setAttribute('aria-busy','true');
     try{
       let next,origin='Latest repository snapshot';
@@ -92,7 +98,14 @@
           next=D.validate({schemaVersion:2,generatedAt:new Date().toISOString(),brief,properties:rows,health:{status:'not-run',message:'The published research snapshot is unavailable. Showing the saved ledger; no new source check is implied.',sources:[],pausedPortals:brief.pausedPortals},latestListingReviewAt:rows.map(row=>row['Listing Checked At']||row['Listing Verified At']||row['Last Researched']||'').sort().at(-1)||null});origin='Ledger fallback — health snapshot unavailable';
         }
       }
+      if(expectedRunId&&String(next.workflowRunId)!==String(expectedRunId)){
+        // Raw-file CDN propagation can lag a completed job. Read the current
+        // repository content directly before claiming the requested run loaded.
+        try{next=await contentsSnapshot();origin='Latest repository content — refresh handoff';}
+        catch{/* Keep a truthful older snapshot while retrying publication. */}
+      }
       if(ticket!==sequence)return null;
+      $('investorDashboard').dataset.snapshotRunId=String(next.workflowRunId||'');
       snapshot=next;entries=next.properties.map(row=>({row,fit:R.evaluate(row,next.brief),fresh:D.freshness(row,next.brief.listingStaleDays||30)}));sourceHealth(origin);render();return next;
     }catch(error){if(ticket===sequence)notice(`Saved research could not be loaded (${error.message}). Any visible results are the last successfully loaded snapshot. Reload results to retry.`,'error');return null;}
     finally{if(ticket===sequence){$('investorLoading').hidden=true;$('propertyGrid').setAttribute('aria-busy','false');}}
@@ -108,8 +121,9 @@
       const run=current.runId?runs.find(r=>r.id===current.runId):D.dispatchedRun(runs,current.requestedAt,current.baseline);
       if(run){current.runId=run.id;write('cltPoloResearchWatch',current,true);$('workflowStatus').textContent=D.workflowLabel(run);
         if(run.status==='completed'){
-          const loaded=await load();if(watch!==current)return;
+          const loaded=await load(run.id);if(watch!==current)return;
           if(loaded&&String(loaded.workflowRunId)===String(run.id)){
+            $('propertyAgentStatus').dataset.completedRunId=String(run.id);
             notice(`${D.workflowLabel(run)}. ${loaded.health.message||'Review the source-health report.'}`,run.conclusion==='success'?'info':'error');stopWatching();return;
           }
           current.publishChecks=(current.publishChecks||0)+1;
@@ -121,7 +135,7 @@
     if(watch===current)watchTimer=setTimeout(poll,30000);
   }
   agent.addEventListener('click',async()=>{
-    if(watch)return;agent.disabled=true;agent.textContent='Starting source check…';const requestedAt=Date.now();let baseline=[];
+    if(watch)return;delete $('propertyAgentStatus').dataset.completedRunId;agent.disabled=true;agent.textContent='Starting source check…';const requestedAt=Date.now();let baseline=[];
     try{baseline=(await getRuns()).map(run=>run.id);}catch{/* Timestamp still prevents attaching to an old completed run. */}
     try{
       await request(agent.dataset.refreshEndpoint,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({source:'investor-dashboard'})});
