@@ -1,328 +1,48 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <title>Investor Portal | Charlotte Polo Club</title>
-    <link rel="canonical" href="https://charlottepolo.com/investors" />
-    <meta name="description"
-        content="Private investor portal for Charlotte Polo Club land research, acquisition candidates, drive-time context, and development diligence." />
-
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="/style.css" />
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Property Research | Charlotte Polo Club</title>
+  <meta name="description" content="Arena-first polo property research: 20+ acres, flat usable land, I-77 south toward Columbia, within 45 minutes of Uptown Charlotte.">
+  <meta name="research-release" content="2026-09-21-r2">
+  <link rel="canonical" href="https://charlottepolo.com/investors/">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="/property-research.css?v=20260921r2">
 </head>
-
-<body class="investors-page">
-    <header class="site-header">
-        <div class="wrap header-inner">
-            <a class="brand" href="/home">Charlotte Polo Club</a>
-
-            <button class="nav-toggle" aria-label="Toggle navigation">Menu</button>
-
-            <nav class="site-nav">
-                <a href="/home">Home</a>
-                <a href="/events">Events</a>
-                <a href="/about">About</a>
-                <a href="/become-a-member">Become a Member</a>
-                <a href="/contact" class="nav-cta">Contact</a>
-            </nav>
-        </div>
-    </header>
-
-    <main>
-        <section class="investor-lock section" id="investorLock">
-            <div class="wrap investor-lock-wrap">
-                <div class="investor-lock-card">
-                    <p class="section-kicker">Private Access</p>
-
-                    <h1>Investor Portal</h1>
-
-                    <p class="lead">
-                        A private working dashboard for land acquisition research, site scoring,
-                        drive-time context, and due diligence connected to Charlotte Polo Club’s
-                        long-term facility vision.
-                    </p>
-
-                    <form class="investor-code-form" id="investorCodeForm">
-                        <label for="investorCode">Access Code</label>
-
-                        <input id="investorCode" name="investorCode" type="password" placeholder="Enter access code"
-                            autocomplete="off" required />
-
-                        <button class="button button-primary full-width" type="submit">
-                            Enter Portal
-                        </button>
-
-                        <p class="investor-error" id="investorCodeError" hidden>
-                            Incorrect code. Please try again.
-                        </p>
-                    </form>
-
-                    <p class="investor-lock-note">
-                        This portal is intended for preliminary review only. Property details,
-                        pricing, location, drive times, and diligence notes should be independently verified.
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <section class="investor-dashboard" id="investorDashboard" hidden>
-            <section class="investor-hero">
-                <div class="wrap investor-hero-inner">
-                    <div class="investor-hero-main">
-                        <p class="section-kicker">Investor Research</p>
-
-                        <h1>Land Acquisition Dashboard</h1>
-
-                        <p class="lead">
-                            A visual view of potential land opportunities being evaluated for polo fields,
-                            equestrian programming, event use, investor relevance, and long-term regional growth.
-                        </p>
-
-                        <div class="investor-hero-pills">
-                            <span>50+ Acre Minimum</span>
-                            <span>Listing Source Links</span>
-                            <span>Agentic Refresh</span>
-                            <span>Broker Verification Required</span>
-                        </div>
-                    </div>
-
-                    <aside class="investor-hero-panel" aria-label="Dashboard summary">
-                        <p>Data Discipline</p>
-                        <h3>50+ Acre Land, Reviewed Before It Shows</h3>
-                        <span>
-                            Every visible property comes from the dashboard CSV and meets the 50+ acre screen.
-                            When prompted, the agent starts a refresh of that CSV so new or changed opportunities
-                            can be reviewed before investor decisions.
-                        </span>
-                    </aside>
-                </div>
-            </section>
-
-            <section class="investor-map-section">
-                <div class="wrap">
-                    <div class="investor-map-head">
-                        <div>
-                            <p class="section-kicker">Regional View</p>
-                            <h2>50+ Acre Source-Checked Map</h2>
-                        </div>
-
-                        <p>
-                            Only 50+ acre candidates are shown. Map pins and cards are research aids, with
-                            source links or property addresses included so each site can be verified on the
-                            relevant listing or broker platform.
-                        </p>
-                    </div>
-
-                    <div class="investor-map-layout">
-                        <div class="investor-map-card investor-map-card-live"
-                            aria-label="Interactive property map around Charlotte">
-                            <div class="actual-map" id="investorMap"></div>
-
-                            <div class="map-legend map-legend-live">
-                                <span><i class="legend-dot legend-priority"></i> Investor shortlist</span>
-                                <span><i class="legend-dot"></i> Active research</span>
-                                <span><i class="legend-ring"></i> Uptown Charlotte reference</span>
-                            </div>
-                        </div>
-
-                        <aside class="drive-panel">
-                            <div class="drive-panel-head">
-                                <p>Drive-Time Lens</p>
-                                <h3>From Uptown Charlotte</h3>
-                            </div>
-
-                            <div class="drive-band drive-band-primary">
-                                <span>0–35 min</span>
-                                <strong>Best for recurring use</strong>
-                                <p>Most compelling for lessons, club activity, events, and sponsor access.</p>
-                            </div>
-
-                            <div class="drive-band">
-                                <span>35–55 min</span>
-                                <strong>Viable destination property</strong>
-                                <p>Can work if acreage, pricing, road access, and event upside are strong.</p>
-                            </div>
-
-                            <div class="drive-band">
-                                <span>55+ min</span>
-                                <strong>Strategic / value review</strong>
-                                <p>Needs a strong land thesis or regional partnership angle to justify distance.</p>
-                            </div>
-                        </aside>
-                    </div>
-                </div>
-            </section>
-
-            <section class="investor-command">
-                <div class="wrap">
-                    <div class="investor-command-top">
-                        <div>
-                            <p class="section-kicker">Snapshot</p>
-                            <h2>Current Opportunities</h2>
-                        </div>
-
-                        <div class="investor-command-actions" aria-label="Investor data actions">
-                            <button class="button button-primary investor-agent-refresh" id="runPropertyAgent"
-                                type="button"
-                                data-refresh-endpoint="https://refresh-properties.charlottepolo-refresh.workers.dev"
-                                data-vote-endpoint="https://refresh-properties.charlottepolo-refresh.workers.dev/votes"
-                                data-actions-url="https://github.com/Ballzatram/cltpolo/actions/workflows/update-properties.yml">
-                                Run CSV Refresh Agent
-                            </button>
-
-                            <button class="button button-secondary investor-refresh" id="refreshInvestorData"
-                                type="button">
-                                Reload Committed Data
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="investor-data-alert" role="note">
-                        <strong>Reliability standard:</strong> this view excludes sub-50-acre land and treats every
-                        source page as a research input, not a guaranteed investment fact. Exact listing links are
-                        preferred, but a property address on the card is enough to search and verify the site on
-                        the relevant broker, land, or listing platform. The refresh button only starts the GitHub
-                        Actions CSV workflow; use Reload Committed Data after that workflow finishes and commits real
-                        listing changes.
-                    </div>
-
-                    <div class="investor-agent-status" id="propertyAgentStatus" role="status" aria-live="polite"
-                        hidden>
-                    </div>
-
-                    <div class="investor-stats-grid" id="investorStats">
-                        <article class="investor-stat-card">
-                            <span>50+ Acre Sites</span>
-                            <strong>—</strong>
-                        </article>
-
-                        <article class="investor-stat-card">
-                            <span>Shortlist Sites</span>
-                            <strong>—</strong>
-                        </article>
-
-                        <article class="investor-stat-card">
-                            <span>Avg. Score</span>
-                            <strong>—</strong>
-                        </article>
-
-                        <article class="investor-stat-card">
-                            <span>Total 50+ Acres</span>
-                            <strong>—</strong>
-                        </article>
-                    </div>
-
-                    <div class="investor-filter-shell">
-                        <div class="investor-filter-heading">
-                            <div>
-                                <h3>Search Properties</h3>
-                                <p>
-                                    Filter only 50+ acre land candidates by corridor, recommendation tier,
-                                    pricing, county, drive time, verification status, or diligence notes.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="investor-filters">
-                            <label class="investor-search-field">
-                                Search
-                                <input id="investorSearch" type="search"
-                                    placeholder="Search by property, county, notes, corridor..." />
-                            </label>
-
-                            <label>
-                                Corridor
-                                <select id="corridorFilter">
-                                    <option value="">All Corridors</option>
-                                </select>
-                            </label>
-
-                            <label>
-                                Tier
-                                <select id="tierFilter">
-                                    <option value="">All Tiers</option>
-                                </select>
-                            </label>
-
-                            <label>
-                                Sort
-                                <select id="sortFilter">
-                                    <option value="score-desc">Score: High to Low</option>
-                                    <option value="drive-asc">Drive Time: Low to High</option>
-                                    <option value="price-asc">Price: Low to High</option>
-                                    <option value="acres-desc">Acres: High to Low</option>
-                                    <option value="updated-desc">Recently Updated</option>
-                                </select>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="investor-list-section">
-                <div class="wrap">
-                    <div class="investor-results-head">
-                        <div>
-                            <p class="section-kicker">Property Pipeline</p>
-                            <h2>Land Candidates</h2>
-                        </div>
-
-                        <p>
-                            Each card highlights the essentials: acreage, price, location, drive time, source
-                            access, address, verification status, and the next diligence step.
-                        </p>
-                    </div>
-
-                    <div class="investor-loading" id="investorLoading">
-                        Loading investor dashboard...
-                    </div>
-
-                    <div class="investor-empty" id="investorEmpty" hidden>
-                        No matching properties found. Try clearing one of the filters.
-                    </div>
-
-                    <div class="property-grid" id="propertyGrid"></div>
-                </div>
-            </section>
-        </section>
-    </main>
-
-    <footer class="site-footer">
-        <div class="wrap footer-grid">
-            <div>
-                <a class="brand footer-brand" href="/home">Charlotte Polo Club</a>
-                <p class="footer-copy">
-                    Charlotte Polo Club is an emerging club and event platform focused on the
-                    sustainable future of polo in the Charlotte region.
-                </p>
-            </div>
-
-            <div>
-                <h4>Navigation</h4>
-                <ul class="footer-links">
-                    <li><a href="/home">Home</a></li>
-                    <li><a href="/events">Events</a></li>
-                    <li><a href="/about">About</a></li>
-                    <li><a href="/become-a-member">Become a Member</a></li>
-                    <li><a href="/contact">Contact</a></li>
-                </ul>
-            </div>
-
-            <div>
-                <h4>Resources</h4>
-                <ul class="footer-links">
-                    <li><a href="https://uspolo.org/" target="_blank" rel="noreferrer">USPA</a></li>
-                    <li><a href="https://watch.uspolo.org/" target="_blank" rel="noreferrer">Watch Polo</a></li>
-                </ul>
-            </div>
-        </div>
-    </footer>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="/script.js"></script>
+<body class="investors-page research-page">
+  <a href="#main" class="skip-link">Skip to research</a>
+  <header class="research-header"><a class="brand" href="/home">Charlotte Polo Club<small>Property research</small></a><nav aria-label="Club navigation"><a href="/home">Club home</a><a href="/contact">Contact</a></nav></header>
+  <main id="main">
+    <section id="investorLock" class="access-panel">
+      <p class="eyebrow">The next home for Charlotte polo</p><h1>Property research</h1>
+      <p>Flat land. An arena-led site plan. A practical drive from Charlotte.</p>
+      <form id="investorCodeForm"><label for="investorCode">Access code</label><div class="access-fields"><input id="investorCode" type="password" autocomplete="off" required><button type="submit">Open research</button></div><p id="investorCodeError" role="alert" hidden>Incorrect code. Please try again.</p></form>
+      <p class="fine-print">This is a convenience gate, not secure authentication. Research files are publicly hosted; do not add confidential documents.</p>
+      <noscript>This page needs JavaScript to display saved research and source-check status.</noscript>
+    </section>
+    <div id="investorDashboard" hidden>
+      <section class="research-hero"><div><p class="eyebrow">Arena-first acquisition brief</p><h1>Find the right<br>home for polo.</h1><p class="hero-copy">Prioritize a flat, usable site for an arena, with a separately assessed grass format. Extra land is welcome—not a substitute for the right terrain.</p><p class="hero-location">I-77 south of Charlotte toward Columbia</p></div><aside class="brief-card" aria-label="Property requirements"><dl><div><dt>Minimum parcel</dt><dd>20 acres</dd></div><div><dt>Non-negotiable</dt><dd>Flat usable land</dd></div><div><dt>Development priority</dt><dd>Arena first + grass</dd></div><div><dt>From Uptown Charlotte</dt><dd>45 minutes max.</dd></div></dl><p>Expansion room is a bonus. Columbia sets the direction, not the drive-time limit.</p></aside></section>
+      <section class="workspace" aria-label="Property research workspace">
+        <div class="section-heading"><div><p class="eyebrow">Saved research &amp; new leads</p><h2>Property search</h2></div><div class="actions"><button id="runPropertyAgent" type="button" data-refresh-endpoint="https://refresh-properties.charlottepolo-refresh.workers.dev" data-vote-endpoint="https://refresh-properties.charlottepolo-refresh.workers.dev/votes">Check for new properties</button><button id="refreshInvestorData" type="button" class="secondary">Reload results</button></div></div>
+        <p class="section-intro">The background job checks configured public sources. Its progress and results appear here; you do not need to manage a spreadsheet or open workflow logs.</p>
+        <section class="health-panel" aria-label="Research freshness"><div class="health-title"><strong id="healthTitle">Loading source health…</strong><span id="dataOrigin"></span></div><p id="healthMessage">A saved property is a research lead, not a verified available site.</p><dl class="health-dates"><div><dt>Latest research attempt</dt><dd id="lastAttempt">Not established</dd></div><div><dt>Most recent listing-source review</dt><dd id="lastReview">Not established</dd></div></dl><details><summary>Source coverage and technical details</summary><div id="sourceHealth"></div><p id="workflowStatus"></p><p id="voteServiceStatus">Checking shared voting…</p><p>The ledger is still stored as CSV internally. This page reads a generated research snapshot, including failure reports. A new snapshot date does not make an old listing current.</p><div class="technical-links"><a href="https://github.com/Ballzatram/cltpolo/actions/workflows/update-properties.yml" target="_blank" rel="noopener noreferrer">Workflow details</a><a href="https://raw.githubusercontent.com/Ballzatram/cltpolo/main/data/charlotte_polo_properties.csv" target="_blank" rel="noopener noreferrer">Download research ledger</a></div></details></section>
+        <div id="propertyAgentStatus" class="notice" role="status" aria-live="polite" hidden></div>
+        <div id="investorStats" class="stats" aria-label="Research totals"></div>
+        <div class="filters"><label>Search<input id="investorSearch" type="search" placeholder="Property, county or notes"></label><label>Research stage<select id="researchView"><option value="active">Active leads</option><option value="eligible">Meets documented brief</option><option value="research">Needs verification</option><option value="outside">Outside brief / archive</option><option value="saved">Saved on this device</option><option value="all">All tracked properties</option></select></label><label>Terrain evidence<select id="terrainFilter"><option value="">All evidence levels</option><option value="verified">Documented flat footprint</option><option value="unknown">Flatness not verified</option></select></label><label>Sort<select id="sortFilter"><option value="fit">Evidence-based fit</option><option value="drive">Shortest recorded drive</option><option value="price">Lowest recorded price</option><option value="acres">Largest parcel</option></select></label></div>
+        <p class="results-count" id="resultCount" role="status"></p>
+        <div id="investorLoading" class="notice" role="status" hidden>Loading saved research…</div>
+        <section id="investorEmpty" class="empty-panel" hidden><h3 id="emptyTitle">No active leads in this view</h3><p id="emptyMessage">No saved record currently clears this screen. That is not evidence that suitable land does not exist.</p><div class="actions"><button id="showOutside" class="secondary" type="button">Review archived properties</button><button id="resetFilters" class="secondary" type="button">Reset filters</button></div></section>
+        <div id="propertyGrid" class="property-grid"></div>
+        <details class="map-details" open><summary>Map of visible properties</summary><p class="fine-print">Pins are location references, not parcel boundaries. No map radius is presented as a 45-minute travel boundary.</p><div id="investorMap" class="actual-map" aria-label="Map of visible research properties"></div><p id="mapStatus" class="fine-print" role="status"></p></details>
+        <section class="source-directory"><h2>Browse the wider market</h2><p>Some portals block automated access. These links open their public searches; those results are not automatically verified or saved here.</p><div id="browseSources" class="technical-links"></div></section>
+        <details class="method"><summary>What counts as a documented match?</summary><p>All required checks must pass: 20+ parcel acres, a documented flat usable footprint, an arena-first layout, a separate grass format, southern I-77 access, and a recorded route of 45 minutes or less from Uptown Charlotte. A grass training area is not labeled as a full-size field.</p><p>Listing claims are not survey evidence. The app checks that an analyst recorded a source, status and review date; it does not independently certify a survey, zoning, drainage or engineering design. Confirm current availability with the broker.</p><p>Research-priority weights: flatness 40, arena 25, grass 15, access/drive 10, acreage 5, optional expansion 5. Price, extra acreage, votes and historic scores cannot override a failed requirement. An over-limit legacy drive estimate stays outside the current screen until a better route check resolves it.</p></details>
+      </section>
+    </div>
+  </main>
+  <footer><span>Charlotte Polo Club · Preliminary property research</span><span>Release 2026-09-21-r2</span></footer>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+  <script src="/property-research-core.js?v=20260921r2" defer></script>
+  <script src="/property-research-data.js?v=20260921r2" defer></script>
+  <script src="/property-research.js?v=20260921r2" defer></script>
 </body>
-
 </html>

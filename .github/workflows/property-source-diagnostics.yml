@@ -1,0 +1,43 @@
+name: Property Source Diagnostics
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/property-source-diagnostics.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect live release and public service responses
+        run: |
+          python - <<'PY'
+          import json,re
+          from urllib.request import Request,urlopen
+          urls=['https://charlottepolo.com/investors/','https://refresh-properties.charlottepolo-refresh.workers.dev/votes','https://raw.githubusercontent.com/Ballzatram/cltpolo/main/data/property-research.json']
+          for url in urls:
+              try:
+                  with urlopen(Request(url,headers={'User-Agent':'CLTPoloResearch/2.0 (+https://charlottepolo.com/contact)'}),timeout=15) as response:
+                      body=response.read(1000000).decode('utf-8','replace')
+                      print('PUBLIC URL',url,'HTTP',response.status)
+                      if '/investors/' in url:
+                          print('TITLE',re.findall(r'<title[^>]*>(.*?)</title>',body,re.I|re.S))
+                          print('RELEASE',re.findall(r'name="research-release" content="([^"]+)"',body))
+                          print('OLD COPY STILL PRESENT',bool(re.search(r'50\+ Acre Minimum|Run CSV Refresh Agent',body)))
+                      else:
+                          data=json.loads(body)
+                          print(json.dumps({key:data.get(key) for key in ['schemaVersion','generatedAt','workflowRunId','latestListingReviewAt','health','message']},indent=2))
+              except Exception as exc:print('PUBLIC URL',url,'UNAVAILABLE',str(exc))
+          PY
+      - name: Exercise bounded broker discovery without publishing data
+        continue-on-error: true
+        run: python scripts/property_pipeline.py --dry-run --max-listings 4 --summary-path source-diagnostic-summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: property-source-diagnostics
+          path: source-diagnostic-summary.json
+          if-no-files-found: ignore

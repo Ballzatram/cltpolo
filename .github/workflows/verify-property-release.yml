@@ -1,0 +1,79 @@
+name: Verify Property Release
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'investors/index.html'
+      - 'property-research.js'
+      - 'property-research-data.js'
+      - 'property-research.css'
+      - '.github/workflows/verify-property-release.yml'
+permissions:
+  contents: read
+concurrency:
+  group: verify-property-release
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Verify published page, assets and snapshot without credentials
+        run: |
+          python - <<'PY'
+          import json,time
+          from urllib.request import Request,urlopen
+          origin='https://charlottepolo.com'
+          headers={'User-Agent':'CLTPoloReleaseCheck/2.0','Origin':origin}
+          def get(url):
+              with urlopen(Request(url,headers=headers),timeout=15) as response:
+                  return response.status,response.read(2000000).decode('utf-8','replace')
+          for attempt in range(18):
+              try:
+                  status,body=get(origin+'/investors/?release-check=20260921r2')
+                  if 'name="research-release" content="2026-09-21-r2"' in body and 'Run CSV Refresh Agent' not in body:
+                      print('Live property page verified: HTTP',status,'release 2026-09-21-r2')
+                      break
+              except Exception as error:print('Page not verified:',type(error).__name__)
+              time.sleep(15)
+          else:raise SystemExit('Current property page release was not observed; do not claim live deployment.')
+          for path in ['/property-research.js','/property-research-data.js','/property-research-core.js','/property-research.css']:
+              status,body=get(origin+path+'?release-check=20260921r2')
+              assert status==200 and len(body)>100,path
+              print('Live asset verified',path,status)
+          url='https://raw.githubusercontent.com/Ballzatram/cltpolo/main/data/property-research.json'
+          for attempt in range(10):
+              try:
+                  status,body=get(url+'?release-check='+str(time.time_ns()))
+                  data=json.loads(body)
+                  assert data['schemaVersion']==2 and data['brief']['minimumAcres']==20 and data['brief']['maximumDriveMinutes']==45
+                  print('Live snapshot verified',json.dumps({'runId':data.get('workflowRunId'),'properties':len(data['properties']),'health':data['health'],'latestListingReviewAt':data.get('latestListingReviewAt')}))
+                  break
+              except Exception as error:print('Snapshot not verified:',type(error).__name__);time.sleep(10)
+          else:raise SystemExit('Current research snapshot was not observed.')
+          PY
+      - name: Exercise the same refresh request used by the page
+        run: |
+          python - <<'PY'
+          import json
+          from urllib.request import Request,urlopen
+          from urllib.error import HTTPError
+          origin='https://charlottepolo.com'
+          endpoint='https://refresh-properties.charlottepolo-refresh.workers.dev'
+          headers={'Origin':origin,'Content-Type':'application/json','Accept':'application/json','User-Agent':'CLTPoloReleaseCheck/2.0'}
+          preflight=Request(endpoint,method='OPTIONS',headers={'Origin':origin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'content-type'})
+          with urlopen(preflight,timeout=15) as response:
+              assert response.headers.get('Access-Control-Allow-Origin') in (origin,'*'),'CORS origin mismatch'
+              assert 'POST' in response.headers.get('Access-Control-Allow-Methods',''),'CORS method mismatch'
+              assert 'content-type' in response.headers.get('Access-Control-Allow-Headers','').lower(),'CORS header mismatch'
+              print('Live refresh preflight verified',response.status)
+          request=Request(endpoint,method='POST',headers=headers,data=json.dumps({'source':'investor-dashboard'}).encode())
+          try:
+              with urlopen(request,timeout=20) as response:
+                  assert response.headers.get('Access-Control-Allow-Origin') in (origin,'*'),'CORS response mismatch'
+                  body=json.loads(response.read(100000).decode())
+                  print('Live refresh request accepted',response.status,json.dumps(body))
+          except HTTPError as error:
+              print('Live refresh request failed',error.code,error.read(5000).decode('utf-8','replace'))
+              raise
+          PY

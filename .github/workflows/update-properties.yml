@@ -1,59 +1,71 @@
 name: Update Property Dataset
-
 on:
   schedule:
-    - cron: "0 11 * * *" # 7 AM Eastern during daylight time
+    - cron: '17 11 * * *'
   workflow_dispatch:
-
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/property_pipeline.py'
+      - 'data/property-search-brief.json'
+      - '.github/workflows/update-properties.yml'
 permissions:
   contents: write
-
 concurrency:
   group: update-property-dataset
   cancel-in-progress: false
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   update:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 12
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
-          persist-credentials: true
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+          ref: main
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-
-      - name: Run property update agent
-        run: python scripts/update_properties.py --summary-path property-refresh-summary.json
-
-      - name: Upload refresh summary
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test research rules and pipeline
+        run: |
+          node --test tests/property-research*.test.cjs
+          python -m unittest discover -s tests -p 'test_property*.py'
+      - name: Check configured property sources
+        id: research
+        continue-on-error: true
+        run: python scripts/property_pipeline.py --summary-path property-refresh-summary.json
+      - name: Upload source health report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: property-refresh-summary
           path: property-refresh-summary.json
-          if-no-files-found: ignore
-
-      - name: Validate investor data quality gate
-        run: python scripts/update_properties.py --validate-only
-
-      - name: Commit listing dataset changes
+          if-no-files-found: warn
+      - name: Validate snapshot before publication
+        if: always() && steps.research.outcome != 'skipped'
         run: |
-          git config user.name "property-research-agent"
-          git config user.email "actions@github.com"
-
-          git add data/charlotte_polo_properties.csv
-
-          if git diff --cached --quiet; then
-            echo "No listing-data changes to commit"
-          else
-            git commit -m "Update property dataset from refresh agent"
-            git push
+          test -s data/property-research.json
+          python scripts/property_pipeline.py --validate-only
+      - name: Publish results and failure reports together
+        if: success() && steps.research.outcome != 'skipped'
+        run: |
+          git config user.name 'property-research-agent'
+          git config user.email 'actions@github.com'
+          git add data/charlotte_polo_properties.csv data/property-research.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish property research snapshot and source health'
+            git fetch origin main
+            git rebase origin/main
+            git push origin HEAD:main
           fi
+      - name: Keep a failed check visibly failed after publishing its report
+        if: always() && steps.research.outcome == 'failure'
+        run: |
+          echo '::error::Research failed. Saved data and any valid failure report were retained; inspect source health.'
+          exit 1
