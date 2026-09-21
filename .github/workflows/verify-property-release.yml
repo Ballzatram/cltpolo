@@ -24,7 +24,7 @@ jobs:
           import json,time
           from urllib.request import Request,urlopen
           origin='https://charlottepolo.com'
-          headers={'User-Agent':'CLTPoloReleaseCheck/2.0','Origin':origin}
+          headers={'User-Agent':'CLTPoloReleaseCheck/2.0'}
           def get(url):
               with urlopen(Request(url,headers=headers),timeout=15) as response:
                   return response.status,response.read(2000000).decode('utf-8','replace')
@@ -52,21 +52,30 @@ jobs:
               except Exception as error:print('Snapshot not verified:',type(error).__name__);time.sleep(10)
           else:raise SystemExit('Current research snapshot was not observed.')
           PY
-      - name: Exercise the same refresh request used by the page
+      - name: Exercise the same refresh request used by the final page origin
         run: |
           python - <<'PY'
           import json
           from urllib.request import Request,urlopen
+          from urllib.parse import urlsplit
           from urllib.error import HTTPError
-          origin='https://charlottepolo.com'
+          with urlopen('https://charlottepolo.com/investors/',timeout=15) as page:
+              final=urlsplit(page.url)
+              origin=final.scheme+'://'+final.netloc
+              print('Actual deployed page origin:',origin)
           endpoint='https://refresh-properties.charlottepolo-refresh.workers.dev'
           headers={'Origin':origin,'Content-Type':'application/json','Accept':'application/json','User-Agent':'CLTPoloReleaseCheck/2.0'}
           preflight=Request(endpoint,method='OPTIONS',headers={'Origin':origin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'content-type'})
-          with urlopen(preflight,timeout=15) as response:
-              assert response.headers.get('Access-Control-Allow-Origin') in (origin,'*'),'CORS origin mismatch'
-              assert 'POST' in response.headers.get('Access-Control-Allow-Methods',''),'CORS method mismatch'
-              assert 'content-type' in response.headers.get('Access-Control-Allow-Headers','').lower(),'CORS header mismatch'
-              print('Live refresh preflight verified',response.status)
+          try:
+              with urlopen(preflight,timeout=15) as response:
+                  print('Preflight response:',response.status,'Allow-Origin:',response.headers.get('Access-Control-Allow-Origin'))
+                  assert response.headers.get('Access-Control-Allow-Origin') in (origin,'*'),'CORS origin mismatch'
+                  assert 'POST' in response.headers.get('Access-Control-Allow-Methods',''),'CORS method mismatch'
+                  assert 'content-type' in response.headers.get('Access-Control-Allow-Headers','').lower(),'CORS header mismatch'
+              print('Live refresh preflight verified')
+          except HTTPError as error:
+              print('Public preflight rejection:',error.code,'Allow-Origin:',error.headers.get('Access-Control-Allow-Origin'),'Body:',error.read(3000).decode('utf-8','replace'))
+              raise SystemExit('On-demand refresh is unavailable from the actual page origin; no refresh was dispatched.')
           request=Request(endpoint,method='POST',headers=headers,data=json.dumps({'source':'investor-dashboard'}).encode())
           try:
               with urlopen(request,timeout=20) as response:
