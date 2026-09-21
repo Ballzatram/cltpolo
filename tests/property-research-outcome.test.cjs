@@ -1,0 +1,16 @@
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const O=require('../property-research-outcome.js');
+const zero={status:'limited',rowsAdded:0,rowsChanged:0,listingsChecked:0};
+test('zero collected listings is not a successful market search',()=>{const s=O.summary(zero);assert.match(s,/No listing updates/);assert.match(s,/0 new · 0 changed · 0 listing pages/);assert.match(s,/No usable listing data/);});
+test('unchanged checked listings differ from zero collection',()=>{const s=O.summary({...zero,listingsChecked:3});assert.match(s,/No listing changes/);assert.doesNotMatch(s,/No usable/);});
+test('changed listings are counted without asserting suitability',()=>{const s=O.summary({...zero,rowsAdded:2,rowsChanged:1,listingsChecked:4});assert.match(s,/2 new · 1 changed/);assert.match(s,/not verified polo sites/);});
+test('failed reports stay failed even with count fields',()=>{assert.match(O.summary({...zero,status:'error'}),/Source check failed/);assert.match(O.summary({...zero,status:'blocked'}),/Source check failed/);});
+test('missing counters do not silently become zero',()=>{assert.match(O.summary({status:'limited'}),/unavailable/);assert.match(O.summary(null),/unavailable/);});
+test('negative and nonfinite counters are not counts',()=>{for(const value of [-1,NaN,Infinity,'0',undefined,null])assert.equal(O.count(value),null);assert.equal(O.count(0),0);});
+test('same-day checks have visibly different time including zone',()=>{const a=O.checkTime('2026-09-21T19:00:00Z'),b=O.checkTime('2026-09-21T19:56:17Z');assert.notEqual(a,b);assert.match(b,/3:56:17/);assert.match(b,/EDT|GMT-4/);});
+test('unknown time stays unknown',()=>assert.equal(O.checkTime('not a date'),'Not established'));
+test('an older CDN report never replaces the newer loaded report',()=>{const newer={generatedAt:'2026-09-21T20:00:00Z',workflowRunId:'42'},older={generatedAt:'2026-09-21T19:00:00Z',workflowRunId:'1'};assert.equal(O.newer(newer,older),newer);assert.equal(O.newer(older,newer),newer);assert.equal(O.newer(null,older),older);});
+test('a reload of the same report does not claim a new search',()=>{const report={workflowRunId:'42',health:zero};assert.match(O.reloadMessage(report,report),/no newer report/);assert.match(O.reloadMessage(null,report),/Published report loaded/);});
+test('original shared theme and navigation are restored, without legacy filtering code',()=>{const html=fs.readFileSync('investors/index.html','utf8');assert.match(html,/href="\/style.css\?/);assert.match(html,/class="site-header"/);assert.match(html,/Land Acquisition Dashboard/);assert.match(html,/class="site-footer"/);assert.match(html,/property-research-outcome.js/);assert.doesNotMatch(html,/src="\/script.js"/);assert.doesNotMatch(html,/Find the right<br>/);assert.match(html,/All tracked — includes archive/);});

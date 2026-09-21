@@ -4,9 +4,7 @@ on:
     branches: [main]
     paths:
       - 'investors/index.html'
-      - 'property-research.js'
-      - 'property-research-data.js'
-      - 'property-research.css'
+      - 'property-research*'
       - '.github/workflows/verify-property-release.yml'
 permissions:
   contents: read
@@ -16,35 +14,67 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 8
     steps:
-      - name: Verify deployed page, handoff code and snapshot
+      - uses: actions/checkout@v4
+      - name: Verify the current page and exact deployed assets
         run: |
           python - <<'PY'
-          import json,time
-          from urllib.request import urlopen
+          import hashlib,json,re,time
+          from pathlib import Path
+          from urllib.request import Request,urlopen
           origin='https://charlottepolo.com'
+          html=Path('investors/index.html').read_text()
+          release=re.search(r'name="research-release" content="([^"]+)"',html)[1]
+          assets=['/style.css','/property-research.css','/property-research-core.js','/property-research-data.js','/property-research-outcome.js','/property-research.js']
+          headers={'User-Agent':'CLTPoloReleaseCheck/3.0','Origin':origin}
           def get(url):
-              with urlopen(url,timeout=15) as response:
-                  return response.read(2000000).decode('utf-8')
-          for attempt in range(24):
+              with urlopen(Request(url,headers=headers),timeout=15) as response:
+                  return response.status,response.read(2000000)
+          for attempt in range(18):
               try:
-                  nonce=str(time.time_ns())
-                  html=get(origin+'/investors/?release-check='+nonce)
-                  script=get(origin+'/property-research.js?release-check='+nonce)
-                  assert 'research-release' in html and 'Run CSV Refresh Agent' not in html
-                  assert 'contentsSnapshot' in script and 'dataset.completedRunId' in script
+                  query='?release-check='+release+'&t='+str(time.time_ns())
+                  status,body=get(origin+'/investors/'+query)
+                  body=body.decode('utf-8')
+                  assert 'name="research-release" content="'+release+'"' in body
+                  assert 'href="/style.css?' in body and 'Land Acquisition Dashboard' in body
+                  for path in assets:
+                      status,content=get(origin+path+query)
+                      assert status==200 and hashlib.sha256(content).digest()==hashlib.sha256(Path(path.lstrip('/')).read_bytes()).digest(),path
+                  print('LIVE PAGE AND EXACT ASSETS VERIFIED',release)
                   break
               except Exception as error:
-                  print('Awaiting deployed revision:',type(error).__name__)
-                  time.sleep(10)
-          else:raise SystemExit('Current live revision was not observed')
-          data=json.loads(get('https://raw.githubusercontent.com/Ballzatram/cltpolo/main/data/property-research.json?check='+str(time.time_ns())))
-          assert data['schemaVersion']==2
-          assert data['brief']['minimumAcres']==20 and data['brief']['maximumDriveMinutes']==45
-          assert isinstance(data['properties'],list) and isinstance(data['health'],dict)
-          print('LIVE PAGE AND HANDOFF CODE VERIFIED')
-          print(json.dumps({'workflowRunId':data.get('workflowRunId'),'sourceHealth':data['health']['status'],'properties':len(data['properties']),'latestListingReviewAt':data.get('latestListingReviewAt')},indent=2))
-          print('This is a read-only deployment check, not proof of a new dispatch or full market coverage.')
-          print('Exact run-ID matching, stale CDN recovery and failed publication are tested in Property Research Checks.')
+                  print('Waiting for the matching deployment:',type(error).__name__,str(error)[:180])
+                  time.sleep(15)
+          else:raise SystemExit('Matching live release was not observed; do not claim deployed.')
+          status,body=get('https://raw.githubusercontent.com/Ballzatram/cltpolo/main/data/property-research.json?t='+str(time.time_ns()))
+          data=json.loads(body)
+          assert data['schemaVersion']==2 and data['brief']['minimumAcres']==20 and data['brief']['maximumDriveMinutes']==45
+          print('LIVE REPORT',json.dumps({'runId':data.get('workflowRunId'),'attemptedAt':data['health'].get('attemptedAt'),'rowsAdded':data['health'].get('rowsAdded'),'rowsChanged':data['health'].get('rowsChanged'),'listingsChecked':data['health'].get('listingsChecked'),'properties':len(data['properties'])}))
+          PY
+      - name: Verify the refresh request separately from source coverage
+        run: |
+          python - <<'PY'
+          import json
+          from urllib.request import Request,urlopen
+          from urllib.error import HTTPError
+          origin='https://charlottepolo.com'
+          endpoint='https://refresh-properties.charlottepolo-refresh.workers.dev/'
+          headers={'Origin':origin,'User-Agent':'CLTPoloReleaseCheck/3.0'}
+          try:
+              req=Request(endpoint,method='OPTIONS',headers={**headers,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'content-type'})
+              with urlopen(req,timeout=15) as response:
+                  assert response.status in (200,204)
+                  assert response.headers.get('Access-Control-Allow-Origin')==origin
+                  assert 'POST' in response.headers.get('Access-Control-Allow-Methods','')
+                  assert 'content-type' in response.headers.get('Access-Control-Allow-Headers','').lower()
+                  print('Live preflight passed',response.status)
+              req=Request(endpoint,method='POST',headers={**headers,'Content-Type':'application/json','Accept':'application/json'},data=json.dumps({'source':'investor-dashboard'}).encode())
+              with urlopen(req,timeout=20) as response:
+                  assert response.status==202 and response.headers.get('Access-Control-Allow-Origin')==origin
+                  print('Live dispatch accepted',response.status)
+                  print('Dispatch is not proof of new listings, successful collection, or report publication.')
+          except HTTPError as error:
+              print('Live refresh request failed',error.code,error.read(2000).decode('utf-8','replace'))
+              raise
           PY
