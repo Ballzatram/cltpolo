@@ -13,6 +13,9 @@
   "weights": {"terrain": 40, "arena": 25, "grass": 15, "access": 10, "acreage": 5, "expansion": 5},
   "listingStaleDays": 30,
   "brokerSources": [
+    {"name": "Mossy Oak Properties — York County", "url": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/"},
+    {"name": "Mossy Oak Properties — Chester County", "url": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/"},
+    {"name": "Mossy Oak Properties — Mecklenburg County", "url": "https://www.mossyoakproperties.com/land-for-sale/north-carolina/mecklenburg-county/"},
     {"name": "Advance Land & Timber — York County", "url": "https://www.advancelandandtimber.com/property-listings/south-carolina/york-county/"},
     {"name": "Advance Land & Timber — Chester County", "url": "https://www.advancelandandtimber.com/property-listings/south-carolina/chester-county/"}
   ],

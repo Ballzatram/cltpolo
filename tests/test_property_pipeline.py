@@ -34,8 +34,8 @@ class PipelineTests(unittest.TestCase):
         rows,health=P.refresh(old,BRIEF,Client({}),'2026-09-21');self.assertEqual(rows,old);self.assertEqual(health['status'],'blocked')
     def test_http200_without_inventory_is_not_success(self):
         rows,health=P.refresh([],{'brokerSources':[SOURCE]},Client({SOURCE['url']:{'ok':True,'http':200,'body':'<h1>Access challenge</h1>'}}),'2026-09-21');self.assertEqual(health['status'],'blocked');self.assertEqual(health['sources'][0]['status'],'unparsed')
-    def test_rendered_zero_is_limited_not_market_zero(self):
-        rows,health=P.refresh([],{'brokerSources':[SOURCE]},Client({SOURCE['url']:{'ok':True,'http':200,'body':'<h1>York</h1>0 - 0 of 0 Listings'}}),'2026-09-21');self.assertEqual(health['status'],'limited');self.assertIn('Dynamically',health['sources'][0]['note'])
+    def test_rendered_zero_is_not_a_successful_listing_refresh(self):
+        rows,health=P.refresh([],{'brokerSources':[SOURCE]},Client({SOURCE['url']:{'ok':True,'http':200,'body':'<h1>York</h1>0 - 0 of 0 Listings'}}),'2026-09-21');self.assertEqual(health['status'],'error');self.assertFalse(health['listingRefreshSucceeded']);self.assertIn('not evidence',health['sources'][0]['note'])
     def test_new_lead_never_verifies_flatness_or_route(self):
         brief={**BRIEF,'brokerSources':[SOURCE]};client=Client({SOURCE['url']:{'ok':True,'http':200,'body':f'<a href="{URL}">Property</a>'},URL:{'ok':True,'http':200,'body':HTML}})
         rows,health=P.refresh([],brief,client,'2026-09-21');self.assertEqual(health['rowsAdded'],1);self.assertEqual(rows[0]['Terrain Status'],'unverified');self.assertNotIn('Verified Drive Minutes',rows[0])
