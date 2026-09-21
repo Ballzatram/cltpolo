@@ -16,7 +16,7 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - name: Verify published page, assets and snapshot without credentials
         run: |
@@ -36,7 +36,7 @@ jobs:
                       break
               except Exception as error:print('Page not verified:',type(error).__name__)
               time.sleep(15)
-          else:raise SystemExit('Current property page release was not observed; do not claim live deployment.')
+          else:raise SystemExit('Current property page release was not observed.')
           for path in ['/property-research.js','/property-research-data.js','/property-research-core.js','/property-research.css']:
               status,body=get(origin+path+'?release-check=20260921r2')
               assert status==200 and len(body)>100,path
@@ -52,37 +52,71 @@ jobs:
               except Exception as error:print('Snapshot not verified:',type(error).__name__);time.sleep(10)
           else:raise SystemExit('Current research snapshot was not observed.')
           PY
-      - name: Exercise the same refresh request used by the final page origin
+      - name: Install standard Chromium for the live user flow
+        run: |
+          python -m pip install playwright==1.55.0
+          python -m playwright install --with-deps chromium
+      - name: Exercise one real refresh from the live page
         run: |
           python - <<'PY'
           import json
-          from urllib.request import Request,urlopen
-          from urllib.parse import urlsplit
-          from urllib.error import HTTPError
-          with urlopen('https://charlottepolo.com/investors/',timeout=15) as page:
-              final=urlsplit(page.url)
-              origin=final.scheme+'://'+final.netloc
-              print('Actual deployed page origin:',origin)
-          endpoint='https://refresh-properties.charlottepolo-refresh.workers.dev'
-          headers={'Origin':origin,'Content-Type':'application/json','Accept':'application/json','User-Agent':'CLTPoloReleaseCheck/2.0'}
-          preflight=Request(endpoint,method='OPTIONS',headers={'Origin':origin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'content-type'})
-          try:
-              with urlopen(preflight,timeout=15) as response:
-                  print('Preflight response:',response.status,'Allow-Origin:',response.headers.get('Access-Control-Allow-Origin'))
-                  assert response.headers.get('Access-Control-Allow-Origin') in (origin,'*'),'CORS origin mismatch'
-                  assert 'POST' in response.headers.get('Access-Control-Allow-Methods',''),'CORS method mismatch'
-                  assert 'content-type' in response.headers.get('Access-Control-Allow-Headers','').lower(),'CORS header mismatch'
-              print('Live refresh preflight verified')
-          except HTTPError as error:
-              print('Public preflight rejection:',error.code,'Allow-Origin:',error.headers.get('Access-Control-Allow-Origin'),'Body:',error.read(3000).decode('utf-8','replace'))
-              raise SystemExit('On-demand refresh is unavailable from the actual page origin; no refresh was dispatched.')
-          request=Request(endpoint,method='POST',headers=headers,data=json.dumps({'source':'investor-dashboard'}).encode())
-          try:
-              with urlopen(request,timeout=20) as response:
-                  assert response.headers.get('Access-Control-Allow-Origin') in (origin,'*'),'CORS response mismatch'
-                  body=json.loads(response.read(100000).decode())
-                  print('Live refresh request accepted',response.status,json.dumps(body))
-          except HTTPError as error:
-              print('Live refresh request failed',error.code,error.read(5000).decode('utf-8','replace'))
-              raise
+          from pathlib import Path
+          from playwright.sync_api import sync_playwright
+          target='https://charlottepolo.com/investors/'
+          worker='https://refresh-properties.charlottepolo-refresh.workers.dev'
+          out=Path('artifacts');out.mkdir(exist_ok=True)
+          report={'page':target,'workerResponses':[],'pageErrors':[]}
+          with sync_playwright() as p:
+              # Real Chromium defaults: no user-agent override, interception,
+              # proxy, challenge solving, fingerprint changes or access bypass.
+              browser=p.chromium.launch(headless=True,args=['--no-sandbox'])
+              page=browser.new_page(viewport={'width':1440,'height':1000})
+              page.on('pageerror',lambda error:report['pageErrors'].append(str(error)))
+              def observed(response):
+                  if response.url.startswith(worker):
+                      report['workerResponses'].append({'url':response.url,'method':response.request.method,'status':response.status})
+              page.on('response',observed)
+              try:
+                  page.goto(target,wait_until='domcontentloaded',timeout=45000)
+                  report['finalPage']=page.url
+                  assert page.locator('meta[name="research-release"]').get_attribute('content')=='2026-09-21-r2'
+                  # Existing public convenience gate; not a credential or account login.
+                  page.locator('#investorCode').fill('cltpolo123!')
+                  page.get_by_role('button',name='Open research').click()
+                  page.wait_for_function("document.querySelectorAll('#investorStats .stat').length===4",timeout=45000)
+                  assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1')
+                  report['healthBefore']=page.locator('#healthTitle').text_content()
+                  report['reviewDateBefore']=page.locator('#lastReview').text_content()
+                  page.locator('#runPropertyAgent').click()
+                  page.wait_for_function("document.getElementById('propertyAgentStatus').textContent.includes('Workflow finished') || document.getElementById('propertyAgentStatus').dataset.status==='error'",timeout=180000)
+                  report['refreshMessage']=page.locator('#propertyAgentStatus').text_content()
+                  report['healthAfter']=page.locator('#healthTitle').text_content()
+                  report['reviewDateAfter']=page.locator('#lastReview').text_content()
+                  report['dispatchAccepted']=any(r['method']=='POST' and r['status']==202 for r in report['workerResponses'])
+                  report['matchingSnapshotLoaded']='Workflow finished' in report['refreshMessage']
+                  page.locator('#researchView').select_option('all')
+                  page.screenshot(path=str(out/'property-live-desktop.png'),full_page=True)
+                  page.set_viewport_size({'width':390,'height':844})
+                  assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1')
+                  page.screenshot(path=str(out/'property-live-mobile.png'),full_page=True)
+                  assert report['dispatchAccepted'],'The deployed Worker did not accept the actual browser POST'
+                  assert report['matchingSnapshotLoaded'],'The browser did not load the matching completed-run snapshot'
+                  assert not report['pageErrors'],report['pageErrors']
+                  report['result']='passed'
+              except Exception as error:
+                  report['result']='failed';report['error']=str(error)
+                  if page.locator('#propertyAgentStatus').count():report['refreshMessage']=page.locator('#propertyAgentStatus').text_content()
+                  page.screenshot(path=str(out/'property-live-failure.png'),full_page=True)
+                  raise
+              finally:
+                  print('LIVE BROWSER REPORT',json.dumps(report,indent=2))
+                  (out/'property-live-report.json').write_text(json.dumps(report,indent=2))
+                  browser.close()
           PY
+      - name: Preserve live release evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: property-live-release
+          path: artifacts/property-live-*
+          if-no-files-found: ignore
