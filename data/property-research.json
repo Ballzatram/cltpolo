@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-21T20:09:24Z",
+  "generatedAt": "2026-09-21T20:37:10Z",
   "brief": {
     "version": "2026-09-21-r2",
     "minimumAcres": 20,
@@ -33,6 +33,18 @@
     },
     "listingStaleDays": 30,
     "brokerSources": [
+      {
+        "name": "Mossy Oak Properties — York County",
+        "url": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/"
+      },
+      {
+        "name": "Mossy Oak Properties — Chester County",
+        "url": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/"
+      },
+      {
+        "name": "Mossy Oak Properties — Mecklenburg County",
+        "url": "https://www.mossyoakproperties.com/land-for-sale/north-carolina/mecklenburg-county/"
+      },
       {
         "name": "Advance Land & Timber — York County",
         "url": "https://www.advancelandandtimber.com/property-listings/south-carolina/york-county/"
@@ -442,20 +454,297 @@
       "Nearest I-77 Reference": "I-77 Exit 90 / Carowinds (60.4 mi est.)",
       "Scrape Source Name": "Manual source audit + automated daily updater",
       "Scrape Source URL": "https://www.landsearch.com/properties/york-county-sc/filter/50-minacres | https://www.landsearch.com/properties/chester-county-sc/filter/50-minacres | https://www.landsearch.com/properties/lancaster-county-sc/filter/50-minacres | https://www.landsearch.com/properties/iredell-county-nc/filter/50-minacres"
+    },
+    {
+      "ID": "MOP-74443",
+      "Dashboard Include": "Yes",
+      "Property Name": "+/- 35.90ac - 1342 Mcknight Rd Smyrna SC - York Co",
+      "Property URL": "https://www.mossyoakproperties.com/property/35-90ac-1342-mcknight-rd-smyrna-sc-york-co-york-south-carolina/74443/",
+      "Source URL": "https://www.mossyoakproperties.com/property/35-90ac-1342-mcknight-rd-smyrna-sc-york-co-york-south-carolina/74443/",
+      "Listing External ID": "74443",
+      "Acres": "35.9",
+      "County": "York County",
+      "City": "Smyrna",
+      "State": "SC",
+      "Address / Property": "1342 Mcknight Road",
+      "Status": "Available",
+      "Source": "Mossy Oak Properties",
+      "Listing Notes": "Broker lists 35.9 acres. Broker describes about an hour or longer from Charlotte; the 45-minute route requirement is not demonstrated. Polo layout and I-77 access require independent review.",
+      "Listing Checked At": "2026-09-21T20:36:56Z",
+      "Source Check Outcome": "Public broker facts parsed; suitability unverified",
+      "Listing Verification Status": "Broker source retrieved; confirm availability directly. Terrain, route and polo layout are not verified.",
+      "Scrape Source Name": "Mossy Oak Properties — York County",
+      "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
+      "Source Drive Conflict": "Broker describes about an hour or longer from Charlotte",
+      "MLS / External Reference": "--/4193756",
+      "List Price": "545000.0",
+      "Latitude": "35.031204",
+      "Longitude": "-81.386014",
+      "Terrain Status": "unverified",
+      "Arena Fit": "unverified",
+      "Grass Fit": "unverified",
+      "Corridor Status": "unverified",
+      "Expansion Status": "unverified",
+      "Next Due Diligence": "Confirm a contiguous flat arena/support footprint and separate grass format; verify I-77 south access, an Uptown route within 45 minutes, drainage and permitted use."
+    },
+    {
+      "ID": "MOP-105412",
+      "Dashboard Include": "Yes",
+      "Property Name": "Kings Creek Tract 1",
+      "Property URL": "https://www.mossyoakproperties.com/property/kings-creek-tract-1-york-south-carolina/105412/",
+      "Source URL": "https://www.mossyoakproperties.com/property/kings-creek-tract-1-york-south-carolina/105412/",
+      "Listing External ID": "105412",
+      "Acres": "22.5",
+      "County": "York County",
+      "City": "Smyrna",
+      "State": "SC",
+      "Address / Property": "5555 River Road",
+      "Status": "New Listing",
+      "Source": "Mossy Oak Properties",
+      "Listing Notes": "Broker lists 22.5 acres. Broker describes rolling terrain; a flat usable polo footprint has not been established. Polo layout and I-77 access require independent review.",
+      "Listing Checked At": "2026-09-21T20:36:56Z",
+      "Source Check Outcome": "Public broker facts parsed; suitability unverified",
+      "Listing Verification Status": "Broker source retrieved; confirm availability directly. Terrain, route and polo layout are not verified.",
+      "Scrape Source Name": "Mossy Oak Properties — York County",
+      "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
+      "Source Drive Conflict": "",
+      "List Price": "240319.0",
+      "Latitude": "35.040678",
+      "Longitude": "-81.46729",
+      "Terrain Status": "unverified",
+      "Arena Fit": "unverified",
+      "Grass Fit": "unverified",
+      "Corridor Status": "unverified",
+      "Expansion Status": "unverified",
+      "Next Due Diligence": "Confirm a contiguous flat arena/support footprint and separate grass format; verify I-77 south access, an Uptown route within 45 minutes, drainage and permitted use."
+    },
+    {
+      "ID": "MOP-105397",
+      "Dashboard Include": "Yes",
+      "Property Name": "Kings Creek Tract 2",
+      "Property URL": "https://www.mossyoakproperties.com/property/kings-creek-tract-2-york-south-carolina/105397/",
+      "Source URL": "https://www.mossyoakproperties.com/property/kings-creek-tract-2-york-south-carolina/105397/",
+      "Listing External ID": "105397",
+      "Acres": "79.7",
+      "County": "York County",
+      "City": "Smyrna",
+      "State": "SC",
+      "Address / Property": "5460 River Road",
+      "Status": "Available",
+      "Source": "Mossy Oak Properties",
+      "Listing Notes": "Broker lists 79.7 acres. Broker describes rolling terrain; a flat usable polo footprint has not been established. Polo layout and I-77 access require independent review.",
+      "Listing Checked At": "2026-09-21T20:36:56Z",
+      "Source Check Outcome": "Public broker facts parsed; suitability unverified",
+      "Listing Verification Status": "Broker source retrieved; confirm availability directly. Terrain, route and polo layout are not verified.",
+      "Scrape Source Name": "Mossy Oak Properties — York County",
+      "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
+      "Source Drive Conflict": "",
+      "List Price": "471427.0",
+      "Latitude": "35.042005",
+      "Longitude": "-81.460725",
+      "Terrain Status": "unverified",
+      "Arena Fit": "unverified",
+      "Grass Fit": "unverified",
+      "Corridor Status": "unverified",
+      "Expansion Status": "unverified",
+      "Next Due Diligence": "Confirm a contiguous flat arena/support footprint and separate grass format; verify I-77 south access, an Uptown route within 45 minutes, drainage and permitted use."
+    },
+    {
+      "ID": "MOP-105403",
+      "Dashboard Include": "Yes",
+      "Property Name": "Kings Creek Tract 3",
+      "Property URL": "https://www.mossyoakproperties.com/property/kings-creek-tract-3-york-south-carolina/105403/",
+      "Source URL": "https://www.mossyoakproperties.com/property/kings-creek-tract-3-york-south-carolina/105403/",
+      "Listing External ID": "105403",
+      "Acres": "41.6",
+      "County": "York County",
+      "City": "Smyrna",
+      "State": "SC",
+      "Address / Property": "5460 River Road",
+      "Status": "Available",
+      "Source": "Mossy Oak Properties",
+      "Listing Notes": "Broker lists 41.6 acres. Broker describes rolling terrain; a flat usable polo footprint has not been established. Polo layout and I-77 access require independent review.",
+      "Listing Checked At": "2026-09-21T20:36:56Z",
+      "Source Check Outcome": "Public broker facts parsed; suitability unverified",
+      "Listing Verification Status": "Broker source retrieved; confirm availability directly. Terrain, route and polo layout are not verified.",
+      "Scrape Source Name": "Mossy Oak Properties — York County",
+      "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
+      "Source Drive Conflict": "",
+      "List Price": "352496.0",
+      "Latitude": "35.045274",
+      "Longitude": "-81.460989",
+      "Terrain Status": "unverified",
+      "Arena Fit": "unverified",
+      "Grass Fit": "unverified",
+      "Corridor Status": "unverified",
+      "Expansion Status": "unverified",
+      "Next Due Diligence": "Confirm a contiguous flat arena/support footprint and separate grass format; verify I-77 south access, an Uptown route within 45 minutes, drainage and permitted use."
+    },
+    {
+      "ID": "MOP-105384",
+      "Dashboard Include": "Yes",
+      "Property Name": "Kings Creek Tract 4",
+      "Property URL": "https://www.mossyoakproperties.com/property/kings-creek-tract-4-york-south-carolina/105384/",
+      "Source URL": "https://www.mossyoakproperties.com/property/kings-creek-tract-4-york-south-carolina/105384/",
+      "Listing External ID": "105384",
+      "Acres": "75.2",
+      "County": "York County",
+      "City": "Smyrna",
+      "State": "SC",
+      "Address / Property": "Kings Creek- McGill Road",
+      "Status": "New Listing",
+      "Source": "Mossy Oak Properties",
+      "Listing Notes": "Broker lists 75.2 acres. Broker describes rolling terrain; a flat usable polo footprint has not been established. Polo layout and I-77 access require independent review.",
+      "Listing Checked At": "2026-09-21T20:36:56Z",
+      "Source Check Outcome": "Public broker facts parsed; suitability unverified",
+      "Listing Verification Status": "Broker source retrieved; confirm availability directly. Terrain, route and polo layout are not verified.",
+      "Scrape Source Name": "Mossy Oak Properties — York County",
+      "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
+      "Source Drive Conflict": "",
+      "List Price": "458817.0",
+      "Latitude": "35.045577",
+      "Longitude": "-81.467197",
+      "Terrain Status": "unverified",
+      "Arena Fit": "unverified",
+      "Grass Fit": "unverified",
+      "Corridor Status": "unverified",
+      "Expansion Status": "unverified",
+      "Next Due Diligence": "Confirm a contiguous flat arena/support footprint and separate grass format; verify I-77 south access, an Uptown route within 45 minutes, drainage and permitted use."
+    },
+    {
+      "ID": "MOP-105391",
+      "Dashboard Include": "Yes",
+      "Property Name": "Kings Creek Tract 5",
+      "Property URL": "https://www.mossyoakproperties.com/property/kings-creek-tract-5-york-south-carolina/105391/",
+      "Source URL": "https://www.mossyoakproperties.com/property/kings-creek-tract-5-york-south-carolina/105391/",
+      "Listing External ID": "105391",
+      "Acres": "65.5",
+      "County": "York County",
+      "City": "Smyrna",
+      "State": "SC",
+      "Address / Property": "5156 River Rd",
+      "Status": "Available",
+      "Source": "Mossy Oak Properties",
+      "Listing Notes": "Broker lists 65.5 acres. Broker describes rolling terrain; a flat usable polo footprint has not been established. Polo layout and I-77 access require independent review.",
+      "Listing Checked At": "2026-09-21T20:36:56Z",
+      "Source Check Outcome": "Public broker facts parsed; suitability unverified",
+      "Listing Verification Status": "Broker source retrieved; confirm availability directly. Terrain, route and polo layout are not verified.",
+      "Scrape Source Name": "Mossy Oak Properties — York County",
+      "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
+      "Source Drive Conflict": "",
+      "List Price": "483790.0",
+      "Latitude": "35.041082",
+      "Longitude": "-81.47196",
+      "Terrain Status": "unverified",
+      "Arena Fit": "unverified",
+      "Grass Fit": "unverified",
+      "Corridor Status": "unverified",
+      "Expansion Status": "unverified",
+      "Next Due Diligence": "Confirm a contiguous flat arena/support footprint and separate grass format; verify I-77 south access, an Uptown route within 45 minutes, drainage and permitted use."
+    },
+    {
+      "ID": "MOP-79707",
+      "Dashboard Include": "Yes",
+      "Property Name": "Ridgeview East",
+      "Property URL": "https://www.mossyoakproperties.com/property/ridgeview-east-chester-south-carolina/79707/",
+      "Source URL": "https://www.mossyoakproperties.com/property/ridgeview-east-chester-south-carolina/79707/",
+      "Listing External ID": "79707",
+      "Acres": "49.0",
+      "County": "Chester County",
+      "City": "Chester",
+      "State": "SC",
+      "Address / Property": "Ridgeview Road",
+      "Status": "New Listing",
+      "Source": "Mossy Oak Properties",
+      "Listing Notes": "Broker lists 49.0 acres. Broker describes rolling terrain; a flat usable polo footprint has not been established. Broker describes about an hour or longer from Charlotte; the 45-minute route requirement is not demonstrated. Polo layout and I-77 access require independent review.",
+      "Listing Checked At": "2026-09-21T20:36:56Z",
+      "Source Check Outcome": "Public broker facts parsed; suitability unverified",
+      "Listing Verification Status": "Broker source retrieved; confirm availability directly. Terrain, route and polo layout are not verified.",
+      "Scrape Source Name": "Mossy Oak Properties — Chester County",
+      "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
+      "Source Drive Conflict": "Broker describes about an hour or longer from Charlotte",
+      "List Price": "356728.0",
+      "Latitude": "34.696161",
+      "Longitude": "-81.283464",
+      "Terrain Status": "unverified",
+      "Arena Fit": "unverified",
+      "Grass Fit": "unverified",
+      "Corridor Status": "unverified",
+      "Expansion Status": "unverified",
+      "Next Due Diligence": "Confirm a contiguous flat arena/support footprint and separate grass format; verify I-77 south access, an Uptown route within 45 minutes, drainage and permitted use."
+    },
+    {
+      "ID": "MOP-79708",
+      "Dashboard Include": "Yes",
+      "Property Name": "Ridgeview West Tract",
+      "Property URL": "https://www.mossyoakproperties.com/property/ridgeview-west-tract-chester-south-carolina/79708/",
+      "Source URL": "https://www.mossyoakproperties.com/property/ridgeview-west-tract-chester-south-carolina/79708/",
+      "Listing External ID": "79708",
+      "Acres": "151.75",
+      "County": "Chester County",
+      "City": "Chester",
+      "State": "SC",
+      "Address / Property": "Ridgewiew Road",
+      "Status": "New Listing",
+      "Source": "Mossy Oak Properties",
+      "Listing Notes": "Broker lists 151.75 acres. Broker describes rolling terrain; a flat usable polo footprint has not been established. Broker describes about an hour or longer from Charlotte; the 45-minute route requirement is not demonstrated. Polo layout and I-77 access require independent review.",
+      "Listing Checked At": "2026-09-21T20:36:56Z",
+      "Source Check Outcome": "Public broker facts parsed; suitability unverified",
+      "Listing Verification Status": "Broker source retrieved; confirm availability directly. Terrain, route and polo layout are not verified.",
+      "Scrape Source Name": "Mossy Oak Properties — Chester County",
+      "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
+      "Source Drive Conflict": "Broker describes about an hour or longer from Charlotte",
+      "List Price": "702648.0",
+      "Latitude": "34.699031",
+      "Longitude": "-81.295135",
+      "Terrain Status": "unverified",
+      "Arena Fit": "unverified",
+      "Grass Fit": "unverified",
+      "Corridor Status": "unverified",
+      "Expansion Status": "unverified",
+      "Next Due Diligence": "Confirm a contiguous flat arena/support footprint and separate grass format; verify I-77 south access, an Uptown route within 45 minutes, drainage and permitted use."
     }
   ],
   "health": {
     "status": "limited",
-    "attemptedAt": "2026-09-21T20:09:21Z",
-    "finishedAt": "2026-09-21T20:09:24Z",
+    "attemptedAt": "2026-09-21T20:36:56Z",
+    "finishedAt": "2026-09-21T20:37:10Z",
     "sources": [
+      {
+        "name": "Mossy Oak Properties — York County",
+        "url": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
+        "http": 200,
+        "status": "read",
+        "listingLinks": 7,
+        "note": "Listing links collected; each property is parsed and screened separately.",
+        "reportedTotal": 7
+      },
+      {
+        "name": "Mossy Oak Properties — Chester County",
+        "url": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
+        "http": 200,
+        "status": "read",
+        "listingLinks": 6,
+        "note": "Listing links collected; each property is parsed and screened separately.",
+        "reportedTotal": 6
+      },
+      {
+        "name": "Mossy Oak Properties — Mecklenburg County",
+        "url": "https://www.mossyoakproperties.com/land-for-sale/north-carolina/mecklenburg-county/",
+        "http": 200,
+        "status": "read",
+        "listingLinks": 2,
+        "note": "Listing links collected; each property is parsed and screened separately.",
+        "reportedTotal": 2
+      },
       {
         "name": "Advance Land & Timber — York County",
         "url": "https://www.advancelandandtimber.com/property-listings/south-carolina/york-county/",
         "http": 200,
         "status": "empty-rendered",
         "listingLinks": 0,
-        "note": "The public page rendered zero listings. Dynamically loaded inventory may be missing; this is not a complete no-results search."
+        "note": "This broker county page reports zero listings; not evidence of zero listings in the market.",
+        "reportedTotal": 0
       },
       {
         "name": "Advance Land & Timber — Chester County",
@@ -463,14 +752,181 @@
         "http": 200,
         "status": "empty-rendered",
         "listingLinks": 0,
-        "note": "The public page rendered zero listings. Dynamically loaded inventory may be missing; this is not a complete no-results search."
+        "note": "This broker county page reports zero listings; not evidence of zero listings in the market.",
+        "reportedTotal": 0
       }
     ],
-    "listingChecks": [],
-    "rowsAdded": 0,
+    "listingChecks": [
+      {
+        "url": "https://www.mossyoakproperties.com/property/35-90ac-1342-mcknight-rd-smyrna-sc-york-co-york-south-carolina/74443/",
+        "source": "Mossy Oak Properties — York County",
+        "http": 200,
+        "status": "parsed",
+        "note": "Individual broker property facts read",
+        "result": "new-unverified-research-record"
+      },
+      {
+        "url": "https://www.mossyoakproperties.com/property/6bd-6ba-home-1238-stonecrest-blvd-fort-mill-sc-york-co-york-south-carolina/111287/",
+        "source": "Mossy Oak Properties — York County",
+        "http": 200,
+        "status": "parsed",
+        "note": "Individual broker property facts read",
+        "result": "outside-discovery-scope"
+      },
+      {
+        "url": "https://www.mossyoakproperties.com/property/kings-creek-tract-1-york-south-carolina/105412/",
+        "source": "Mossy Oak Properties — York County",
+        "http": 200,
+        "status": "parsed",
+        "note": "Individual broker property facts read",
+        "result": "new-unverified-research-record"
+      },
+      {
+        "url": "https://www.mossyoakproperties.com/property/kings-creek-tract-2-york-south-carolina/105397/",
+        "source": "Mossy Oak Properties — York County",
+        "http": 200,
+        "status": "parsed",
+        "note": "Individual broker property facts read",
+        "result": "new-unverified-research-record"
+      },
+      {
+        "url": "https://www.mossyoakproperties.com/property/kings-creek-tract-3-york-south-carolina/105403/",
+        "source": "Mossy Oak Properties — York County",
+        "http": 200,
+        "status": "parsed",
+        "note": "Individual broker property facts read",
+        "result": "new-unverified-research-record"
+      },
+      {
+        "url": "https://www.mossyoakproperties.com/property/kings-creek-tract-4-york-south-carolina/105384/",
+        "source": "Mossy Oak Properties — York County",
+        "http": 200,
+        "status": "parsed",
+        "note": "Individual broker property facts read",
+        "result": "new-unverified-research-record"
+      },
+      {
+        "url": "https://www.mossyoakproperties.com/property/kings-creek-tract-5-york-south-carolina/105391/",
+        "source": "Mossy Oak Properties — York County",
+        "http": 200,
+        "status": "parsed",
+        "note": "Individual broker property facts read",
+        "result": "new-unverified-research-record"
+      },
+      {
+        "url": "https://www.mossyoakproperties.com/property/13-6ac-1413-old-columbia-rd-chester-sc-chester-co-chester-south-carolina/110808/",
+        "source": "Mossy Oak Properties — Chester County",
+        "http": 200,
+        "status": "parsed",
+        "note": "Individual broker property facts read",
+        "result": "outside-discovery-scope"
+      },
+      {
+        "url": "https://www.mossyoakproperties.com/property/15-43ac-2597-phil-grant-rd-rock-hill-sc-chester-york-co-chester-south-carolina/113359/",
+        "source": "Mossy Oak Properties — Chester County",
+        "http": 200,
+        "status": "parsed",
+        "note": "Individual broker property facts read",
+        "result": "outside-discovery-scope"
+      },
+      {
+        "url": "https://www.mossyoakproperties.com/property/narrow-bridge-east-chester-south-carolina/79705/",
+        "source": "Mossy Oak Properties — Chester County",
+        "http": 200,
+        "status": "parsed",
+        "note": "Individual broker property facts read",
+        "result": "unavailable-new-record-excluded"
+      },
+      {
+        "url": "https://www.mossyoakproperties.com/property/ridgeview-east-chester-south-carolina/79707/",
+        "source": "Mossy Oak Properties — Chester County",
+        "http": 200,
+        "status": "parsed",
+        "note": "Individual broker property facts read",
+        "result": "new-unverified-research-record"
+      },
+      {
+        "url": "https://www.mossyoakproperties.com/property/ridgeview-west-tract-chester-south-carolina/79708/",
+        "source": "Mossy Oak Properties — Chester County",
+        "http": 200,
+        "status": "parsed",
+        "note": "Individual broker property facts read",
+        "result": "new-unverified-research-record"
+      },
+      {
+        "url": "https://www.mossyoakproperties.com/property/the-fishing-creek-tract-chester-south-carolina/90228/",
+        "source": "Mossy Oak Properties — Chester County",
+        "http": 200,
+        "status": "parsed",
+        "note": "Individual broker property facts read",
+        "result": "unavailable-new-record-excluded"
+      },
+      {
+        "url": "https://www.mossyoakproperties.com/property/11-17ac-2835-2839-miranda-road-charlotte-nc-mecklenburg-co-mecklenburg-north-carolina/87074/",
+        "source": "Mossy Oak Properties — Mecklenburg County",
+        "http": 200,
+        "status": "parsed",
+        "note": "Individual broker property facts read",
+        "result": "outside-discovery-scope"
+      },
+      {
+        "url": "https://www.mossyoakproperties.com/property/3bd-3ba-home-2835-miranda-rd-charlotte-nc-mecklenburg-co-mecklenburg-north-carolina/112939/",
+        "source": "Mossy Oak Properties — Mecklenburg County",
+        "http": 200,
+        "status": "parsed",
+        "note": "Individual broker property facts read",
+        "result": "outside-discovery-scope"
+      }
+    ],
+    "rowsAdded": 8,
     "rowsChanged": 0,
-    "listingsChecked": 0,
-    "coverage": "Limited public-broker discovery; not a complete market search.",
+    "listingsChecked": 15,
+    "listingPagesAttempted": 15,
+    "outOfScope": 5,
+    "unavailableNewListingsExcluded": 2,
+    "changes": [
+      {
+        "id": "MOP-74443",
+        "kind": "added",
+        "fields": []
+      },
+      {
+        "id": "MOP-105412",
+        "kind": "added",
+        "fields": []
+      },
+      {
+        "id": "MOP-105397",
+        "kind": "added",
+        "fields": []
+      },
+      {
+        "id": "MOP-105403",
+        "kind": "added",
+        "fields": []
+      },
+      {
+        "id": "MOP-105384",
+        "kind": "added",
+        "fields": []
+      },
+      {
+        "id": "MOP-105391",
+        "kind": "added",
+        "fields": []
+      },
+      {
+        "id": "MOP-79707",
+        "kind": "added",
+        "fields": []
+      },
+      {
+        "id": "MOP-79708",
+        "kind": "added",
+        "fields": []
+      }
+    ],
+    "coverage": "Configured public broker inventory only; not a complete MLS or market search.",
     "pausedPortals": [
       {
         "name": "LandSearch / Land.com / LandWatch / Zillow / LoopNet / Crexi",
@@ -481,13 +937,16 @@
         "reason": "Automated requests returned HTTP 429 in the September 20 run. Paused; an authorized feed is needed for reliable coverage."
       }
     ],
+    "listingUrlsDiscovered": 15,
     "listingLimitReached": false,
-    "sourcesRead": 2,
-    "sourcesAttempted": 2,
-    "message": "Public broker pages checked. Major portals remain paused after access blocks; this is a limited search, not full market coverage."
+    "nextListingOffset": 0,
+    "sourcesRead": 5,
+    "sourcesAttempted": 5,
+    "listingRefreshSucceeded": true,
+    "message": "Parsed 15 individual listing pages; added 8 research records and changed 0 existing records. Broker coverage is limited; source facts are not verified polo suitability."
   },
-  "ledgerSha256": "10f25cfc0012ec13b26a76a09b5f6440756660485ba724672195f241c8b5cd3b",
-  "latestListingReviewAt": "2026-05-11T22:30:00Z",
-  "workflowRunId": "35649270427",
-  "codeRevision": "34e05dbb2a2ead760b47da9173f9d0088ec62db9"
+  "ledgerSha256": "5e16a300ad80dd74138e774be03891d41c1e9f00a9ede6eac8e72f3f3aa8e0f1",
+  "latestListingReviewAt": "2026-09-21T20:36:56Z",
+  "workflowRunId": "35652166637",
+  "codeRevision": "c341655ecc397dfacd744feffec5a6b085e63913"
 }
