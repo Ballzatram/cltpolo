@@ -1,91 +1,81 @@
 # Property research refresh setup
 
-Current acquisition and data behavior is documented in
-[`property-research-brief.md`](property-research-brief.md). The public research
-page is `/investors/`; release `2026-09-21-r2` replaces the old 50-acre dashboard.
+Current route: `/investors/`, release `2026-09-21-r2`. The brief is 20+ parcel
+acres, flat usable polo land, arena-first plus a separately assessed grass format,
+I-77 south toward Columbia, maximum 45 minutes from Uptown Charlotte, and optional
+expansion. See `property-research-brief.md` for the evidence fields.
 
-## Active data flow
+## Data flow
 
-1. The scheduled or on-demand **Update Property Dataset** workflow runs
-   `python scripts/property_pipeline.py`.
-2. `data/property-search-brief.json` defines the 20-acre minimum, flat usable
-   terrain requirement, arena-first plus separate grass format, I-77 south
-   corridor, and 45-minute maximum from Uptown Charlotte. Expansion is optional.
-3. Public broker sources are checked with robots rules, bounded requests and no
-   access-control bypass. Blocked major portals are paused and disclosed.
-4. The CSV remains the editable research ledger. An atomic
-   `data/property-research.json` snapshot combines that ledger with the current
-   brief, source-health report, checksum and workflow run ID.
-5. The page reads the latest raw-GitHub snapshot, with explicitly labeled
-   deployed/ledger fallbacks. It does not depend on a Pages rebuild for every
-   workflow-token data commit.
-6. Failure reports can be published without changing old listing-review dates.
-   The workflow still fails when the source job fails; failure is not concealed.
+The scheduled/on-demand **Update Property Dataset** workflow runs
+`scripts/property_pipeline.py`. The CSV remains the editable research ledger.
+`data/property-research.json` combines the ledger, current brief, source-health
+report, checksum and workflow run ID in one snapshot.
 
-The main controls are **Check for new properties** and **Reload results**. A
-refresh request, workflow completion, published snapshot and successful source
-coverage are distinct states. Job success is not a complete market search.
+The page reads the latest raw-GitHub snapshot with labeled fallbacks. After a
+completed refresh, it checks current repository contents through the public
+GitHub API when raw-file CDN propagation is behind. It reports completion only
+when the displayed snapshot's run ID matches the completed job. API failure or
+rate limiting preserves an explicitly older snapshot rather than inventing a
+successful handoff. No browser GitHub token is used.
 
-## Existing Cloudflare refresh service
+**Check for new properties** starts a source check. **Reload results** reloads
+saved research. Request accepted, job completed, matching snapshot published and
+successful source coverage are different states. Failure reports can be committed
+without changing old listing-review dates; failed source jobs still fail visibly.
 
-The page calls `https://refresh-properties.charlottepolo-refresh.workers.dev`.
-Repository source is `workers/refresh-properties.js`. A GitHub commit does not
-redeploy that Worker; confirm the actual deployed service separately.
+## Public-source coverage
 
-The Worker configuration is:
+The pipeline checks configured public York/Chester broker pages with robots
+rules, a transparent user agent and bounded requests. Blocked major portals are
+paused rather than bypassed. A rendered zero count may omit dynamic inventory;
+it is not a market-wide no-results finding. Broader dependable coverage needs
+appropriate additional sources or an authorized feed.
 
-| Setting | Value |
-| --- | --- |
-| `GITHUB_REPOSITORY` | `Ballzatram/cltpolo` |
-| `GITHUB_WORKFLOW` | `update-properties.yml` |
-| `GITHUB_REF` | `main` |
-| `ALLOWED_ORIGIN` | `https://charlottepolo.com` |
-| `GITHUB_TOKEN` | Server-side secret with repository Actions read/write access |
+Listing checks do not certify availability, flatness, route times, layout,
+drainage or permitted use. Job/snapshot timestamps must not replace source dates.
 
-Never place the token in browser files or ask a visitor to paste an owner token.
-Verify the service from the actual browser origin. A Python HTTP probe rejected
-by Cloudflare with error 1010 is not conclusive evidence that a normal browser
-request will fail; the release workflow tests the actual live Chromium flow.
-Do not weaken protection or spoof clients merely to make a diagnostic pass.
+## Existing Cloudflare service
 
-## Shared voting and local saved research
+Endpoint: `https://refresh-properties.charlottepolo-refresh.workers.dev`.
+Repository source: `workers/refresh-properties.js`. A GitHub commit does not
+redeploy that Worker. Existing settings are `GITHUB_REPOSITORY=Ballzatram/cltpolo`,
+`GITHUB_WORKFLOW=update-properties.yml`, `GITHUB_REF=main`, and
+`ALLOWED_ORIGIN=https://charlottepolo.com`. `GITHUB_TOKEN` stays a server-side
+secret with repository Actions permission; never place it in browser files.
 
-Shared voting needs the current Worker deployed and a `PROPERTY_VOTES` Workers KV
-binding. Repository code alone does not establish deployment. The September 21
-inspection observed HTTP 405 from the deployed `/votes` endpoint; the page only
-shows shared voting after a valid service response.
+A September 21 live Chromium check received HTTP 202 from the real refresh
+endpoint and started successful workflow run `35627639476`. A Python diagnostic
+was rejected with Cloudflare error 1010; that was not proof of browser failure.
 
-**Save for review** uses local browser storage and remains usable without that
-service. It is explicitly device-local, not a shared team vote or synced account.
+Shared voting remains a separate deployed-service limitation: the real `/votes`
+GET returned HTTP 405. The UI hides unavailable shared voting. **Save for review**
+is device-local browser storage, not a shared vote or synced account. Shared votes
+require the matching Worker deployment and a `PROPERTY_VOTES` KV binding.
 
-## Verification commands
+## Verification
 
 ```sh
 node --test tests/property-research*.test.cjs
 python -m unittest discover -s tests -p 'test_property*.py'
 python scripts/property_pipeline.py --snapshot-only
 python scripts/property_pipeline.py --validate-only
-python scripts/property_pipeline.py --dry-run
 python tests/property_browser_smoke.py
 ```
 
-`Property Research Checks` tests the actual HTML/CSS/JavaScript on mobile and
-desktop with mocked external services. `Verify Property Release` separately
-checks published assets/snapshot and performs one real on-demand refresh through
-the live browser page. Inspect both; a green unit test is not proof of deployment.
+**Property Research Checks** uses actual HTML/CSS/JavaScript with mocked external
+services. It tests mobile/desktop behavior, stale-CDN recovery through the contents
+API, exact completed/displayed run IDs, and failure when a job finished but its
+snapshot is unavailable. A success-looking message alone must never pass that test.
 
-The older `scripts/update_properties.py` and
-`scripts/refresh_property_research.py` entry points are historical and are not run
-by the active workflow. Do not use their old criteria or search settings.
+**Verify Property Release** is now read-only: it verifies deployed page/assets,
+corrected handoff code and snapshot structure without launching repeated production
+searches on every frontend commit. This is not a claim of end-to-end job completion
+or comprehensive source coverage. The earlier live report's permissive text-match
+assertion was replaced after inspection exposed an older cached snapshot.
 
-## Data and access limitations
+The older `update_properties.py` and `refresh_property_research.py` CLIs are
+historical, not active workflow entry points.
 
-Source dates describe the last actual page review, not the latest job timestamp.
-A rendered empty broker page may omit dynamically loaded inventory; it is not a
-market-wide no-results finding. Broader dependable coverage requires appropriate
-additional sources or an authorized feed. No listing claim verifies flatness,
-routing, field layout, zoning or availability by itself.
-
-The existing client-side access-code gate is a convenience, not authentication.
-The repository and research files are publicly hosted; confidential investor
-information and private survey documents must not be published there.
+The public client-side access-code gate is a convenience, not secure
+authentication. Do not publish confidential investor or survey documents here.
