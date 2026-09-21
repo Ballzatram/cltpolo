@@ -40,6 +40,7 @@ with sync_playwright() as p:
     page.locator('#investorCode').fill('cltpolo123!');page.get_by_role('button',name='Open research').click()
     try:
         page.wait_for_function("document.querySelectorAll('.property-card').length===2",timeout=10000)
+        page.wait_for_function("document.getElementById('voteServiceStatus').textContent.includes('unavailable')",timeout=15000)
     except Exception:
         print('BROWSER ERRORS',errors)
         print('LOAD NOTICE',page.locator('#propertyAgentStatus').text_content())
@@ -49,11 +50,10 @@ with sync_playwright() as p:
         raise
     assert not page.locator('#propertyGrid img').count();assert page.evaluate('window.injected') is None
     assert 'Map unavailable' in page.locator('#mapStatus').inner_text()
-    assert 'unavailable' in page.locator('#voteServiceStatus').inner_text()
     assert not page.locator('[data-vote-id]').count()
     assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth+1')
     page.locator('[data-save-id]').first.click();page.locator('#researchView').select_option('saved');assert page.locator('.property-card').count()==1
-    page.reload();page.wait_for_selector('.property-card');page.locator('#researchView').select_option('saved');assert page.locator('.property-card').count()==1
+    page.reload();page.wait_for_selector('.property-card');page.wait_for_function("document.getElementById('voteServiceStatus').textContent.includes('unavailable')");page.locator('#researchView').select_option('saved');assert page.locator('.property-card').count()==1
     page.locator('#researchView').select_option('outside');assert page.locator('.property-card').count()==1
     page.locator('#investorSearch').fill('no-such-property');page.wait_for_function("document.querySelectorAll('.property-card').length===0");assert page.locator('#investorEmpty').is_visible()
     page.locator('#resetFilters').click();page.wait_for_function("document.querySelectorAll('.property-card').length===2")
