@@ -1,0 +1,27 @@
+.investors-page [hidden] { display: none !important; }
+.research-brief-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1rem; margin: 1.5rem 0 2rem; }
+.research-brief-grid article { border: 1px solid #d9dee1; border-radius: 12px; padding: 1.25rem; background: #fff; }
+.research-brief-grid h2 { font-size: 1.15rem; margin: 0 0 .75rem; }
+.research-help, .research-method { line-height: 1.65; font-size: .94rem; }
+.research-card-head { padding: 1.25rem; background: #edf2f2; border-bottom: 1px solid #d9dee1; }
+.research-card-head h3 { margin: .6rem 0; overflow-wrap: anywhere; }
+.research-badge { display: inline-block; border-radius: 6px; padding: .35rem .65rem; background: #fff1cd; color: #624500; font-weight: 700; font-size: .82rem; }
+.research-badge[data-state="eligible"], .research-check[data-state="pass"] { background: #e4f1e9; color: #183e29; }
+.research-badge[data-state="outside"], .research-check[data-state="fail"] { background: #f8e6e4; color: #682621; }
+.research-checks { display: grid; gap: .6rem; margin: 1rem 0; }
+.research-check { border-radius: 7px; padding: .75rem; background: #f3f4f4; color: #263841; line-height: 1.5; }
+.research-check strong { display: block; font-size: .88rem; }
+.research-check p { margin: .25rem 0; font-size: .85rem; }
+.research-check a { text-decoration: underline; }
+.research-check small { display: block; }
+.research-card-links { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1rem 0; }
+.research-card-links a, .research-card-links button { min-height: 44px; }
+.research-method { margin: 2rem 0; padding: 1.25rem; border: 1px solid #d9dee1; border-radius: 10px; background: #fff; }
+.research-method summary { cursor: pointer; font-weight: 700; }
+.research-vote-status { min-height: 1.5rem; font-size: .85rem; }
+.property-card-body, .research-help, .research-check, .research-method { overflow-wrap: anywhere; }
+.investors-page input, .investors-page select, .investors-page button { min-height: 44px; }
+.investors-page :focus-visible { outline: 3px solid #946b15; outline-offset: 3px; }
+@media (max-width: 800px) { .research-brief-grid { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .investor-filters { grid-template-columns: 1fr !important; } .research-card-links { flex-direction: column; } .research-card-links a { text-align: center; } }
+@media (prefers-reduced-motion: reduce) { .investors-page * { scroll-behavior: auto !important; transition: none !important; } }

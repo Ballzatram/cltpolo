@@ -1,0 +1,22 @@
+{
+  "version": "2026-09-21",
+  "minimumAcres": 20,
+  "maximumDriveMinutes": 45,
+  "driveOrigin": "Uptown Charlotte",
+  "origin": {"latitude": 35.2271, "longitude": -80.8431},
+  "corridor": "I-77 south of Charlotte toward Columbia",
+  "discoveryCounties": ["Mecklenburg County", "York County", "Chester County"],
+  "discoveryStates": ["NC", "SC"],
+  "southernLatitude": 34.0,
+  "purpose": "Arena-first polo with a separately assessed grass format",
+  "expansionRequired": false,
+  "weights": {"terrain": 40, "arena": 25, "grass": 15, "access": 10, "acreage": 5, "expansion": 5},
+  "sources": [
+    {"name": "LandSearch Mecklenburg County: 20+ acres", "source": "LandSearch", "url": "https://www.landsearch.com/properties/mecklenburg-county-nc/filter/20-minacres"},
+    {"name": "LandSearch York County: 20+ acres", "source": "LandSearch", "url": "https://www.landsearch.com/properties/york-county-sc/filter/20-minacres"},
+    {"name": "LandSearch Chester County: 20+ acres", "source": "LandSearch", "url": "https://www.landsearch.com/properties/chester-county-sc/filter/20-minacres"},
+    {"name": "Land.com Mecklenburg County: 20+ acres", "source": "Land.com", "url": "https://www.land.com/Mecklenburg-County-NC/all-land/20-100000-acres/"},
+    {"name": "Land.com York County: 20+ acres", "source": "Land.com", "url": "https://www.land.com/York-County-SC/all-land/20-100000-acres/"},
+    {"name": "Land.com Chester County: 20+ acres", "source": "Land.com", "url": "https://www.land.com/Chester-County-SC/all-land/20-100000-acres/"}
+  ]
+}

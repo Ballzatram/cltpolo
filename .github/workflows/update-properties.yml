@@ -18,21 +18,21 @@ env:
 jobs:
   update:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
           persist-credentials: true
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
+      - name: Test arena-first research rules
+        run: |
+          node --test tests/property-research-core.test.cjs
+          python -m unittest discover -s tests -p 'test_property_research.py'
       - name: Run property update agent
-        run: python scripts/update_properties.py --summary-path property-refresh-summary.json
-
+        run: python scripts/refresh_property_research.py --summary-path property-refresh-summary.json
       - name: Upload refresh summary
         if: always()
         uses: actions/upload-artifact@v4
@@ -40,20 +40,16 @@ jobs:
           name: property-refresh-summary
           path: property-refresh-summary.json
           if-no-files-found: ignore
-
-      - name: Validate investor data quality gate
-        run: python scripts/update_properties.py --validate-only
-
+      - name: Validate retained research and archive data
+        run: python scripts/refresh_property_research.py --validate-only
       - name: Commit listing dataset changes
         run: |
           git config user.name "property-research-agent"
           git config user.email "actions@github.com"
-
           git add data/charlotte_polo_properties.csv
-
           if git diff --cached --quiet; then
             echo "No listing-data changes to commit"
           else
-            git commit -m "Update property dataset from refresh agent"
+            git commit -m "Refresh arena-first polo property research"
             git push
           fi

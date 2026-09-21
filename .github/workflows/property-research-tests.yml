@@ -1,0 +1,38 @@
+name: Property Research Checks
+on:
+  pull_request:
+    paths:
+      - 'property-research*'
+      - 'investors/**'
+      - 'data/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - '.github/workflows/**'
+  push:
+    branches: [main]
+    paths:
+      - 'property-research*'
+      - 'investors/**'
+      - 'data/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - '.github/workflows/**'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          node --check property-research-core.js
+          node --check property-research.js
+          node --test tests/property-research-core.test.cjs
+          python -m unittest discover -s tests -p 'test_property_research.py'
+          python scripts/refresh_property_research.py --validate-only

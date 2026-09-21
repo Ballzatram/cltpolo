@@ -1,0 +1,63 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const R = require('../property-research-core.js');
+const brief = require('../data/property-search-brief.json');
+const today = '2026-09-21';
+const base = () => ({ID:'test',Acres:'20',Latitude:'35.01',Longitude:'-80.95',
+  'Terrain Status':'verified-flat','Terrain Evidence':'https://example.org/survey','Terrain Checked At':'2026-09-20',
+  'Corridor Status':'verified','Corridor Evidence':'https://example.org/access','Corridor Checked At':'2026-09-20',
+  'Verified Drive Minutes':'45','Drive Origin':'Uptown Charlotte','Drive Evidence':'https://example.org/route','Drive Checked At':'2026-09-20',
+  'Arena Fit':'verified','Grass Fit':'verified-training','Layout Evidence':'https://example.org/layout','Layout Checked At':'2026-09-20'});
+const fit = (changes = {}) => R.evaluate({...base(), ...changes}, brief, today);
+
+test('20 acres and 45 minutes are inclusive, with expansion optional', () => { assert.equal(fit().status,'eligible'); assert.equal(fit().score,95); });
+test('19.99 acres is outside even with otherwise perfect evidence', () => assert.equal(fit({Acres:'19.99'}).status,'outside'));
+test('a 20 acre site does not need 35 minutes of travel', () => assert.equal(fit({'Verified Drive Minutes':'12'}).status,'eligible'));
+test('45.1 minutes is outside', () => assert.equal(fit({'Verified Drive Minutes':'45.1'}).status,'outside'));
+test('missing and invalid numeric values never become zero', () => { for (const value of ['',null,undefined,'NaN','unknown','Infinity']) assert.equal(R.number(value),null); });
+test('unknown acreage is not a match', () => assert.equal(fit({Acres:''}).status,'research'));
+test('acreage alone never qualifies a property', () => { const x = R.evaluate({Acres:'1000','Weighted Polo Score':'99'},brief,today); assert.equal(x.status,'research'); assert.equal(x.score,5); });
+test('legacy terrain scores and shortlist tier do not prove flatness', () => assert.equal(fit({'Terrain Status':'','Field / Terrain Signal':'100','Recommendation Tier':'Tier 1 - Investor Shortlist'}).status,'research'));
+test('claimed flat is not verified flat', () => assert.equal(fit({'Terrain Status':'claimed-flat'}).status,'research'));
+test('positive status needs a source', () => assert.equal(fit({'Terrain Evidence':''}).status,'research'));
+test('positive status needs a valid review date', () => assert.equal(fit({'Terrain Checked At':'2026-02-30'}).status,'research'));
+test('future-dated evidence cannot qualify', () => assert.equal(fit({'Terrain Checked At':'2027-01-01'}).status,'research'));
+test('unsafe evidence links cannot qualify', () => assert.equal(fit({'Terrain Evidence':'javascript:alert(1)'}).status,'research'));
+test('no false substring verification', () => assert.equal(fit({'Terrain Status':'not verified-flat'}).status,'research'));
+test('rolling pasture without a documented flat footprint is outside', () => assert.equal(fit({'Terrain Status':'unverified','Listing Notes':'Rolling pasture with water.'}).status,'outside'));
+test('negated rolling description is not an automatic conflict', () => assert.equal(fit({'Terrain Status':'unverified','Listing Notes':'No rolling hills; inspect the site.'}).status,'research'));
+test('Flat Creek and pasture are not proof of level terrain', () => assert.equal(fit({'Terrain Status':'','Listing Notes':'Flat Creek frontage and pasture.'}).status,'research'));
+test('reviewed footprint can resolve a broader terrain description', () => assert.equal(fit({'Listing Notes':'Rolling pasture on remainder of estate.'}).status,'eligible'));
+test('explicit unsuitable terrain is a hard gate', () => assert.equal(fit({'Terrain Status':'unsuitable',Acres:'800','List Price':'1000'}).status,'outside'));
+test('I-77 North is excluded', () => assert.equal(fit({'Corridor Status':'',Corridor:'I-77 North / Iredell County'}).status,'outside'));
+test('US-521 does not satisfy southern I-77', () => assert.equal(fit({'Corridor Status':'',Corridor:'US-521 / Lancaster Panhandle'}).status,'outside'));
+test('north-of-origin coordinates are outside despite claimed corridor approval', () => assert.equal(fit({Latitude:'35.9'}).status,'outside'));
+test('south-of-Columbia coordinates are outside', () => assert.equal(fit({Latitude:'33.5'}).status,'outside'));
+test('county alone cannot verify corridor', () => assert.equal(fit({'Corridor Status':'',County:'York County'}).status,'research'));
+test('drive origin must be Uptown Charlotte', () => assert.equal(fit({'Drive Origin':'South Charlotte'}).status,'research'));
+test('legacy 35-minute estimate is a lead, never verified route evidence', () => { const x = fit({'Verified Drive Minutes':'','Drive Time From Charlotte':'35'}); assert.equal(x.status,'research'); assert.equal(x.driveVerified,false); });
+test('legacy estimate exceeding 45 stays outside until corrected by route evidence', () => assert.equal(fit({'Verified Drive Minutes':'','Drive Time From Charlotte':'48'}).status,'outside'));
+test('verified route supersedes an obsolete estimate', () => assert.equal(fit({'Drive Time From Charlotte':'60','Verified Drive Minutes':'40'}).status,'eligible'));
+test('ranges use the conservative upper bound', () => { assert.equal(R.minutes('35–45 min'),45); assert.equal(R.minutes('35-50'),50); assert.equal(fit({'Verified Drive Minutes':'35–50'}).status,'outside'); });
+test('unknown drive is not synthesized from straight-line distance', () => { const x = fit({'Verified Drive Minutes':'','Miles From Charlotte':'10'}); assert.equal(x.drive,null); assert.equal(x.status,'research'); });
+test('zero and negative drive cannot qualify', () => { assert.equal(fit({'Verified Drive Minutes':'0'}).status,'research'); assert.equal(R.minutes('-5'),null); });
+test('arena fit is a required check', () => assert.equal(fit({'Arena Fit':'unverified'}).status,'research'));
+test('unsuitable arena cannot be outweighed', () => assert.equal(fit({'Arena Fit':'unsuitable'}).status,'outside'));
+test('grass format is assessed independently', () => assert.equal(fit({'Grass Fit':'unverified'}).status,'research'));
+test('training and full field are distinguishable valid documented formats', () => { assert.equal(fit({'Grass Fit':'verified-full-field'}).status,'eligible'); assert.match(fit().checks.find(c => c.key==='grass').note,/not a full-size/); });
+test('no expansion does not fail the brief', () => assert.equal(fit({'Expansion Status':'unavailable'}).status,'eligible'));
+test('only documented expansion earns optional bonus', () => { assert.equal(fit({'Expansion Status':'possible'}).score,95); assert.equal(fit({'Expansion Status':'verified','Expansion Evidence':'https://example.org/expansion','Expansion Checked At':'2026-09-20'}).score,100); });
+test('manual exclusions and sold records remain outside', () => { assert.equal(fit({'Dashboard Include':'No'}).status,'outside'); assert.equal(fit({Status:'Sold'}).status,'outside'); });
+test('price and votes do not alter eligibility or fit', () => assert.equal(fit({'List Price':'1000',Votes:'500','Weighted Polo Score':'99'}).score,95));
+test('sorting puts hard failures below matches regardless of score', () => { const a = {row:base(),fit:fit()}, b={row:base(),fit:fit({'Arena Fit':'unsuitable'})}; assert.ok(R.compare(a,b)<0); });
+test('unknown prices sort last', () => { const a={row:{'List Price':'100'},fit:{status:'research',score:5}}, b={row:{},fit:{status:'research',score:5}}; assert.ok(R.compare(a,b,'price')<0); });
+test('strict CSV parser supports BOM, quoted commas, escaped quotes and multiline notes', () => { const rows = R.parseCSV('\ufeffID,Listing Notes\r\nx,"Flat, ""claimed""\nreview"\r\n'); assert.equal(rows[0].ID,'x'); assert.equal(rows[0]['Listing Notes'],'Flat, "claimed"\nreview'); });
+test('CSV parser rejects malformed quotes, duplicate headers and row widths', () => { for (const csv of ['ID,Notes\nx,"bad','ID,ID\nx,y','ID,Notes\nx']) assert.throws(()=>R.parseCSV(csv)); });
+test('historic audit rows never appear as properties', () => assert.equal(R.isAudit({ID:'SEARCH-50AC-AUDIT'}),true));
+test('unsafe and credential-bearing links are rejected', () => { for (const url of ['javascript:alert(1)','data:text/html,x','https://u:p@example.org']) assert.equal(R.safeUrl(url),''); });
+test('investor route loads the new screen, not the legacy 50-acre bundle', () => { const html=fs.readFileSync(path.join(__dirname,'../investors/index.html'),'utf8'); assert.match(html,/property-research-core.js/); assert.doesNotMatch(html, /src="\/script.js"/); assert.doesNotMatch(html,/50\+|35[–-]55/); });
+test('discovery sources use 20 acres and the southern launch counties', () => { assert.equal(brief.minimumAcres,20); assert.equal(brief.maximumDriveMinutes,45); assert.equal(brief.expansionRequired,false); for(const source of brief.sources) { assert.match(source.url,/20-minacres|20-100000-acres/); assert.doesNotMatch(source.url,/iredell|lancaster|columbia/); } });
+const csvPath = path.join(__dirname,'../data/charlotte_polo_properties.csv');
+if (fs.existsSync(csvPath)) test('committed dataset parses and no displayed match bypasses required gates',()=> { for(const row of R.parseCSV(fs.readFileSync(csvPath,'utf8')).filter(r=>!R.isAudit(r))) { const x=R.evaluate(row,brief); if(x.status==='eligible') { assert.ok(x.acres>=20); assert.ok(x.drive<=45 && x.driveVerified); assert.ok(x.terrainVerified && x.arenaPass && x.grassPass); } } });
