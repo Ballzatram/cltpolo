@@ -1,5 +1,5 @@
 """Actual checked-in UI/CSS/rules, mocked external services; never exercises paid APIs."""
-import functools,json,os,shutil,threading
+import functools,json,os,re,shutil,threading
 from datetime import datetime,timezone
 from http.server import SimpleHTTPRequestHandler,ThreadingHTTPServer
 from pathlib import Path
@@ -16,28 +16,37 @@ properties=[base,{**base,'ID':'fixture-unknown','Property Name':'<img src=x oner
 state={'started':False,'dispatch_fails':True}
 def data():
     return {'schemaVersion':2,'generatedAt':datetime.now(timezone.utc).isoformat(),'brief':BRIEF,'properties':properties,'health':{'status':'limited','message':'Only the configured broker sources were checked.','sources':[],'attemptedAt':datetime.now(timezone.utc).isoformat()},'latestListingReviewAt':'2026-05-11T22:30:00Z','workflowRunId':'42' if state['started'] else '1'}
-def fulfill(route,payload,status=200):route.fulfill(status=status,content_type='application/json',body=json.dumps(payload))
+def fulfill(route,payload,status=200):
+    route.fulfill(status=status,content_type='application/json',headers={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Methods':'GET,POST,OPTIONS','Access-Control-Allow-Headers':'content-type'},body=json.dumps(payload))
 with sync_playwright() as p:
     executable=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium')
     browser=p.chromium.launch(headless=True,executable_path=executable,args=['--no-sandbox'])
     page=browser.new_page(viewport={'width':390,'height':844},device_scale_factor=1)
     errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
     page.add_init_script("const real=setTimeout;window.setTimeout=(fn,ms,...args)=>real(fn,[5000,30000].includes(ms)?25:ms,...args);")
-    page.route('**unpkg.com/**',lambda route:route.abort())
-    page.route('**raw.githubusercontent.com/**/property-research.json*',lambda route:fulfill(route,data()))
+    page.route(re.compile(r'^https://unpkg\.com/'),lambda route:route.abort())
+    page.route(re.compile(r'^https://raw\.githubusercontent\.com/.*/property-research\.json'),lambda route:fulfill(route,data()))
     def runs(route):
         run={'id':42 if state['started'] else 1,'head_branch':'main','event':'workflow_dispatch','created_at':datetime.now(timezone.utc).isoformat(),'status':'completed','conclusion':'success'}
         fulfill(route,{'workflow_runs':[run]})
-    page.route('**api.github.com/**/runs?*',runs)
+    page.route(re.compile(r'^https://api\.github\.com/.*/runs\?'),runs)
     def worker(route):
         if route.request.url.endswith('/votes'):fulfill(route,{'message':'Use POST'},405)
         elif state['dispatch_fails']:fulfill(route,{'message':'Service unavailable'},405)
         else:state['started']=True;fulfill(route,{'message':'Accepted'},202)
-    page.route('**refresh-properties.charlottepolo-refresh.workers.dev**',worker)
+    page.route(re.compile(r'^https://refresh-properties\.charlottepolo-refresh\.workers\.dev'),worker)
     page.goto(f'http://127.0.0.1:{server.server_port}/investors/')
     page.locator('#investorCode').fill('wrong');page.get_by_role('button',name='Open research').click();assert page.locator('#investorCodeError').is_visible()
     page.locator('#investorCode').fill('cltpolo123!');page.get_by_role('button',name='Open research').click()
-    page.wait_for_function("document.querySelectorAll('.property-card').length===2")
+    try:
+        page.wait_for_function("document.querySelectorAll('.property-card').length===2",timeout=10000)
+    except Exception:
+        print('BROWSER ERRORS',errors)
+        print('LOAD NOTICE',page.locator('#propertyAgentStatus').text_content())
+        print('BODY',page.locator('body').inner_text()[:5000])
+        out=ROOT/'artifacts';out.mkdir(exist_ok=True)
+        page.screenshot(path=str(out/'research-failure.png'),full_page=True)
+        raise
     assert not page.locator('#propertyGrid img').count();assert page.evaluate('window.injected') is None
     assert 'Map unavailable' in page.locator('#mapStatus').inner_text()
     assert 'unavailable' in page.locator('#voteServiceStatus').inner_text()
