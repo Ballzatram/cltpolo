@@ -1,96 +1,91 @@
-# Investor CSV refresh agent setup
+# Property research refresh setup
 
-The land dashboard is a static page, so it cannot safely store an owner GitHub token in browser JavaScript. The dashboard calls a Cloudflare Worker instead. That Worker keeps the GitHub credential server-side, dispatches the property update workflow, and exposes a small shared voting API.
+Current acquisition and data behavior is documented in
+[`property-research-brief.md`](property-research-brief.md). The public research
+page is `/investors/`; release `2026-09-21-r2` replaces the old 50-acre dashboard.
 
-This repository includes the Worker at `workers/refresh-properties.js`.
+## Active data flow
 
-## One-time refresh setup
+1. The scheduled or on-demand **Update Property Dataset** workflow runs
+   `python scripts/property_pipeline.py`.
+2. `data/property-search-brief.json` defines the 20-acre minimum, flat usable
+   terrain requirement, arena-first plus separate grass format, I-77 south
+   corridor, and 45-minute maximum from Uptown Charlotte. Expansion is optional.
+3. Public broker sources are checked with robots rules, bounded requests and no
+   access-control bypass. Blocked major portals are paused and disclosed.
+4. The CSV remains the editable research ledger. An atomic
+   `data/property-research.json` snapshot combines that ledger with the current
+   brief, source-health report, checksum and workflow run ID.
+5. The page reads the latest raw-GitHub snapshot, with explicitly labeled
+   deployed/ledger fallbacks. It does not depend on a Pages rebuild for every
+   workflow-token data commit.
+6. Failure reports can be published without changing old listing-review dates.
+   The workflow still fails when the source job fails; failure is not concealed.
 
-1. Create a fine-grained GitHub personal access token for the repository.
-   - Repository access: `Ballzatram/cltpolo` only.
-   - Permissions: **Actions: Read and write**.
-   - Set an expiration date and rotate it periodically.
-2. Deploy `workers/refresh-properties.js` as the `refresh-properties` Cloudflare Worker.
-3. Add these Worker secrets / variables:
-   - `GITHUB_TOKEN`: the fine-grained token from step 1. Store this as a secret, not a plain variable.
-   - `GITHUB_REPOSITORY`: `Ballzatram/cltpolo`.
-   - `GITHUB_WORKFLOW`: `update-properties.yml`.
-   - `GITHUB_REF`: `main`.
-   - `ALLOWED_ORIGIN`: `https://charlottepolo.com`.
-4. Confirm the investor dashboard button has `data-refresh-endpoint="https://refresh-properties.charlottepolo-refresh.workers.dev"`.
-5. Test from the investor dashboard by clicking **Run CSV Refresh Agent**. The browser sends a `POST` to the Worker; the browser never asks for, stores, or submits a GitHub token.
+The main controls are **Check for new properties** and **Reload results**. A
+refresh request, workflow completion, published snapshot and successful source
+coverage are distinct states. Job success is not a complete market search.
 
-## One-time shared voting setup
+## Existing Cloudflare refresh service
 
-The thumbs-up / thumbs-down counts persist for all users through Cloudflare Workers KV.
+The page calls `https://refresh-properties.charlottepolo-refresh.workers.dev`.
+Repository source is `workers/refresh-properties.js`. A GitHub commit does not
+redeploy that Worker; confirm the actual deployed service separately.
 
-1. Create a Workers KV namespace for property votes, for example `PROPERTY_VOTES`.
-2. Bind that namespace to the `refresh-properties` Worker with the binding name `PROPERTY_VOTES`.
-3. Redeploy the Worker.
-4. Confirm the investor dashboard button has `data-vote-endpoint="https://refresh-properties.charlottepolo-refresh.workers.dev/votes"`.
-5. Test from the investor dashboard by clicking a card vote. The browser stores only that visitor's current selection locally so the same visitor can toggle their vote; shared totals come from KV.
+The Worker configuration is:
 
-## Data refresh behavior
+| Setting | Value |
+| --- | --- |
+| `GITHUB_REPOSITORY` | `Ballzatram/cltpolo` |
+| `GITHUB_WORKFLOW` | `update-properties.yml` |
+| `GITHUB_REF` | `main` |
+| `ALLOWED_ORIGIN` | `https://charlottepolo.com` |
+| `GITHUB_TOKEN` | Server-side secret with repository Actions read/write access |
 
-The button starts the GitHub Actions workflow; it does **not** mean new property data was found or committed. The honest success path is:
+Never place the token in browser files or ask a visitor to paste an owner token.
+Verify the service from the actual browser origin. A Python HTTP probe rejected
+by Cloudflare with error 1010 is not conclusive evidence that a normal browser
+request will fail; the release workflow tests the actual live Chromium flow.
+Do not weaken protection or spoof clients merely to make a diagnostic pass.
 
-1. `investors.html` calls `script.js` when **Run CSV Refresh Agent** is clicked.
-2. `script.js` sends a `POST` to the Cloudflare Worker refresh endpoint.
-3. `workers/refresh-properties.js` dispatches `.github/workflows/update-properties.yml` through GitHub's workflow dispatch API.
-4. The workflow runs `python scripts/update_properties.py --summary-path property-refresh-summary.json`.
-5. The script attempts public 50+ acre search pages and tracked listing URLs, prints a source/listing/row summary, and writes `data/charlotte_polo_properties.csv` only when listing rows were added or meaningfully updated. Audit-only timestamp changes are skipped unless the script is intentionally run with `--allow-audit-only`.
+## Shared voting and local saved research
 
-## Troubleshooting
+Shared voting needs the current Worker deployed and a `PROPERTY_VOTES` Workers KV
+binding. Repository code alone does not establish deployment. The September 21
+inspection observed HTTP 405 from the deployed `/votes` endpoint; the page only
+shows shared voting after a valid service response.
 
-### How to tell whether the Worker dispatched correctly
+**Save for review** uses local browser storage and remains usable without that
+service. It is explicitly device-local, not a shared team vote or synced account.
 
-- In the browser, a successful button click means the Worker returned HTTP `202` after GitHub accepted `workflow_dispatch`.
-- That response only proves the workflow was queued. It does not prove the workflow completed, found listings, or committed CSV changes.
-- If the button reports an error, check the Worker logs and verify `GITHUB_TOKEN`, `GITHUB_REPOSITORY`, `GITHUB_WORKFLOW`, `GITHUB_REF`, and `ALLOWED_ORIGIN`.
+## Verification commands
 
-### Where to check GitHub Actions
-
-- Open `https://github.com/Ballzatram/cltpolo/actions/workflows/update-properties.yml`.
-- Open the newest **Update Property Dataset** run.
-- Review the **Run property update agent** step for the printed refresh summary:
-  - sources attempted
-  - sources succeeded
-  - sources failed
-  - blocked/unavailable sources
-  - listing URLs discovered
-  - candidates processed
-  - rows added
-  - rows updated
-  - whether the run was audit-only
-- Download the `property-refresh-summary` artifact when present for machine-readable details.
-
-### How to tell whether the CSV actually changed
-
-- In the workflow log, the commit step prints either `No listing-data changes to commit` or a commit hash.
-- In GitHub, inspect `data/charlotte_polo_properties.csv` history. A real dataset refresh should add a new listing row or change listing fields such as source URL, acreage, price, verification status, coordinates, or listing notes.
-- The dashboard's **Reload Committed Data** button only reloads the CSV currently deployed/served by the site. Use it after the workflow finishes and a deployment has picked up any commit.
-
-### What 403 source failures mean
-
-- `HTTP Error 403: Forbidden`, `429`, CAPTCHA, or similar blocked/unavailable responses mean the public source refused automated fetching from the GitHub Actions runner or network path.
-- The agent does not bypass paywalls, logins, CAPTCHA, or anti-bot protections. It records the failure and moves to alternate public sources such as Land.com, LandWatch, Realtor.com, Zillow, LoopNet, and Crexi search pages when publicly reachable.
-- If most search sources fail and no new listing rows are added, the script exits non-zero by default so the Action does not silently commit an audit-only refresh that looks like fresh listing data.
-- Existing valid rows are preserved even when sources fail; they should be manually verified before investor decisions.
-
-## Local validation commands
-
-Run these before changing the workflow or CSV behavior:
-
-```bash
-python scripts/update_properties.py --validate-only
-python scripts/update_properties.py --dry-run --allow-source-failures
+```sh
+node --test tests/property-research*.test.cjs
+python -m unittest discover -s tests -p 'test_property*.py'
+python scripts/property_pipeline.py --snapshot-only
+python scripts/property_pipeline.py --validate-only
+python scripts/property_pipeline.py --dry-run
+python tests/property_browser_smoke.py
 ```
 
-Use `--allow-source-failures` for local dry runs from networks where public listing sites block automated requests; omit it in CI when you want the reliability gate to fail on source-wide outages.
+`Property Research Checks` tests the actual HTML/CSS/JavaScript on mobile and
+desktop with mocked external services. `Verify Property Release` separately
+checks published assets/snapshot and performs one real on-demand refresh through
+the live browser page. Inspect both; a green unit test is not proof of deployment.
 
-## Security notes
+The older `scripts/update_properties.py` and
+`scripts/refresh_property_research.py` entry points are historical and are not run
+by the active workflow. Do not use their old criteria or search settings.
 
-- Do not put the GitHub token in `investors.html`, `script.js`, or any other browser-delivered file.
-- Do not ask investors to paste your GitHub credentials.
-- Keep the Worker `ALLOWED_ORIGIN` set to `https://charlottepolo.com` unless you intentionally add another production origin.
-- Consider adding Cloudflare rate limiting, Turnstile, or an authenticated access layer before sharing the dashboard widely.
+## Data and access limitations
+
+Source dates describe the last actual page review, not the latest job timestamp.
+A rendered empty broker page may omit dynamically loaded inventory; it is not a
+market-wide no-results finding. Broader dependable coverage requires appropriate
+additional sources or an authorized feed. No listing claim verifies flatness,
+routing, field layout, zoning or availability by itself.
+
+The existing client-side access-code gate is a convenience, not authentication.
+The repository and research files are publicly hosted; confidential investor
+information and private survey documents must not be published there.
