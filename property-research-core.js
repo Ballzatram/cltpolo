@@ -66,10 +66,12 @@
     const driveVerified = recordedDrive !== null && rightOrigin && driveProof.valid;
     const legacyDrive = minutes(field(row, ["Drive Time From Charlotte", "Est. Drive Min to Charlotte"]));
     const drive = driveVerified ? recordedDrive : legacyDrive;
-    const driveFail = drive !== null && drive > brief.maximumDriveMinutes;
+    const sourceDriveConflict = !driveVerified && text(row["Source Drive Conflict"]) === "Broker describes about an hour or longer from Charlotte";
+    const driveFail = (drive !== null && drive > brief.maximumDriveMinutes) || sourceDriveConflict;
     const driveLabel = drive === null ? "Route time unverified" : `${drive} min${driveVerified ? " · route checked" : " · unverified estimate"}`;
     add("drive", `Within ${brief.maximumDriveMinutes} minutes`, driveFail ? "fail" : driveVerified ? "pass" : "unknown",
-      `${driveLabel} from ${brief.driveOrigin}${driveFail ? "; outside the current time screen" : "; check the intended day and departure time"}`, driveProof);
+      sourceDriveConflict ? "Broker describes about an hour or longer from Charlotte — source claim, not a measured route; verify before reconsidering"
+        : `${driveLabel} from ${brief.driveOrigin}${driveFail ? "; outside the current time screen" : "; check the intended day and departure time"}`, driveProof);
 
     const terrainProof = evidence(row, "Terrain", today);
     const terrainStatus = text(row["Terrain Status"]).toLowerCase();

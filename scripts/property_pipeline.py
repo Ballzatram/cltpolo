@@ -198,8 +198,11 @@ def source_constraints(description):
         notes.append('Broker mentions a conservation easement; review permitted development.')
     # Narrow textual signals only, not a geocoded route estimate. Store no minutes
     # as verified evidence. Both common forms below explicitly exceed 45 minutes.
-    distant = bool(re.search(r'\b(?:an?|one) hour (?:away )?from Charlotte\b', text, re.I)
-                   or re.search(r'\bCharlotte (?:are |is )?(?:both )?(?:just )?(?:over |more than )?(?:an?|one) hour away\b', text, re.I))
+    hour_mentions = re.finditer(r'\b(?:an?|one) hour (?:away )?from Charlotte\b', text, re.I)
+    shorter_qualifier = r'\b(?:half(?: of)?|under|within|less than|not|no more than|at most)\s*(?:(?:about|approximately|just)\s*)?$'
+    distant = any(not re.search(shorter_qualifier, text[max(0,mention.start()-40):mention.start()], re.I)
+                  for mention in hour_mentions)
+    distant = distant or bool(re.search(r'\bCharlotte (?:are |is )?(?:both )?(?:just )?(?:over |more than )?(?:an?|one) hour away\b', text, re.I))
     if distant:
         notes.append('Broker describes about an hour or longer from Charlotte; the 45-minute route requirement is not demonstrated.')
     return notes, distant
@@ -300,11 +303,10 @@ def refresh(rows, brief, client, checked_at, limit=24, offset=0):
                 attempt.update(status='unparsed',note='Page responded but no reliable listing inventory was extracted.')
         health['sources'].append(attempt)
     # Keep established records current even when they drop out of discovery indexes.
-    source_by_host={urlparse(s['url']).hostname:s for s in brief.get('brokerSources',[])}
     for row in rows:
         url=canonical_listing_url(row.get('Property URL') or row.get('Source URL'))
         if not is_audit(row) and url and urlparse(url).hostname in client.hosts:
-            discovered.setdefault(url,source_by_host.get(urlparse(url).hostname,{'name':'Tracked broker listing','url':url}))
+            discovered.setdefault(url,{'name':'Tracked broker listing','url':url})
     # A changed title/URL slug on the same publisher listing must not duplicate a record.
     unique={}
     for url,source in discovered.items():unique.setdefault(identity({'Property URL':url}),(url,source))

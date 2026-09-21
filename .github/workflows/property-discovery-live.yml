@@ -8,6 +8,9 @@ on:
       - 'data/property-search-brief.json'
 permissions:
   contents: read
+concurrency:
+  group: property-discovery-live-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   inspect:
     runs-on: ubuntu-latest
@@ -17,52 +20,41 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Observe public inventory without changing the ledger
+      - name: Verify actual discovery, parsing, and repeat-run behavior without publishing
         run: |
           python - <<'PY'
           import json,sys
           from pathlib import Path
+          from urllib.parse import urlparse
           sys.path.insert(0,'scripts')
           import property_pipeline as P
-          sources=[
-            {'name':'Mossy Oak Properties — York','url':'https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/'},
-            {'name':'Mossy Oak Properties — Chester','url':'https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/'},
-            {'name':'Mossy Oak Properties — Mecklenburg','url':'https://www.mossyoakproperties.com/land-for-sale/north-carolina/mecklenburg-county/'}]
-          client=P.PublicClient({'www.mossyoakproperties.com'})
+          brief=P.validate_brief(json.loads(P.BRIEF.read_text()))
+          original=P.LEDGER.read_bytes()
+          _,rows=P.load_ledger()
+          class RecordingClient(P.PublicClient):
+              def __init__(self,hosts):super().__init__(hosts);self.recorded={};self.replay=False
+              def get(self,url):
+                  if self.replay:return self.recorded.get(url,{'ok':False,'http':None,'reason':'Not captured in live pass'})
+                  result=super().get(url);self.recorded[url]=result;return result
+          client=RecordingClient({urlparse(s['url']).hostname for s in brief['brokerSources']})
+          checked_at=P.now_iso()
+          updated,health=P.refresh(rows,brief,client,checked_at,limit=24)
           out=Path('source-diagnostic');out.mkdir(exist_ok=True)
-          observations=[]
-          for i,source in enumerate(sources):
-            result=client.get(source['url'])
-            info={'source':source,'ok':result['ok'],'http':result.get('http'),'reason':result.get('reason')}
-            if result['ok']:
-              (out/f'index-{i}.html').write_text(result['body'])
-              page=P.Page();page.feed(result['body']);links=P.listing_links(page,source)
-              info['links']=links;info['samples']=[]
-              for j,url in enumerate(links[:3]):
-                detail=client.get(url)
-                sample={'url':url,'ok':detail['ok'],'http':detail.get('http'),'reason':detail.get('reason')}
-                if detail['ok']:
-                  (out/f'detail-{i}-{j}.html').write_text(detail['body'])
-                  row=P.parse_broker_listing(detail['body'],url,source,P.now_iso())
-                  sample['parsed']=bool(row)
-                  if row:sample['facts']={k:row.get(k) for k in ['ID','Property Name','Acres','Status','City','County','State','List Price','Latitude','Longitude']}
-                info['samples'].append(sample)
-            observations.append(info)
-            print(json.dumps(info,indent=2),flush=True)
-          (out/'observations.json').write_text(json.dumps(observations,indent=2))
+          (out/'live-preview.json').write_text(json.dumps({'brief':brief,'properties':[r for r in updated if not P.is_audit(r)],'health':health},indent=2))
+          print('LIVE SOURCE REPORT',json.dumps(health,indent=2),flush=True)
+          assert health['listingsChecked']>0 and health['listingRefreshSucceeded'],'No actual individual listings parsed'
+          client.replay=True
+          repeated,second=P.refresh(updated,brief,client,checked_at,limit=24)
+          assert second['rowsAdded']==0,'The same source response created duplicate records'
+          assert second['rowsChanged']==0,'Unchanged captured source facts were reported as substantive changes'
+          assert P.LEDGER.read_bytes()==original,'Live check must not write the production ledger'
+          print('PASS: actual public property pages parsed; replay produced no duplicate/phantom changes; ledger not written.')
           PY
-      - name: Retain bounded public-source diagnostics and matching parser source
+      - name: Retain the factual live report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: property-source-diagnostic
-          retention-days: 3
-          path: |
-            source-diagnostic/
-            scripts/
-            tests/
-            data/
-            investors/index.html
-            property-research*.js
-            property-research.css
-            style.css
+          name: property-source-live-report
+          retention-days: 7
+          path: source-diagnostic/live-preview.json
+          if-no-files-found: warn
