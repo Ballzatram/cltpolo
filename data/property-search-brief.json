@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-21",
+  "version": "2026-09-21-r2",
   "minimumAcres": 20,
   "maximumDriveMinutes": 45,
   "driveOrigin": "Uptown Charlotte",
@@ -11,10 +11,19 @@
   "purpose": "Arena-first polo with a separately assessed grass format",
   "expansionRequired": false,
   "weights": {"terrain": 40, "arena": 25, "grass": 15, "access": 10, "acreage": 5, "expansion": 5},
+  "listingStaleDays": 30,
+  "brokerSources": [
+    {"name": "Advance Land & Timber — York County", "url": "https://www.advancelandandtimber.com/property-listings/south-carolina/york-county/"},
+    {"name": "Advance Land & Timber — Chester County", "url": "https://www.advancelandandtimber.com/property-listings/south-carolina/chester-county/"}
+  ],
+  "pausedPortals": [
+    {"name": "LandSearch / Land.com / LandWatch / Zillow / LoopNet / Crexi", "reason": "Automated requests returned HTTP 403 in the September 20 run. Paused rather than repeatedly retrying blocked sites."},
+    {"name": "Realtor.com", "reason": "Automated requests returned HTTP 429 in the September 20 run. Paused; an authorized feed is needed for reliable coverage."}
+  ],
   "sources": [
-    {"name": "LandSearch Mecklenburg County: 20+ acres", "source": "LandSearch", "url": "https://www.landsearch.com/properties/mecklenburg-county-nc/filter/20-minacres"},
-    {"name": "LandSearch York County: 20+ acres", "source": "LandSearch", "url": "https://www.landsearch.com/properties/york-county-sc/filter/20-minacres"},
-    {"name": "LandSearch Chester County: 20+ acres", "source": "LandSearch", "url": "https://www.landsearch.com/properties/chester-county-sc/filter/20-minacres"},
+    {"name": "Browse Mecklenburg County: 20+ acres", "source": "LandSearch", "url": "https://www.landsearch.com/properties/mecklenburg-county-nc/filter/20-minacres"},
+    {"name": "Browse York County: 20+ acres", "source": "LandSearch", "url": "https://www.landsearch.com/properties/york-county-sc/filter/20-minacres"},
+    {"name": "Browse Chester County: 20+ acres", "source": "LandSearch", "url": "https://www.landsearch.com/properties/chester-county-sc/filter/20-minacres"},
     {"name": "Land.com Mecklenburg County: 20+ acres", "source": "Land.com", "url": "https://www.land.com/Mecklenburg-County-NC/all-land/20-100000-acres/"},
     {"name": "Land.com York County: 20+ acres", "source": "Land.com", "url": "https://www.land.com/York-County-SC/all-land/20-100000-acres/"},
     {"name": "Land.com Chester County: 20+ acres", "source": "Land.com", "url": "https://www.land.com/Chester-County-SC/all-land/20-100000-acres/"}

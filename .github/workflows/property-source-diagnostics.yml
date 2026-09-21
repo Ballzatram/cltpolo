@@ -11,34 +11,33 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 4
     steps:
-      - name: Check public property sources without credentials
+      - uses: actions/checkout@v4
+      - name: Inspect live release and public service responses
         run: |
           python - <<'PY'
-          import json, re
-          from urllib.request import Request, urlopen
-          from html.parser import HTMLParser
-          class Links(HTMLParser):
-              def __init__(self): super().__init__(); self.links=[]
-              def handle_starttag(self, tag, attrs):
-                  href=dict(attrs).get('href','')
-                  if tag == 'a' and re.search(r'property|listing|south-carolina|chester|york|land-for-sale',href,re.I): self.links.append(href)
-          targets = [
-              'https://charlottepolo.com/investors/',
-              'https://refresh-properties.charlottepolo-refresh.workers.dev/votes',
-              'https://www.landsearch.com/properties/york-county-sc/filter/20-minacres',
-              'https://www.advancelandandtimber.com/',
-              'https://www.advancelandandtimber.com/robots.txt'
-          ]
-          for url in targets:
+          import json,re
+          from urllib.request import Request,urlopen
+          urls=['https://charlottepolo.com/investors/','https://refresh-properties.charlottepolo-refresh.workers.dev/votes','https://raw.githubusercontent.com/Ballzatram/cltpolo/main/data/property-research.json']
+          for url in urls:
               try:
                   with urlopen(Request(url,headers={'User-Agent':'CLTPoloResearch/2.0 (+https://charlottepolo.com/contact)'}),timeout=15) as response:
                       body=response.read(1000000).decode('utf-8','replace')
-                      print('\nSOURCE',url,'HTTP',response.status)
-                      if 'robots.txt' in url or '/votes' in url: print(body[:1500])
+                      print('PUBLIC URL',url,'HTTP',response.status)
+                      if '/investors/' in url:
+                          print('TITLE',re.findall(r'<title[^>]*>(.*?)</title>',body,re.I|re.S))
+                          print('RELEASE',re.findall(r'name="research-release" content="([^"]+)"',body))
+                          print('OLD COPY STILL PRESENT',bool(re.search(r'50\+ Acre Minimum|Run CSV Refresh Agent',body)))
                       else:
-                          parser=Links(); parser.feed(body)
-                          print('TITLE',re.findall(r'<title[^>]*>(.*?)</title>',body,re.I|re.S)[:1])
-                          print('COPY',re.findall(r'.{0,50}(?:50\+|20\+|CSV|45.minute).{0,70}',body)[:10])
-                          print('LINKS',json.dumps(list(dict.fromkeys(parser.links))[:25]))
-              except Exception as exc: print('\nSOURCE',url,'FAILED',type(exc).__name__,str(exc))
+                          data=json.loads(body)
+                          print(json.dumps({key:data.get(key) for key in ['schemaVersion','generatedAt','workflowRunId','latestListingReviewAt','health','message']},indent=2))
+              except Exception as exc:print('PUBLIC URL',url,'UNAVAILABLE',str(exc))
           PY
+      - name: Exercise bounded broker discovery without publishing data
+        continue-on-error: true
+        run: python scripts/property_pipeline.py --dry-run --max-listings 4 --summary-path source-diagnostic-summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: property-source-diagnostics
+          path: source-diagnostic-summary.json
+          if-no-files-found: ignore

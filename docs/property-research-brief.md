@@ -1,137 +1,107 @@
-# Arena-first polo property research
+# Property research — active implementation (2026-09-21-r2)
 
-Brief updated 2026-09-21. Active route: `/investors/` (the existing `/investors.html`
-redirect is unchanged).
+The production route is `/investors/`. The brief remains: at least 20 parcel acres;
+flat contiguous usable polo land; arena first, with a separate grass format;
+I-77 south toward Columbia; at most 45 minutes from Uptown Charlotte; expansion
+optional. Training grass is not represented as a full-size field.
 
-## Acquisition brief
+## Audit findings
 
-- Minimum **20 parcel acres**, inclusive; no maximum acreage or assumed budget.
-- **Flat, contiguous usable polo land is required.** A listing claim, pasture,
-  favorable historic score, or large total acreage does not establish flatness.
-- **Arena first**, with a separately assessed grass format. Record whether the
-  grass plan supports training/reduced play or a full field. Neither a 20-acre
-  parcel nor a claimed flat area establishes that both layouts fit.
-- **I-77 south of Charlotte toward Columbia**, at most **45 minutes from Uptown
-  Charlotte**, inclusive. Uptown retains the previous dashboard's origin. No
-  35-minute lower bound. Columbia describes direction, not a second travel hub.
-- Expansion is optional. Document usable reserve land or an actual assemblage
-  opportunity; don't infer expansion rights from a neighboring empty parcel.
+The previous PR was still unmerged when the user reported outdated copy. A real
+GitHub runner request confirmed the public page still said 50+ acres and exposed
+CSV refresh mechanics. Scheduled run `35517092467` (2026-09-20) tried 28 discovery
+pages: all failed (403, and Realtor.com 429), no rows changed, and no CSV was
+written. The failure report was only an Actions artifact, not visible in the UI.
+The deployed `/votes` endpoint returned HTTP 405 even though repository Worker
+code defined a GET handler. Repo source and deployed Worker are not the same thing.
 
-`data/property-search-brief.json` supplies thresholds, scoring weights and active
-search-source URLs to the new page and refresh entry point. Search pages cover
-Mecklenburg, York and Chester counties at 20+ acres. County scope is only a
-collection boundary, not proof of I-77 frontage, flatness or a qualifying route.
-North-of-Uptown coordinates, explicitly different corridors and over-limit legacy
-estimates stay outside the current screen until better evidence resolves them.
-The latitude boundary at Columbia is a coarse directional check, not a route map.
+References: repository runs `35517092467` and `35622652957`. These are dated
+observations, not claims that provider access can never change.
 
-## What changed
+## Active data path
 
-The investor route now loads `property-research-core.js` and
-`property-research.js`, not the old investor code in `script.js`. Public pages
-continue using their original shared bundle. The main map, team votes, source
-links and Worker-triggered refresh remain. The old mile-radius circles are removed;
-they were not drive-time isochrones. Card mini-maps are replaced by one filtered
-regional map and per-property driving links to keep the page lighter.
+1. `data/property-search-brief.json` defines the brief, public broker discovery
+   pages, paused portals, and human-readable wider-market search links.
+2. `scripts/property_pipeline.py` reads the existing CSV ledger, checks permitted
+   public broker sources, and preserves historical and analyst-entered records.
+3. It writes **one atomic** `data/property-research.json` containing the brief,
+   property rows, ledger checksum, source-health report, code SHA and run ID.
+4. The workflow validates and commits the snapshot even when the source run fails.
+   A final step still marks a failed source run as failed; `continue-on-error` is
+   used only to make failure reporting publishable, not to hide failure.
+5. The browser reads the latest raw-GitHub snapshot, then explicitly labeled
+   deployed/ledger fallbacks. It does not depend on a Pages rebuild for every
+   data update. GitHub workflow-token commits do not trigger Pages branch builds:
+   https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site
+6. A refresh request stays on-page. Public GitHub workflow status is checked at
+   bounded intervals, and the page waits for a snapshot with the matching run ID.
+   Dispatch accepted, job completed, snapshot published and sources checked are
+   distinct states. A failed/rate-limited status request never invents completion.
 
-The active refresh command is:
+## Honest coverage
 
-```sh
-python scripts/refresh_property_research.py --summary-path property-refresh-summary.json
-python scripts/refresh_property_research.py --validate-only
-```
+Major blocked portals are paused, not scraped through proxies or CAPTCHA bypass.
+The initial replacement provider is Advance Land & Timber's public York and
+Chester county pages, with robots-policy checks and a transparent user agent.
+Its main site and robots policy were reachable from the actual runner during the
+inspection. This is **limited broker coverage**, not the whole market and not
+coverage of every Mecklenburg parcel. Human browsing links remain available.
 
-The unchanged `update-properties.yml` workflow name and Worker endpoint now run
-this entry point, so no Worker redeployment is required for this change. The old
-`scripts/update_properties.py` is retained only as the existing fetch/parser
-library. Its old normalization, target selection, scoring, main routine and
-50-acre search settings are **not** called by the active refresh. Do not run its
-old CLI for this brief. Historical documentation referring to that command
-predates this change.
+A rendered zero-listing count can omit dynamically loaded inventory. The job
+reports `empty-rendered`, explicitly not a comprehensive no-results search.
+HTTP 200 with unrecognized markup is `unparsed`, not success. HTTP/network/robots
+failures preserve saved records. Requests are host-allowlisted, size/time bounded,
+limited per run, and cease on an access block for that host.
 
-Historical CSV rows and analyst fields are retained, not rewritten as suitable
-sites. The seven pre-change listings have no documented flatness/layout/route
-qualification under this brief, and have recorded distance or corridor conflicts.
-Their May 2026 source dates must not be interpreted as a current listing check.
-No new listings or fabricated evidence are seeded by this implementation.
+`limited` and `partial` source reports are never labeled complete market success.
+An authorized broker/MLS/search feed would be needed for broader reliable
+coverage; no new paid service or API key is silently assumed or configured.
 
-## Evidence fields
+## Dates and suitability
 
-Evidence URLs must be HTTP(S); review dates must be actual, non-future `YYYY-MM-DD`
-dates. The UI checks the presence and format of this analyst-recorded evidence;
-it does **not** fetch a survey and verify its conclusions. A status without a
-valid source and date cannot pass a required check.
+`Listing Checked At` means the public source page was actually retrieved and
+parsed. It is separate from snapshot/job timestamps and does not certify current
+availability. Failed checks never refresh old source-review dates. Reviews older
+than the configurable 30-day display threshold get stale badges. Neither an HTTP
+200 nor a listing saying "flat" verifies terrain, routes, layout or permitted use.
 
-| Check | Fields | Passing status |
-| --- | --- | --- |
-| Terrain | `Terrain Status`, `Terrain Evidence`, `Terrain Checked At` | `verified-flat` |
-| Corridor | `Corridor Status`, `Corridor Evidence`, `Corridor Checked At` | `verified` |
-| Drive | `Verified Drive Minutes`, `Drive Origin`, `Drive Evidence`, `Drive Checked At` | Positive route time <=45, origin `Uptown Charlotte` |
-| Arena | `Arena Fit`, `Layout Evidence`, `Layout Checked At` | `verified` |
-| Grass | `Grass Fit`, `Layout Evidence`, `Layout Checked At` | `verified-training` or `verified-full-field` |
-| Expansion | `Expansion Status`, `Expansion Evidence`, `Expansion Checked At` | Optional `verified` |
+The rule engine still requires dated HTTP(S) evidence for verified terrain,
+corridor, route and layout statuses. It validates presence/format, not the
+contents of a survey. Legacy estimates above 45 minutes stay outside the screen
+until a documented route resolves them. A county name alone is not I-77 access.
+Manual exclusions and arbitrary analyst columns survive source refreshes.
+Changed acreage/coordinates revoke site pass statuses but retain old evidence
+links for historical review. A failed requirement cannot be outweighed by price,
+acreage, expansion or team preference.
 
-Use `unverified` for unknown statuses; `claimed-flat` for a terrain claim;
-`unsuitable` for a negative terrain/arena/grass assessment; `outside` for a
-negative corridor assessment; `possible` or `unavailable` for expansion.
-`Terrain Notes` and `Usable Flat Acres` preserve useful footprint details.
+## Frontend behavior
 
-Legacy `Drive Time From Charlotte` / `Est. Drive Min to Charlotte` values remain
-explicitly **unverified estimates**. An estimate over 45 minutes is outside the
-screen, not conclusive proof of an actual journey time. A valid recorded route
-check supersedes it. Range inputs use their upper bound. Unknown time is never
-zero or calculated from straight-line miles. Record departure-day/time context
-in the linked route evidence and revisit it before arranging a site visit.
+Main actions are "Check for new properties" and "Reload results". CSV remains
+only a technical export. Empty/filter/archive states are explicit. Local saved
+properties work without shared voting; the page never implies a local save was
+synced to the team. Shared voting appears only after a valid service response.
+The existing client-side access-code gate is retained and disclosed as **not
+secure authentication**. Do not publish confidential documents in this repo.
 
-The refresh preserves unknown/custom columns and manual exclusions, never fills
-these evidence statuses as verified, and revokes pass statuses when recorded
-acreage or coordinates change. Evidence links remain for historical review.
-Source parsing is not verification of current availability, permitted uses,
-flatness, drainage or safe field geometry.
-
-## Eligibility and ordering
-
-- **Meets documented brief:** every required check passes. This is still not an
-  engineering, permitting, legal or purchase recommendation.
-- **Needs verification:** no recorded hard conflict, but at least one check is
-  unknown. These are leads, not confirmed matches.
-- **Outside current brief:** one or more conflicts, recorded inactive status or
-  manual exclusion. Available in the archive view without deletion.
-
-Order by status first, then documented-fit points. Terrain 40; arena 25; grass
-15; corridor plus drive 10; minimum acreage 5; optional expansion 5. Price, votes,
-legacy scores and extra acreage cannot override a failed required check. Missing
-prices/drives sort last, rather than as free land or zero-minute journeys.
-
-## Refresh integrity and testing
-
-The existing daily schedule and on-demand dispatch are retained. The refresh
-collects from the new county/acreage sources, records per-source failures and
-provenance, caps listing-page requests, preserves archival data, and writes
-atomically only when meaningful listing fields change. Audit-only timestamp
-changes do not rewrite the CSV. Severe source failures block writes by default;
-`--allow-source-failures` is an explicit operator override. `--dry-run` never
-writes the CSV. HTTP success does not imply terrain qualification.
+## Commands and tests
 
 ```sh
-node --check property-research-core.js
-node --check property-research.js
-node --test tests/property-research-core.test.cjs
-python -m unittest discover -s tests -p 'test_property_research.py'
-python scripts/refresh_property_research.py --validate-only
+python scripts/property_pipeline.py --dry-run
+python scripts/property_pipeline.py --snapshot-only
+python scripts/property_pipeline.py --validate-only
+node --test tests/property-research*.test.cjs
+python -m unittest discover -s tests -p 'test_property*.py'
+python tests/property_browser_smoke.py
 ```
 
-`Property Research Checks` runs these checks for relevant pull requests and main
-pushes; the scheduled refresh runs the unit tests before collecting listings.
-An additional local Chromium smoke test exercised the access gate, filters,
-empty/archive view, vote/toggle, refresh messaging, unsafe-link/text handling and
-missing-map fallback using synthetic records and mocked network responses. It
-was not a live Worker, live listing-source or production-stylesheet test.
+The old `scripts/update_properties.py` and `scripts/refresh_property_research.py`
+are retained for historical parser/tests only. Their CLIs are **not the active
+refresh path**. Older setup documents describing them are superseded here.
+The Worker endpoint/workflow identity is unchanged; the new frontend does not
+require a new Worker `/status` endpoint. Fixing/deploying the older shared-vote
+Worker remains a separate infrastructure task, not falsely claimed by this page.
 
-## Existing access limitation
-
-The existing session-based access-code gate is retained, with storage errors
-handled safely. It is **not authentication**: the code, CSV and page are publicly
-hosted. The page now says so. Keep confidential investor information and private
-survey documents out of this public repository. Real access control and the
-existing vote-service trust model are separate security work, not solved here.
+The browser suite uses real checked-in HTML/CSS/JS and mocked external services.
+It covers mobile/desktop overflow, gate, filters, archive/empty views, script
+injection escaping, local saved properties, unavailable maps/votes, dispatch
+failure and in-page completion. It does not verify live surveys or broker data.

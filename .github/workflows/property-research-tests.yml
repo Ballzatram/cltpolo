@@ -1,27 +1,16 @@
 name: Property Research Checks
 on:
   pull_request:
-    paths:
-      - 'property-research*'
-      - 'investors/**'
-      - 'data/**'
-      - 'scripts/**'
-      - 'tests/**'
-      - '.github/workflows/**'
+    paths: ['property-research*', 'investors/**', 'data/**', 'scripts/**', 'tests/**', '.github/workflows/**']
   push:
     branches: [main]
-    paths:
-      - 'property-research*'
-      - 'investors/**'
-      - 'data/**'
-      - 'scripts/**'
-      - 'tests/**'
-      - '.github/workflows/**'
+    paths: ['property-research*', 'investors/**', 'data/**', 'scripts/**', 'tests/**', '.github/workflows/**']
 permissions:
   contents: read
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -30,9 +19,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: |
-          node --check property-research-core.js
+      - name: Unit, syntax and actual-ledger checks
+        run: |
           node --check property-research.js
-          node --test tests/property-research-core.test.cjs
-          python -m unittest discover -s tests -p 'test_property_research.py'
-          python scripts/refresh_property_research.py --validate-only
+          node --check property-research-data.js
+          node --check property-research-core.js
+          node --test tests/property-research*.test.cjs
+          python -m unittest discover -s tests -p 'test_property*.py'
+          python scripts/property_pipeline.py --snapshot-only
+          python scripts/property_pipeline.py --validate-only
+      - name: Install browser test runtime
+        run: |
+          python -m pip install playwright==1.55.0
+          python -m playwright install --with-deps chromium
+      - name: Test the actual page on mobile and desktop
+        run: python tests/property_browser_smoke.py
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: property-browser-evidence
+          path: artifacts/research-*.png
+          if-no-files-found: ignore
