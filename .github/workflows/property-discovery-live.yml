@@ -1,0 +1,68 @@
+name: Property Discovery Live Check
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/property-discovery-live.yml'
+      - 'scripts/property_pipeline.py'
+      - 'data/property-search-brief.json'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Observe public inventory without changing the ledger
+        run: |
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'scripts')
+          import property_pipeline as P
+          sources=[
+            {'name':'Mossy Oak Properties — York','url':'https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/'},
+            {'name':'Mossy Oak Properties — Chester','url':'https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/'},
+            {'name':'Mossy Oak Properties — Mecklenburg','url':'https://www.mossyoakproperties.com/land-for-sale/north-carolina/mecklenburg-county/'}]
+          client=P.PublicClient({'www.mossyoakproperties.com'})
+          out=Path('source-diagnostic');out.mkdir(exist_ok=True)
+          observations=[]
+          for i,source in enumerate(sources):
+            result=client.get(source['url'])
+            info={'source':source,'ok':result['ok'],'http':result.get('http'),'reason':result.get('reason')}
+            if result['ok']:
+              (out/f'index-{i}.html').write_text(result['body'])
+              page=P.Page();page.feed(result['body']);links=P.listing_links(page,source)
+              info['links']=links;info['samples']=[]
+              for j,url in enumerate(links[:3]):
+                detail=client.get(url)
+                sample={'url':url,'ok':detail['ok'],'http':detail.get('http'),'reason':detail.get('reason')}
+                if detail['ok']:
+                  (out/f'detail-{i}-{j}.html').write_text(detail['body'])
+                  row=P.parse_broker_listing(detail['body'],url,source,P.now_iso())
+                  sample['parsed']=bool(row)
+                  if row:sample['facts']={k:row.get(k) for k in ['ID','Property Name','Acres','Status','City','County','State','List Price','Latitude','Longitude']}
+                info['samples'].append(sample)
+            observations.append(info)
+            print(json.dumps(info,indent=2),flush=True)
+          (out/'observations.json').write_text(json.dumps(observations,indent=2))
+          PY
+      - name: Retain bounded public-source diagnostics and matching parser source
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: property-source-diagnostic
+          retention-days: 3
+          path: |
+            source-diagnostic/
+            scripts/
+            tests/
+            data/
+            investors/index.html
+            property-research*.js
+            property-research.css
+            style.css
