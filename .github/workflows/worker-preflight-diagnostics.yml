@@ -1,0 +1,56 @@
+name: Worker Preflight Diagnostics
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/worker-preflight-diagnostics.yml'
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Capture bounded public GET and OPTIONS responses without credentials
+        run: |
+          python - <<'PY'
+          import html,json,re
+          from urllib.request import Request,urlopen,build_opener,HTTPRedirectHandler
+          from urllib.error import HTTPError
+          from datetime import datetime,timezone
+          class NoRedirect(HTTPRedirectHandler):
+              def redirect_request(self,*args,**kwargs): return None
+          opener=build_opener(NoRedirect)
+          endpoint='https://refresh-properties.charlottepolo-refresh.workers.dev'
+          origin='https://charlottepolo.com'
+          preflight={'Origin':origin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'content-type'}
+          probes=[('root GET','GET',endpoint+'/',{}),('bare OPTIONS','OPTIONS',endpoint+'/',{}),('browser preflight','OPTIONS',endpoint+'/',preflight),('original verifier URL','OPTIONS',endpoint,preflight)]
+          allowed_headers=['Content-Type','Server','Location','CF-Ray','CF-Mitigated','Access-Control-Allow-Origin','Access-Control-Allow-Methods','Access-Control-Allow-Headers','Vary']
+          results=[]
+          for label,method,url,headers in probes:
+              result={'probe':label,'method':method,'url':url,'at':datetime.now(timezone.utc).isoformat()}
+              req=Request(url,method=method,headers={'User-Agent':'CLTPoloPreflightDiagnostic/1.0',**headers})
+              try:
+                  try: response=opener.open(req,timeout=15)
+                  except HTTPError as error: response=error
+                  with response:
+                      body=response.read(16000).decode('utf-8','replace')
+                      result['status']=response.code
+                      result['headers']={key:response.headers.get(key) for key in allowed_headers if response.headers.get(key)}
+                      result['title']=re.findall(r'<title[^>]*>(.*?)</title>',body,re.I|re.S)
+                      cleaned=re.sub(r'<(?:script|style)\b[^>]*>.*?</(?:script|style)>',' ',body,flags=re.I|re.S)
+                      cleaned=html.unescape(re.sub(r'<[^>]+>',' ',cleaned))
+                      cleaned=re.sub(r'\s+',' ',cleaned).strip()
+                      result['body_excerpt']=cleaned[:2400]
+                      if label=='browser preflight':
+                          methods={v.strip().upper() for v in response.headers.get('Access-Control-Allow-Methods','').split(',')}
+                          fields={v.strip().lower() for v in response.headers.get('Access-Control-Allow-Headers','').split(',')}
+                          result['preflight_ok']=response.code in (200,204) and response.headers.get('Access-Control-Allow-Origin')==origin and 'POST' in methods and 'content-type' in fields
+              except Exception as error:
+                  result['error']=type(error).__name__+': '+str(error)
+              results.append(result)
+              print(json.dumps(result,indent=2),flush=True)
+          print('No POST sent, no GitHub secret accessed, no property refresh dispatched, and no deployment changed.')
+          if not any(row.get('preflight_ok') for row in results):
+              raise SystemExit('Live browser preflight did not pass; see captured response, not just status code.')
+          PY
