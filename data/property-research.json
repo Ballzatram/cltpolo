@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-21T16:45:44Z",
+  "generatedAt": "2026-09-21T16:54:44Z",
   "brief": {
     "version": "2026-09-21-r2",
     "minimumAcres": 20,
@@ -446,8 +446,8 @@
   ],
   "health": {
     "status": "limited",
-    "attemptedAt": "2026-09-21T16:45:41Z",
-    "finishedAt": "2026-09-21T16:45:44Z",
+    "attemptedAt": "2026-09-21T16:54:42Z",
+    "finishedAt": "2026-09-21T16:54:44Z",
     "sources": [
       {
         "name": "Advance Land & Timber — York County",
@@ -488,6 +488,6 @@
   },
   "ledgerSha256": "10f25cfc0012ec13b26a76a09b5f6440756660485ba724672195f241c8b5cd3b",
   "latestListingReviewAt": "2026-05-11T22:30:00Z",
-  "workflowRunId": "35627639476",
-  "codeRevision": "89acd226d9b10cd7f2b9519ed7753b3154cb8053"
+  "workflowRunId": "35628600026",
+  "codeRevision": "dbbf1d46247b9706d11349ada39ee220b2060354"
 }
