@@ -55,7 +55,7 @@ with sync_playwright() as p:
         page.wait_for_function("document.querySelectorAll('.property-card').length===3 && document.getElementById('voteServiceStatus').textContent.includes('unavailable')")
         assert page.locator('#researchView').input_value()=='all'
         assert page.locator('.badge[data-state="outside"]').count()==1
-        assert page.locator('.investor-hero-main h1').inner_text()=='Land Acquisition Dashboard'
+        assert page.locator('.investor-hero-main h2').inner_text()=='Property Research Pipeline'
         assert not page.locator('#propertyGrid img').count();assert page.evaluate('window.injected') is None
         assert 'Map unavailable' in page.locator('#mapStatus').inner_text();assert not page.locator('[data-vote-id]').count()
         assert 'No listing updates' in page.locator('#refreshOutcome').inner_text()

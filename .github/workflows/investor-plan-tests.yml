@@ -1,0 +1,40 @@
+name: Investor Plan Checks
+on:
+  pull_request:
+    paths: ['investor-*.js', 'investor-plan.css', 'investors/**', 'data/investor-plan.json', 'tests/investor*', '.github/workflows/investor-plan-tests.yml']
+  push:
+    branches: [main]
+    paths: ['investor-*.js', 'investor-plan.css', 'investors/**', 'data/investor-plan.json', 'tests/investor*', '.github/workflows/investor-plan-tests.yml']
+permissions:
+  contents: read
+jobs:
+  feasibility-model:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Model tests and JavaScript syntax
+        run: |
+          node --check investor-model.js
+          node --check investor-plan.js
+          node --test tests/investor-model.test.cjs tests/property-research-*.test.cjs
+      - name: Browser runtime
+        run: |
+          python -m pip install playwright==1.55.0
+          python -m playwright install --with-deps chromium
+      - name: In-memory DOM integration
+        run: python tests/investor_plan_memory_smoke.py
+      - name: HTTP page integration
+        run: python tests/investor_plan_browser_smoke.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: investor-plan-browser-evidence
+          path: artifacts/investment-*
+          if-no-files-found: ignore
