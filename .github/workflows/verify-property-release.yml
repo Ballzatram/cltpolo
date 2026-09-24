@@ -4,6 +4,9 @@ on:
     branches: [main]
     paths:
       - 'investors/index.html'
+      - 'investor-*.js'
+      - 'investor-plan.css'
+      - 'data/investor-plan.json'
       - 'property-research*'
       - '.github/workflows/verify-property-release.yml'
 permissions:
@@ -26,8 +29,8 @@ jobs:
           origin='https://charlottepolo.com'
           html=Path('investors/index.html').read_text()
           release=re.search(r'name="research-release" content="([^"]+)"',html)[1]
-          assets=['/style.css','/property-research.css','/property-research-core.js','/property-research-data.js','/property-research-outcome.js','/property-research.js']
-          headers={'User-Agent':'CLTPoloReleaseCheck/3.0','Origin':origin}
+          assets=['/style.css','/property-research.css','/property-research-core.js','/property-research-data.js','/property-research-outcome.js','/property-research.js','/investor-model.js','/investor-plan.js','/investor-plan.css','/data/investor-plan.json']
+          headers={'User-Agent':'CLTPoloReleaseCheck/4.0','Origin':origin}
           def get(url):
               with urlopen(Request(url,headers=headers),timeout=15) as response:
                   return response.status,response.read(2000000)
@@ -37,7 +40,8 @@ jobs:
                   status,body=get(origin+'/investors/'+query)
                   body=body.decode('utf-8')
                   assert 'name="research-release" content="'+release+'"' in body
-                  assert 'href="/style.css?' in body and 'Land Acquisition Dashboard' in body
+                  assert 'href="/style.css?' in body and 'Property Research Pipeline' in body
+                  assert 'id="investmentPlan"' in body and '/investor-model.js?' in body
                   for path in assets:
                       status,content=get(origin+path+query)
                       assert status==200 and hashlib.sha256(content).digest()==hashlib.sha256(Path(path.lstrip('/')).read_bytes()).digest(),path
@@ -60,7 +64,7 @@ jobs:
           from urllib.error import HTTPError
           origin='https://charlottepolo.com'
           endpoint='https://refresh-properties.charlottepolo-refresh.workers.dev/'
-          headers={'Origin':origin,'User-Agent':'CLTPoloReleaseCheck/3.0'}
+          headers={'Origin':origin,'User-Agent':'CLTPoloReleaseCheck/4.0'}
           try:
               req=Request(endpoint,method='OPTIONS',headers={**headers,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'content-type'})
               with urlopen(req,timeout=15) as response:
