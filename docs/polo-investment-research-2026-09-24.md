@@ -1,56 +1,24 @@
 # Charlotte Polo Club | Investment research and three-site planning brief
 
 **Research date:** September 24, 2026  
-**Release:** 2026-09-24-investment-r2  
-**Decision status:** Feasibility research. Sites A and B are working public-record matches awaiting confirmation that the supplied Prospects token links resolve to these exact parcels; Site C remains open. No acquisition recommendation, verified local construction bids or demonstrated customer demand.
+**Release:** 2026-09-24-investment-r1  
+**Decision status:** Feasibility research. No property selected, no investment recommendation, no verified local construction bids or demonstrated customer demand.
 
 ## Investment thesis
 
 **Polo at the heart. Experience as the business.** A small core of players may create an authentic, differentiated experience, but the club must demonstrate enough contribution from carefully designed experiences to pay for year-round horses, paid staff, facilities and capital. A larger list of revenue streams is not evidence of a viable business. The present prototype does not close that gap.
 
-This release maintains three independent property models. Site A is provisionally matched to 4252-1 Reid Rd in York County; Site B is provisionally matched to 1700 Westbrook Rd / the Lando tract in Chester County; Site C remains open. Because the supplied Prospects token pages could not be machine-read, the link-to-parcel identity must be confirmed before acquisition reliance. Costs, tax inputs, fencing, demand case, notes and diligence checks remain independent. Missing post-development property tax, verified flat acreage and drive time remain unknown, not zero. The deck does not rank unverified sites as investments.
+This release prepares three independent property models; it does not invent three properties. Site A, B and C start with the same explicitly hypothetical development and operating program. Their costs, tax inputs, fencing, demand case, notes and diligence checks can be edited independently. Missing land price and property tax remain unknown, not zero. The deck must not rank unverified sites as investments.
 
 The owner's `20 min` and `10 min` are interpreted as at least **20 total stalls** and **10 club-owned horses**. The prototype allocates two stalls to visitor/quarantine reserve, leaving eight potentially boardable stalls before occupancy. A 10-horse teaching string is not an unlimited supply of mounts for 20 concurrent players. Workload, rotation, individual suitability and turnout require professional approval.
 
 The site brief remains 20+ parcel acres, flat contiguous usable polo footprint, arena first, a separately assessed grass format, the I-77 corridor south of Charlotte toward Columbia, and a documented drive of no more than about 45 minutes from Uptown Charlotte. Expansion is optional. Purchase price and extra acreage do not override location, terrain or permitted-use failures.
 
-## Candidate property diligence added in release r2
-
-### Site A — 4252-1 Reid Rd, Rock Hill, SC (working match)
-
-The current public listing is approximately **32.8 acres at $725,000**, RUD-1, CMLS 4213472, using parcel/parent identifier 6130000014. The larger 58.84-acre parent tract is marketed as proposed tracts, with surveying described after a tract goes under contract. The final 32.8-acre legal boundary therefore remains a fundamental dependency for soil, stream, flood, access and tax analysis. [S20, S21]
-
-The listing indicates a **well is required and no sewer is listed**. Piedmont groundwater is controlled largely by weathered material and bedrock fractures, so county-scale well averages are only context. A test well, sustained pump test and water-quality panel should be a feasibility condition if the property remains in consideration. Wastewater capacity for a horse facility plus public events must be established separately. [S20, S29–S31]
-
-The parent tract marketing describes a flowing stream and small pond, while the individual tract listing does not claim waterfront. That is not necessarily contradictory because the proposed split controls which water features actually fall inside Site A. The final plat should be screened against current flood/wetland layers and field conditions. No parcel-specific SSURGO soil series or contiguous flat polo footprint has yet been verified. [S20, S21, S26]
-
-York County's current code regulates commercial equestrian uses and the full polo-experience program requires a written classification covering instruction, boarding, ticketed events, corporate hospitality, lighting, food/alcohol and parking. Horse-friendly marketing language is not land-use approval. [S22]
-
-### Site B — 1700 Westbrook Rd / Lando tract, Chester County, SC (working match)
-
-The current public record/listing package identifies approximately **156 acres at $2,106,000**, TMS 133-00-00-033-000, zoning R-2. South Carolina Commerce lists **140 developable acres**, elevation roughly 420–500 feet and approximately 2.5 miles to I-77. “Developable” does not mean 140 flat polo acres. [S23, S34]
-
-Utility access is materially better documented than Site A but still requires engineering. SC Commerce lists a **12-inch water line about 50 feet away** and an **18-inch force sewer about 1,600 feet away**. The sewer should therefore not be modeled as an on-site utility until the connection point, easements, capacity, pump/force-main requirements and extension costs are confirmed. [S23]
-
-Fishing Creek borders roughly 4,000 feet of the property. Broker flood/topographic material shows a substantial 100-year floodplain/lowland corridor associated with the creek and interior drainage, while marketing material says uplands above the 100-year floodplain comprise roughly two-thirds of the tract. Permanent facilities and primary polo surfaces should be laid out on verified uplands unless engineering and permitting demonstrate otherwise. National Wetlands Inventory and broker maps are screening tools, not jurisdictional wetland determinations. [S23, S25, S26]
-
-Chester County publishes a USDA-NRCS-derived SSURGO soil layer containing map-unit name, texture, depth to water table, flooding class, drainage class, hydrologic group, slope and hydric rating. The exact parcel AOI map units have **not yet been extracted into this model**; they should be overlaid with the concept plan and field-verified/geotechnically tested before arena, grass field, barn, parking and septic decisions. [S33]
-
-A natural-gas transmission line crosses the property and a 30-foot deeded access easement serves the eastern portion. Those recorded easements and operator crossing/no-build requirements must be pulled before treating gross acreage as usable. Heavy industrial land use immediately west is a reason to prioritize a Phase I ESA; it is not evidence that contamination exists on the parcel. [S23]
-
-R-2 permits equestrian uses in the current Chester County ordinance, but the broader experience-center program still needs a written classification for spectator events, hospitality, food/alcohol, lighting, sound and event frequency. [S24]
-
-### Water-use framework for both South Carolina sites
-
-South Carolina should **not** be modeled as though stream, pond or well access creates unlimited irrigation rights. Surface-water withdrawals above **3 million gallons in a month** enter the state withdrawal program. Outside designated Capacity Use Areas, high-volume groundwater systems above the applicable 3-million-gallon monthly threshold require registration; irrigation wells and potable business wells have separate permitting pathways. Peak-month arena and grass irrigation therefore needs to be quantified before choosing creek withdrawal, groundwater or public water. [S27–S29]
-
-Current raw-land tax bills also should not be used as the operating pro forma. South Carolina rollback provisions can apply when qualifying agricultural use changes, and post-build improvements plus commercial/equestrian uses need assessor review. [S32]
-
 ## Evidence and model discipline
 
 The source register distinguishes supplier benchmarks, historic examples, statutory rules, retail snapshots, scope references and planning assumptions. An attached source does not validate every number in an input's low/base/high band. Most bands are analyst planning allowances to be replaced by local installed bids or actual operating evidence.
 
-No county tax is inferred from acreage. Sites A and B are explicitly labeled as working matches rather than silently treated as verified Prospects parcels. No donated horses, free founder labor, grants, charity proceeds, guaranteed sponsors, refinancing gains, appreciation, property exit value or investor return is assumed. Debt defaults explicitly to zero (an all-equity prototype); it is editable, not an assertion that financing is unavailable or free.
+No county tax is inferred from acreage. No existing listing has been silently assigned to the three slots. No donated horses, free founder labor, grants, charity proceeds, guaranteed sponsors, refinancing gains, appreciation, property exit value or investor return is assumed. Debt defaults explicitly to zero (an all-equity prototype); it is editable, not an assertion that financing is unavailable or free.
 
 ## Demand: headcounts before population percentages
 
@@ -273,7 +241,7 @@ All 83 inputs, low/base/high planning bands, units, validation boundaries, scope
 
 ## Source and search ledger
 
-The complete 34-source register in [`data/investor-plan.json`](../data/investor-plan.json) supplies each source URL, publication/review date, observed benchmark, evidence classification and explicit limitation. The page's research ledger presents the same records. Source IDs below refer to that register.
+The complete 19-source register in [`data/investor-plan.json`](../data/investor-plan.json) supplies each source URL, publication/review date, observed benchmark, evidence classification and explicit limitation. The page's research ledger presents the same records. Source IDs below refer to that register.
 
 | IDs | Research coverage | Critical limitation |
 |---|---|---|
@@ -285,10 +253,6 @@ The complete 34-source register in [`data/investor-plan.json`](../data/investor-
 | S14–S16 | Retail alfalfa, concentrate and bedding snapshots | Location, delivery, tax, bale weight and bag volume require confirmation; not wholesale contracts. |
 | S17 | Triangle Area Polo instruction | Relevant program format, no published price or proof of Charlotte demand. |
 | S19 | 2023 Charlotte BLS wages | Broad historical occupation; not a current skilled polo-groom hiring quote. |
-| S20–S22 | Reid listing/parent tract; current York zoning | Working listing identity remains subject to Prospects-link confirmation and final tract survey. |
-| S23–S26, S33–S34 | Lando/Westbrook parcel, zoning, flood/wetland and soil screening | Public/broker GIS layers require survey, field delineation and engineering before buildability conclusions. |
-| S27–S31 | SC water-use rules and Piedmont hydrogeology | Regulatory thresholds and regional well-yield context are not parcel water-supply commitments. |
-| S32 | Current South Carolina rollback statute | Assessor/counsel must apply the statute to actual ownership and change of use. |
 
 All records were checked or search-index-reviewed on September 24, 2026 as individually disclosed. No verified local turnkey barn/steel-fence bid, trained teaching-string price, farrier contract, insurance underwriting, bulk hay contract or corporate customer commitment was obtained. Those gaps must remain visible in any investor discussion.
 
