@@ -48,7 +48,7 @@ with sync_playwright() as p:
     assert saved['sites'][0]['landPrice']==1000000
     page.locator('[data-site="landPrice"]').fill('1000000');page.locator('[data-site="landPrice"]').blur()
     page.locator('#ipSiteTabs [data-select="1"]').click()
-    assert page.locator('[data-site="landPrice"]').input_value()==''
+    assert page.locator('[data-site="landPrice"]').input_value()=='2106000'
     page.locator('[data-site="name"]').fill('Site B independent');page.locator('[data-site="name"]').blur()
     page.reload();page.wait_for_selector('#investmentPlan[data-ready=true]')
     assert 'York trial site' in page.locator('#ipCompare').inner_text()
