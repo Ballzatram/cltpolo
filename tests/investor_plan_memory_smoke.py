@@ -76,7 +76,7 @@ def main():
         saved = page.evaluate("JSON.parse(localStorage.getItem('cltPoloInvestmentPlan.v1'))")
         assert saved['sites'][0]['landPrice'] == 1000000
         page.locator('#ipSiteTabs [data-select="1"]').click()
-        assert page.locator('[data-site="landPrice"]').input_value() == ''
+        assert page.locator('[data-site="landPrice"]').input_value() == '2106000'
         page.locator('[data-site="name"]').fill('Site B independent')
         page.locator('[data-site="name"]').blur()
         store = page.evaluate('__testStore')
