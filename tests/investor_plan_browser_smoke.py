@@ -18,7 +18,10 @@ with sync_playwright() as p:
     page.add_init_script("sessionStorage.setItem('cltPoloInvestorAccess','true')")
     page.goto(url);page.wait_for_selector('#investmentPlan[data-ready=true]')
     assert page.locator('#ipCompare .ip-property').count()==3
-    assert page.locator('#ipSources .ip-source').count()==19
+    assert page.locator('#ipSources .ip-source').count()==34
+    assert page.locator('#ipLand .ip-land-card').count()==3
+    assert '4252-1 Reid Rd' in page.locator('#ipLand').inner_text()
+    assert '1700 Westbrook Rd' in page.locator('#ipLand').inner_text()
     assert 'Awaiting inputs' in page.locator('#ipCompare').inner_text()
     for width in (360,390,768,1024,1440):
         page.set_viewport_size({'width':width,'height':1000})
