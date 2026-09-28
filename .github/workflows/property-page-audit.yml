@@ -1,0 +1,66 @@
+name: Property Page Audit
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/property-page-audit.yml'
+      - 'property-research*'
+      - 'investors/**'
+      - 'tests/**'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Archive tracked review source without Git configuration or credentials
+        run: git archive --format=tar.gz -o audit-source.tar.gz HEAD
+      - uses: actions/upload-artifact@v4
+        with:
+          name: property-review-source
+          path: audit-source.tar.gz
+          retention-days: 3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install browser
+        run: |
+          python -m pip install playwright==1.55.0
+          python -m playwright install --with-deps chromium
+      - name: Inspect the real published page without dispatching a refresh
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from playwright.sync_api import sync_playwright
+          out=Path('audit-evidence');out.mkdir(exist_ok=True)
+          with sync_playwright() as p:
+              browser=p.chromium.launch()
+              page=browser.new_page(viewport={'width':1440,'height':1000})
+              errors=[];failed=[]
+              page.on('pageerror',lambda e: errors.append(str(e)))
+              page.on('response',lambda r: failed.append({'url':r.url,'status':r.status}) if r.status>=400 else None)
+              page.add_init_script("sessionStorage.setItem('cltPoloInvestorAccess','true')")
+              page.goto('https://charlottepolo.com/investors/',wait_until='domcontentloaded')
+              page.wait_for_function("document.getElementById('resultCount').textContent.length>0",timeout=45000)
+              page.wait_for_timeout(1500)
+              report={'url':page.url,'release':page.locator('meta[name=research-release]').get_attribute('content'),'results':page.locator('#resultCount').inner_text(),'outcome':page.locator('#refreshOutcome').inner_text(),'driveLabels':page.locator('.drive-badge').all_inner_texts(),'errors':errors,'failedResponses':failed}
+              report['desktopOverflow']=page.evaluate('document.documentElement.scrollWidth>innerWidth+1')
+              page.screenshot(path=str(out/'desktop.png'),full_page=True)
+              page.set_viewport_size({'width':390,'height':844});page.wait_for_timeout(300)
+              report['mobileOverflow']=page.evaluate('document.documentElement.scrollWidth>innerWidth+1')
+              page.screenshot(path=str(out/'mobile.png'),full_page=True)
+              (out/'report.json').write_text(json.dumps(report,indent=2))
+              print(json.dumps(report,indent=2))
+              browser.close()
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: property-review-live-evidence
+          path: audit-evidence/
+          retention-days: 7
