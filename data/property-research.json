@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-07T17:49:28Z",
+  "generatedAt": "2026-10-08T17:52:39Z",
   "brief": {
     "version": "2026-09-21-r2",
     "minimumAcres": 20,
@@ -527,21 +527,21 @@
       "Weighted Polo Score": "",
       "Corridor": "",
       "Corridor Fit": "",
-      "Address / Property": "1342 Mcknight Road",
+      "Address / Property": "1350 Mcknight Road",
       "City": "Smyrna",
       "County": "York County",
       "State": "SC",
-      "Acres": "35.9",
-      "List Price": "545000.0",
+      "Acres": "15.0",
+      "List Price": "235000.0",
       "Price / Acre": "",
-      "Status": "Available",
+      "Status": "New Listing",
       "Source": "Mossy Oak Properties",
       "Listing Link Label": "",
-      "Source URL": "https://www.mossyoakproperties.com/property/35-90ac-1342-mcknight-rd-smyrna-sc-york-co-york-south-carolina/74443/",
+      "Source URL": "https://www.mossyoakproperties.com/property/15ac-1350-mcknight-rd-smyrna-sc-york-co-york-south-carolina/74443/",
       "Geocode Query": "",
       "Geo Status": "",
       "Research Confidence": "",
-      "Listing Notes": "Broker lists 35.9 acres. Broker describes about an hour or longer from Charlotte; the 45-minute route requirement is not demonstrated. Polo layout and I-77 access require independent review.",
+      "Listing Notes": "Broker lists 15.0 acres. Polo layout and I-77 access require independent review.",
       "Polo / Investor Notes": "",
       "Investor Narrative": "",
       "Est. Drive Min to Charlotte": "",
@@ -555,11 +555,11 @@
       "Access / Frontage Score": "",
       "Next Due Diligence": "Confirm a contiguous flat arena/support footprint and separate grass format; verify I-77 south access, an Uptown route within 45 minutes, drainage and permitted use.",
       "Last Researched": "",
-      "Property Name": "+/- 35.90ac - 1342 Mcknight Rd Smyrna SC - York Co",
-      "Property URL": "https://www.mossyoakproperties.com/property/35-90ac-1342-mcknight-rd-smyrna-sc-york-co-york-south-carolina/74443/",
+      "Property Name": "+/- 15ac - 1350 Mcknight Rd Smyrna SC - York Co",
+      "Property URL": "https://www.mossyoakproperties.com/property/15ac-1350-mcknight-rd-smyrna-sc-york-co-york-south-carolina/74443/",
       "Map URL": "",
-      "Latitude": "35.031204",
-      "Longitude": "-81.386014",
+      "Latitude": "35.031766",
+      "Longitude": "-81.388192",
       "Drive Time From Charlotte": "",
       "Miles From Charlotte": "",
       "Listing Verified At": "",
@@ -568,15 +568,17 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-09-30T16:49:13Z",
+      "Listing Checked At": "2026-10-08T17:52:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
-      "Source Drive Conflict": "Broker describes about an hour or longer from Charlotte",
-      "MLS / External Reference": "--/4193756",
+      "Source Drive Conflict": "",
+      "MLS / External Reference": "--/4430074",
       "Terrain Status": "unverified",
       "Arena Fit": "unverified",
       "Grass Fit": "unverified",
       "Corridor Status": "unverified",
-      "Expansion Status": "unverified"
+      "Expansion Status": "unverified",
+      "Verified Drive Minutes": "",
+      "Usable Flat Acres": ""
     },
     {
       "ID": "MOP-105412",
@@ -628,7 +630,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-10-07T17:49:01Z",
+      "Listing Checked At": "2026-10-08T17:52:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -688,7 +690,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-10-07T17:49:01Z",
+      "Listing Checked At": "2026-10-08T17:52:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -748,7 +750,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-10-07T17:49:01Z",
+      "Listing Checked At": "2026-10-08T17:52:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -808,7 +810,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-10-07T17:49:01Z",
+      "Listing Checked At": "2026-10-08T17:52:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -868,7 +870,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-10-07T17:49:01Z",
+      "Listing Checked At": "2026-10-08T17:52:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -928,7 +930,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — Chester County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
-      "Listing Checked At": "2026-10-07T17:49:01Z",
+      "Listing Checked At": "2026-10-08T17:52:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "Broker describes about an hour or longer from Charlotte",
       "MLS / External Reference": "",
@@ -988,7 +990,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — Chester County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
-      "Listing Checked At": "2026-10-07T17:49:01Z",
+      "Listing Checked At": "2026-10-08T17:52:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "Broker describes about an hour or longer from Charlotte",
       "MLS / External Reference": "",
@@ -1048,7 +1050,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — Chester County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
-      "Listing Checked At": "2026-10-07T17:49:01Z",
+      "Listing Checked At": "2026-10-08T17:52:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -1108,7 +1110,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — Chester County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
-      "Listing Checked At": "2026-10-07T17:49:01Z",
+      "Listing Checked At": "2026-10-08T17:52:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -1120,18 +1122,18 @@
     }
   ],
   "health": {
-    "status": "partial",
-    "attemptedAt": "2026-10-07T17:49:01Z",
-    "finishedAt": "2026-10-07T17:49:28Z",
+    "status": "limited",
+    "attemptedAt": "2026-10-08T17:52:23Z",
+    "finishedAt": "2026-10-08T17:52:39Z",
     "sources": [
       {
         "name": "Mossy Oak Properties — York County",
         "url": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
         "http": 200,
         "status": "read",
-        "listingLinks": 7,
+        "listingLinks": 8,
         "note": "Listing links collected; each property is parsed and screened separately.",
-        "reportedTotal": 7
+        "reportedTotal": 8
       },
       {
         "name": "Mossy Oak Properties — Chester County",
@@ -1171,6 +1173,14 @@
       }
     ],
     "listingChecks": [
+      {
+        "url": "https://www.mossyoakproperties.com/property/15ac-1350-mcknight-rd-smyrna-sc-york-co-york-south-carolina/74443/",
+        "source": "Mossy Oak Properties — York County",
+        "http": 200,
+        "status": "parsed",
+        "note": "Individual broker property facts read",
+        "result": "existing-record-rechecked"
+      },
       {
         "url": "https://www.mossyoakproperties.com/property/5ac-1811-neelys-creek-rd-rock-hill-sc-york-county-york-south-carolina/118301/",
         "source": "Mossy Oak Properties — York County",
@@ -1330,22 +1340,36 @@
         "status": "parsed",
         "note": "Individual broker property facts read",
         "result": "outside-discovery-scope"
-      },
-      {
-        "url": "https://www.mossyoakproperties.com/property/35-90ac-1342-mcknight-rd-smyrna-sc-york-co-york-south-carolina/74443/",
-        "source": "Tracked broker listing",
-        "http": 404,
-        "status": "failed",
-        "note": "Source HTTP error"
       }
     ],
     "rowsAdded": 0,
-    "rowsChanged": 0,
-    "listingsChecked": 20,
+    "rowsChanged": 1,
+    "listingsChecked": 21,
     "listingPagesAttempted": 21,
     "outOfScope": 10,
     "unavailableNewListingsExcluded": 1,
-    "changes": [],
+    "changes": [
+      {
+        "id": "MOP-74443",
+        "kind": "updated",
+        "fields": [
+          "Acres",
+          "Address / Property",
+          "Latitude",
+          "List Price",
+          "Listing Notes",
+          "Longitude",
+          "MLS / External Reference",
+          "Property Name",
+          "Property URL",
+          "Source Drive Conflict",
+          "Source URL",
+          "Status",
+          "Usable Flat Acres",
+          "Verified Drive Minutes"
+        ]
+      }
+    ],
     "coverage": "Configured public broker inventory only; not a complete MLS or market search.",
     "pausedPortals": [
       {
@@ -1363,10 +1387,10 @@
     "sourcesRead": 5,
     "sourcesAttempted": 5,
     "listingRefreshSucceeded": true,
-    "message": "Parsed 20 individual listing pages; added 0 research records and changed 0 existing records. Broker coverage is limited; source facts are not verified polo suitability. Some source pages failed or inventory is incomplete."
+    "message": "Parsed 21 individual listing pages; added 0 research records and changed 1 existing records. Broker coverage is limited; source facts are not verified polo suitability."
   },
-  "ledgerSha256": "08acb6781b3e9da224a7c172a83d35c147b564a545164d71e88292f7cbeea14b",
-  "latestListingReviewAt": "2026-10-07T17:49:01Z",
-  "workflowRunId": "37661972482",
-  "codeRevision": "1a08f2bb5d18764f9ca199c8a884666d67793438"
+  "ledgerSha256": "64b50c5dbeb399523408f1716cce39a932dff2e832400b3fe78b010e6de2e2d9",
+  "latestListingReviewAt": "2026-10-08T17:52:23Z",
+  "workflowRunId": "37819892618",
+  "codeRevision": "e87ac91c2d71191237744a8ef18bbca658536b2b"
 }
