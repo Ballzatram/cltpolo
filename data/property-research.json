@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-08T17:52:39Z",
+  "generatedAt": "2026-10-09T17:26:48Z",
   "brief": {
     "version": "2026-09-21-r2",
     "minimumAcres": 20,
@@ -156,7 +156,9 @@
       "Arena Fit": "",
       "Grass Fit": "",
       "Corridor Status": "",
-      "Expansion Status": ""
+      "Expansion Status": "",
+      "Verified Drive Minutes": "",
+      "Usable Flat Acres": ""
     },
     {
       "ID": "LS-4797527",
@@ -216,7 +218,9 @@
       "Arena Fit": "",
       "Grass Fit": "",
       "Corridor Status": "",
-      "Expansion Status": ""
+      "Expansion Status": "",
+      "Verified Drive Minutes": "",
+      "Usable Flat Acres": ""
     },
     {
       "ID": "LS-2490553",
@@ -276,7 +280,9 @@
       "Arena Fit": "",
       "Grass Fit": "",
       "Corridor Status": "",
-      "Expansion Status": ""
+      "Expansion Status": "",
+      "Verified Drive Minutes": "",
+      "Usable Flat Acres": ""
     },
     {
       "ID": "LS-4663937",
@@ -336,7 +342,9 @@
       "Arena Fit": "",
       "Grass Fit": "",
       "Corridor Status": "",
-      "Expansion Status": ""
+      "Expansion Status": "",
+      "Verified Drive Minutes": "",
+      "Usable Flat Acres": ""
     },
     {
       "ID": "LS-4959246",
@@ -396,7 +404,9 @@
       "Arena Fit": "",
       "Grass Fit": "",
       "Corridor Status": "",
-      "Expansion Status": ""
+      "Expansion Status": "",
+      "Verified Drive Minutes": "",
+      "Usable Flat Acres": ""
     },
     {
       "ID": "LS-4706308",
@@ -456,7 +466,9 @@
       "Arena Fit": "",
       "Grass Fit": "",
       "Corridor Status": "",
-      "Expansion Status": ""
+      "Expansion Status": "",
+      "Verified Drive Minutes": "",
+      "Usable Flat Acres": ""
     },
     {
       "ID": "LS-4912025",
@@ -516,7 +528,9 @@
       "Arena Fit": "",
       "Grass Fit": "",
       "Corridor Status": "",
-      "Expansion Status": ""
+      "Expansion Status": "",
+      "Verified Drive Minutes": "",
+      "Usable Flat Acres": ""
     },
     {
       "ID": "MOP-74443",
@@ -568,7 +582,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-10-08T17:52:23Z",
+      "Listing Checked At": "2026-10-09T17:26:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "--/4430074",
@@ -630,7 +644,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-10-08T17:52:23Z",
+      "Listing Checked At": "2026-10-09T17:26:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -638,7 +652,9 @@
       "Arena Fit": "unverified",
       "Grass Fit": "unverified",
       "Corridor Status": "unverified",
-      "Expansion Status": "unverified"
+      "Expansion Status": "unverified",
+      "Verified Drive Minutes": "",
+      "Usable Flat Acres": ""
     },
     {
       "ID": "MOP-105397",
@@ -690,7 +706,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-10-08T17:52:23Z",
+      "Listing Checked At": "2026-10-09T17:26:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -698,7 +714,9 @@
       "Arena Fit": "unverified",
       "Grass Fit": "unverified",
       "Corridor Status": "unverified",
-      "Expansion Status": "unverified"
+      "Expansion Status": "unverified",
+      "Verified Drive Minutes": "",
+      "Usable Flat Acres": ""
     },
     {
       "ID": "MOP-105403",
@@ -750,7 +768,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-10-08T17:52:23Z",
+      "Listing Checked At": "2026-10-09T17:26:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -758,7 +776,9 @@
       "Arena Fit": "unverified",
       "Grass Fit": "unverified",
       "Corridor Status": "unverified",
-      "Expansion Status": "unverified"
+      "Expansion Status": "unverified",
+      "Verified Drive Minutes": "",
+      "Usable Flat Acres": ""
     },
     {
       "ID": "MOP-105384",
@@ -810,7 +830,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-10-08T17:52:23Z",
+      "Listing Checked At": "2026-10-09T17:26:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -818,7 +838,9 @@
       "Arena Fit": "unverified",
       "Grass Fit": "unverified",
       "Corridor Status": "unverified",
-      "Expansion Status": "unverified"
+      "Expansion Status": "unverified",
+      "Verified Drive Minutes": "",
+      "Usable Flat Acres": ""
     },
     {
       "ID": "MOP-105391",
@@ -870,7 +892,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-10-08T17:52:23Z",
+      "Listing Checked At": "2026-10-09T17:26:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -878,7 +900,9 @@
       "Arena Fit": "unverified",
       "Grass Fit": "unverified",
       "Corridor Status": "unverified",
-      "Expansion Status": "unverified"
+      "Expansion Status": "unverified",
+      "Verified Drive Minutes": "",
+      "Usable Flat Acres": ""
     },
     {
       "ID": "MOP-79707",
@@ -930,7 +954,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — Chester County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
-      "Listing Checked At": "2026-10-08T17:52:23Z",
+      "Listing Checked At": "2026-10-09T17:26:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "Broker describes about an hour or longer from Charlotte",
       "MLS / External Reference": "",
@@ -938,7 +962,9 @@
       "Arena Fit": "unverified",
       "Grass Fit": "unverified",
       "Corridor Status": "unverified",
-      "Expansion Status": "unverified"
+      "Expansion Status": "unverified",
+      "Verified Drive Minutes": "",
+      "Usable Flat Acres": ""
     },
     {
       "ID": "MOP-79708",
@@ -990,7 +1016,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — Chester County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
-      "Listing Checked At": "2026-10-08T17:52:23Z",
+      "Listing Checked At": "2026-10-09T17:26:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "Broker describes about an hour or longer from Charlotte",
       "MLS / External Reference": "",
@@ -998,7 +1024,9 @@
       "Arena Fit": "unverified",
       "Grass Fit": "unverified",
       "Corridor Status": "unverified",
-      "Expansion Status": "unverified"
+      "Expansion Status": "unverified",
+      "Verified Drive Minutes": "",
+      "Usable Flat Acres": ""
     },
     {
       "ID": "MOP-118795",
@@ -1050,7 +1078,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — Chester County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
-      "Listing Checked At": "2026-10-08T17:52:23Z",
+      "Listing Checked At": "2026-10-09T17:26:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -1058,7 +1086,9 @@
       "Arena Fit": "unverified",
       "Grass Fit": "unverified",
       "Corridor Status": "unverified",
-      "Expansion Status": "unverified"
+      "Expansion Status": "unverified",
+      "Verified Drive Minutes": "",
+      "Usable Flat Acres": ""
     },
     {
       "ID": "MOP-118859",
@@ -1110,7 +1140,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — Chester County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
-      "Listing Checked At": "2026-10-08T17:52:23Z",
+      "Listing Checked At": "2026-10-09T17:26:23Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -1118,13 +1148,15 @@
       "Arena Fit": "unverified",
       "Grass Fit": "unverified",
       "Corridor Status": "unverified",
-      "Expansion Status": "unverified"
+      "Expansion Status": "unverified",
+      "Verified Drive Minutes": "",
+      "Usable Flat Acres": ""
     }
   ],
   "health": {
     "status": "limited",
-    "attemptedAt": "2026-10-08T17:52:23Z",
-    "finishedAt": "2026-10-08T17:52:39Z",
+    "attemptedAt": "2026-10-09T17:26:23Z",
+    "finishedAt": "2026-10-09T17:26:48Z",
     "sources": [
       {
         "name": "Mossy Oak Properties — York County",
@@ -1343,33 +1375,12 @@
       }
     ],
     "rowsAdded": 0,
-    "rowsChanged": 1,
+    "rowsChanged": 0,
     "listingsChecked": 21,
     "listingPagesAttempted": 21,
     "outOfScope": 10,
     "unavailableNewListingsExcluded": 1,
-    "changes": [
-      {
-        "id": "MOP-74443",
-        "kind": "updated",
-        "fields": [
-          "Acres",
-          "Address / Property",
-          "Latitude",
-          "List Price",
-          "Listing Notes",
-          "Longitude",
-          "MLS / External Reference",
-          "Property Name",
-          "Property URL",
-          "Source Drive Conflict",
-          "Source URL",
-          "Status",
-          "Usable Flat Acres",
-          "Verified Drive Minutes"
-        ]
-      }
-    ],
+    "changes": [],
     "coverage": "Configured public broker inventory only; not a complete MLS or market search.",
     "pausedPortals": [
       {
@@ -1387,10 +1398,10 @@
     "sourcesRead": 5,
     "sourcesAttempted": 5,
     "listingRefreshSucceeded": true,
-    "message": "Parsed 21 individual listing pages; added 0 research records and changed 1 existing records. Broker coverage is limited; source facts are not verified polo suitability."
+    "message": "Parsed 21 individual listing pages; added 0 research records and changed 0 existing records. Broker coverage is limited; source facts are not verified polo suitability."
   },
-  "ledgerSha256": "64b50c5dbeb399523408f1716cce39a932dff2e832400b3fe78b010e6de2e2d9",
-  "latestListingReviewAt": "2026-10-08T17:52:23Z",
-  "workflowRunId": "37819892618",
-  "codeRevision": "e87ac91c2d71191237744a8ef18bbca658536b2b"
+  "ledgerSha256": "70dc763838d4c672b2fe758e8360b8619f67a3463e18e77eda2cc8f3138eeda9",
+  "latestListingReviewAt": "2026-10-09T17:26:23Z",
+  "workflowRunId": "37966254027",
+  "codeRevision": "e1b7aaa003df7e74bc808786a18583297ab1c944"
 }
