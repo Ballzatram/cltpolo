@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-09T17:26:48Z",
+  "generatedAt": "2026-10-10T16:14:11Z",
   "brief": {
     "version": "2026-09-21-r2",
     "minimumAcres": 20,
@@ -582,7 +582,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-10-09T17:26:23Z",
+      "Listing Checked At": "2026-10-10T16:13:52Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "--/4430074",
@@ -644,7 +644,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-10-09T17:26:23Z",
+      "Listing Checked At": "2026-10-10T16:13:52Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -706,7 +706,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-10-09T17:26:23Z",
+      "Listing Checked At": "2026-10-10T16:13:52Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -768,7 +768,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-10-09T17:26:23Z",
+      "Listing Checked At": "2026-10-10T16:13:52Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -830,7 +830,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-10-09T17:26:23Z",
+      "Listing Checked At": "2026-10-10T16:13:52Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -892,7 +892,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-10-09T17:26:23Z",
+      "Listing Checked At": "2026-10-10T16:13:52Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -954,7 +954,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — Chester County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
-      "Listing Checked At": "2026-10-09T17:26:23Z",
+      "Listing Checked At": "2026-10-10T16:13:52Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "Broker describes about an hour or longer from Charlotte",
       "MLS / External Reference": "",
@@ -1016,7 +1016,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — Chester County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
-      "Listing Checked At": "2026-10-09T17:26:23Z",
+      "Listing Checked At": "2026-10-10T16:13:52Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "Broker describes about an hour or longer from Charlotte",
       "MLS / External Reference": "",
@@ -1078,7 +1078,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — Chester County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
-      "Listing Checked At": "2026-10-09T17:26:23Z",
+      "Listing Checked At": "2026-10-10T16:13:52Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -1140,7 +1140,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — Chester County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
-      "Listing Checked At": "2026-10-09T17:26:23Z",
+      "Listing Checked At": "2026-10-10T16:13:52Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -1155,8 +1155,8 @@
   ],
   "health": {
     "status": "limited",
-    "attemptedAt": "2026-10-09T17:26:23Z",
-    "finishedAt": "2026-10-09T17:26:48Z",
+    "attemptedAt": "2026-10-10T16:13:52Z",
+    "finishedAt": "2026-10-10T16:14:11Z",
     "sources": [
       {
         "name": "Mossy Oak Properties — York County",
@@ -1172,9 +1172,9 @@
         "url": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
         "http": 200,
         "status": "read",
-        "listingLinks": 11,
+        "listingLinks": 10,
         "note": "Listing links collected; each property is parsed and screened separately.",
-        "reportedTotal": 11
+        "reportedTotal": 10
       },
       {
         "name": "Mossy Oak Properties — Mecklenburg County",
@@ -1350,14 +1350,6 @@
         "result": "outside-discovery-scope"
       },
       {
-        "url": "https://www.mossyoakproperties.com/property/the-fishing-creek-tract-chester-south-carolina/90228/",
-        "source": "Mossy Oak Properties — Chester County",
-        "http": 200,
-        "status": "parsed",
-        "note": "Individual broker property facts read",
-        "result": "unavailable-new-record-excluded"
-      },
-      {
         "url": "https://www.mossyoakproperties.com/property/11-17ac-2835-2839-miranda-road-charlotte-nc-mecklenburg-co-mecklenburg-north-carolina/87074/",
         "source": "Mossy Oak Properties — Mecklenburg County",
         "http": 200,
@@ -1376,10 +1368,10 @@
     ],
     "rowsAdded": 0,
     "rowsChanged": 0,
-    "listingsChecked": 21,
-    "listingPagesAttempted": 21,
+    "listingsChecked": 20,
+    "listingPagesAttempted": 20,
     "outOfScope": 10,
-    "unavailableNewListingsExcluded": 1,
+    "unavailableNewListingsExcluded": 0,
     "changes": [],
     "coverage": "Configured public broker inventory only; not a complete MLS or market search.",
     "pausedPortals": [
@@ -1392,16 +1384,16 @@
         "reason": "Automated requests returned HTTP 429 in the September 20 run. Paused; an authorized feed is needed for reliable coverage."
       }
     ],
-    "listingUrlsDiscovered": 21,
+    "listingUrlsDiscovered": 20,
     "listingLimitReached": false,
     "nextListingOffset": 0,
     "sourcesRead": 5,
     "sourcesAttempted": 5,
     "listingRefreshSucceeded": true,
-    "message": "Parsed 21 individual listing pages; added 0 research records and changed 0 existing records. Broker coverage is limited; source facts are not verified polo suitability."
+    "message": "Parsed 20 individual listing pages; added 0 research records and changed 0 existing records. Broker coverage is limited; source facts are not verified polo suitability."
   },
-  "ledgerSha256": "70dc763838d4c672b2fe758e8360b8619f67a3463e18e77eda2cc8f3138eeda9",
-  "latestListingReviewAt": "2026-10-09T17:26:23Z",
-  "workflowRunId": "37966254027",
-  "codeRevision": "e1b7aaa003df7e74bc808786a18583297ab1c944"
+  "ledgerSha256": "5cb38aa8551ecc1e649943fc611f1b9c3be2951fd45ce227c8ec02db430c6342",
+  "latestListingReviewAt": "2026-10-10T16:13:52Z",
+  "workflowRunId": "38066806378",
+  "codeRevision": "74a16bf345709acfed60513c9bfae0a5a2f1f1fc"
 }
