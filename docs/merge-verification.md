@@ -1,4 +1,4 @@
-# Merge verification — 2026-11-12
+# Merge verification â€” 2026-11-12
 
 Candidate: https://github.com/Ballzatram/cltpolo/pull/23. Base revision: `45e0e0341a97a1c54135c9db8b24f7320e918d1c`.
 Machine-readable evidence: [standards evidence](evidence/standards-2026-11-12.json).
