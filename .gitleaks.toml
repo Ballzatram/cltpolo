@@ -1,0 +1,30 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Exact reviewed public storage identifier or deterministic idempotency UUID; not an authentication credential"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['''^tests/donation\-client\.test\.mjs$''']
+regexes = ['''^47f1f4a6\-4817\-4f99\-9238\-c65055455d2d$''']
+
+[[allowlists]]
+description = "Exact reviewed public storage identifier or deterministic idempotency UUID; not an authentication credential"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['''^tests/donations\-worker\.test\.mjs$''']
+regexes = ['''^47f1f4a6\-4817\-4f99\-9238\-c65055455d2d$''']
+
+[[allowlists]]
+description = "Exact reviewed public storage identifier or deterministic idempotency UUID; not an authentication credential"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['''^tests/donations\-worker\.test\.mjs$''']
+regexes = ['''^47f1f4a6\-4817\-4f99\-9238\-c65055455d2d$''']
+
+[[allowlists]]
+description = "Exact reviewed public storage identifier or deterministic idempotency UUID; not an authentication credential"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['''^investor\-plan\.js$''']
+regexes = ['''^cltPoloInvestmentPlan\.v1$''']

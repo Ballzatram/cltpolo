@@ -1,0 +1,2 @@
+# Runtime: CPython 3.11+ standard library only.
+# Browser test tooling is separately pinned in existing CI.

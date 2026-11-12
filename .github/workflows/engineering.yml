@@ -1,0 +1,85 @@
+name: Engineering Standards
+on:
+  pull_request:
+  push:
+    branches: [main]
+  merge_group:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 13 * * 1'
+permissions:
+  contents: read
+concurrency:
+  group: engineering-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  policy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24.22.3'
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: '0.13.7'
+      - name: Validate pinned policy prerequisites
+        run: python .engineering/tools/audit.py .
+      - name: Install checksum-verified secret scanner
+        run: |
+          mkdir -p "$RUNNER_TEMP/engineering-tools"
+          curl --fail --silent --show-error --location 'https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz' --output "$RUNNER_TEMP/gitleaks.tar.gz"
+          echo '551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  '"$RUNNER_TEMP/gitleaks.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP/engineering-tools" gitleaks
+      - name: Scan repository history without printing credentials
+        run: '"$RUNNER_TEMP/engineering-tools/gitleaks" git . --redact --no-banner --timeout 120'
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24.22.3'
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: '0.13.7'
+      - name: Models, payment denial cases and property-source contracts (offline mocks)
+        run: |
+          node --test tests/*.test.cjs tests/*.test.mjs
+          python -m unittest discover -s tests -p 'test_property*.py' -v
+          python scripts/property_pipeline.py --validate-only
+      - name: Pinned browser test tooling
+        run: |
+          uv venv .engineering/.tools/browser-env
+          uv pip install --python .engineering/.tools/browser-env/bin/python playwright==1.55.0
+          .engineering/.tools/browser-env/bin/python -m playwright install --with-deps chromium
+      - name: Actual mobile and desktop pages; external mutations are mocked
+        run: |
+          .engineering/.tools/browser-env/bin/python tests/property_browser_smoke.py
+          .engineering/.tools/browser-env/bin/python tests/investor_plan_memory_smoke.py
+          .engineering/.tools/browser-env/bin/python tests/investor_plan_browser_smoke.py
+  standards-gate:
+    if: ${{ always() }}
+    needs: [policy, native]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require every selected verification job
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python3 -c 'import json,os,sys; jobs=json.loads(os.environ["RESULTS"]); sys.exit(0 if jobs and all(j["result"]=="success" for j in jobs.values()) else 1)'
