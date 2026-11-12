@@ -97,6 +97,7 @@ jobs:
     needs:
     - policy
     - native
+    - pages-build
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -107,6 +108,17 @@ jobs:
         1)''
 
         '
+  pages-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+    - uses: actions/jekyll-build-pages@44a6e6beabd48582f863aeeb6cb2151cc1716697
+      with:
+        source: ./
+        destination: ./_site
 'on':
   pull_request: null
   push:
