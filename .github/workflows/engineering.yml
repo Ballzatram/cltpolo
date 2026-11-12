@@ -24,6 +24,9 @@ jobs:
         version: 0.13.7
     - name: Test the complete pinned policy implementation
       run: uv run --directory .engineering --locked --python 3.12 python tools/check.py
+    - name: Check tracked documentation is UTF-8
+      run: python -c "import subprocess; from pathlib import Path; names=subprocess.check_output(['git','ls-files','-z','--','*.md']).decode('utf-8').split(chr(0));
+        [Path(name).read_text(encoding='utf-8') for name in names if name]"
     - name: Validate fresh isolated starters
       run: uv run --directory .engineering --locked --python 3.12 python tools/validate_starters.py
     - name: Validate pinned policy prerequisites
@@ -40,7 +43,8 @@ jobs:
 
         '
     - name: Scan history using trusted base rules and fingerprints
-      run: python .engineering/tools/secret_scan.py --scanner "$RUNNER_TEMP/engineering-tools/gitleaks" --trusted-revision "$TRUSTED_REVISION" --candidate-revision "${{ github.sha }}" --bootstrap-config-sha256 b43c514c4a669a4f4463ad6958d45d0deb41e3debf86528146684685b485e760
+      run: python .engineering/tools/secret_scan.py --scanner "$RUNNER_TEMP/engineering-tools/gitleaks" --trusted-revision "$TRUSTED_REVISION" --candidate-revision
+        "${{ github.sha }}" --bootstrap-config-sha256 b43c514c4a669a4f4463ad6958d45d0deb41e3debf86528146684685b485e760
       env:
         TRUSTED_REVISION: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
   native:
