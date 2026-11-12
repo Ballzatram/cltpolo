@@ -1,0 +1,66 @@
+name: engineering-checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+  merge_group:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 13 * * 1'
+permissions:
+  contents: read
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    name: python-${{ matrix.python }}-${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {python: '3.12', os: ubuntu-24.04}
+          - {python: '3.13', os: ubuntu-24.04}
+          - {python: '3.14', os: ubuntu-24.04}
+          - {python: '3.14', os: windows-latest}
+    runs-on: ${{ matrix.os }}
+    env:
+      UV_PYTHON: ${{ matrix.python }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: '0.13.7'
+      - run: uv sync --locked --python ${{ matrix.python }}
+      - name: Verify selected Python runtime
+        run: uv run --locked python -c "import os, sys; assert '.'.join(map(str, sys.version_info[:2])) == os.environ['UV_PYTHON']"
+      - run: uv run --locked python tools/check.py
+  starters:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: '0.13.7'
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: templates/typescript/.node-version
+      - run: uv sync --locked
+      - run: uv run --locked python tools/validate_starters.py
+  standards-gate:
+    if: ${{ always() }}
+    needs: [verify, starters]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require all verification jobs to succeed
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python3 -c 'import json, os, sys; jobs = json.loads(os.environ["RESULTS"]); sys.exit(0 if jobs and all(job["result"] == "success" for job in jobs.values()) else 1)'

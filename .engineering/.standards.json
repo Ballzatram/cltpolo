@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "framework_version": "1.0.1",
+  "framework_source": ".",
+  "owner": "Ballzatram",
+  "risk_tier": "local",
+  "lifecycle": "active",
+  "profiles": ["python", "cli"],
+  "commands": {
+    "format": "uv run --locked ruff format --check .",
+    "lint": "uv run --locked ruff check .",
+    "types": "uv run --locked mypy tools",
+    "test": "uv run --locked python -m pytest",
+    "build": "python -m compileall -q tools",
+    "security": "uv run --locked pip-audit"
+  }
+}

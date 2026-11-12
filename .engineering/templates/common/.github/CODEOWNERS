@@ -1,0 +1,5 @@
+# Replace or extend with actual people/teams who have repository access.
+* @__OWNER__
+/.github/ @__OWNER__
+/.engineering/ @__OWNER__
+/.standards.json @__OWNER__

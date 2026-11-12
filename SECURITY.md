@@ -1,9 +1,5 @@
 # Security reporting
 
-Owner: **OWNER**.
+Report privately through [GitHub private vulnerability reporting](https://github.com/Ballzatram/cltpolo/security/advisories/new). This repository feature is enabled. Reports are addressed to the repository owner, **Ballzatram**; notification monitoring/response drills remain operational review items.
 
-Before sharing or releasing this project, replace this paragraph with a tested private reporting route and a monitored contact. For local development, use the owner's existing private channel. Do not send credentials, personal data or exploit details to public issues.
-
-Declare the supported software versions here before release. Record private incident ownership, vulnerability triage and credential rotation procedures in the runbook. Follow `.engineering/docs/security.md` for response targets and dependency/secret controls.
-
-Deleting an exposed credential from a file does not revoke it. Revoke/rotate first, investigate impact, then remediate tracked files/history as appropriate.
+Do not disclose credentials, personal data or exploit details publicly. Follow `.engineering/docs/security.md` for triage, response targets and rotation. Deleting a credential does not revoke it. Supported releases and response monitoring remain recorded operational responsibilities.

@@ -39,3 +39,5 @@ Create an immutable version or revision, release notes, dependency inventory and
 Use staged rollout, health verification and explicit rollback triggers for services. Test backward-compatible database changes with an expand/migrate/contract sequence where needed. A code rollback does not reverse an incompatible migration. Never make production releases depend on an unreviewed floating standards branch.
 
 The supplied workflows verify code; they do not deploy. Secret scanning, hosted settings, production controls and product-specific integration/E2E tests must be completed during adoption.
+
+Secret-scanner rules and fingerprints must come from the immutable trusted base revision, materialized outside the candidate checkout. Initial adoption may use owner-reviewed, checksum-pinned bootstrap inputs; candidate edits to scanner policy do not take effect merely because a PR changes those files. Disable candidate inline `gitleaks:allow` bypasses. The workflow/checker implementation itself still requires review and hosted enforcement; repository-controlled CI cannot provide independent attestation against an actor allowed to rewrite the required workflow.

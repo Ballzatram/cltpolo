@@ -2,14 +2,14 @@
 
 ## New projects
 
-Choose a language starter or copy `templates/common/` and supply an ecosystem-native toolchain. Read all applicable profiles, set owner and risk, and pin framework version 1.0.0 in `.standards.json`. Python and TypeScript starters include a `.engineering/` snapshot with the auditor and complete policies. For other stacks, copy this repo's VERSION, docs and profiles into `.engineering/` and record that path as `framework_source`; optionally also record the canonical URL and immutable revision. The current auditor checks an in-repo snapshot only.
+Choose a language starter or copy `templates/common/` and supply an ecosystem-native toolchain. Read all applicable profiles, set owner and risk, and pin framework version 1.0.1 in `.standards.json`. Python and TypeScript starters include a `.engineering/` snapshot with the auditor and complete policies. For other stacks, copy this repo's VERSION, docs and profiles into `.engineering/` and record that path as `framework_source`; optionally also record the canonical URL and immutable revision. The current auditor checks an in-repo snapshot only.
 
 Complete setup, lock dependencies and run all checks. Configure hosted settings from CI/CD policy. Replace generated purpose, architecture, security route and audit evidence with project facts. Do not claim adoption is complete while review rows remain pending.
 
 ## Existing projects
 
 1. Inventory stack, runtime versions, users, data, deployments and owners. Choose every applicable profile and the highest applicable risk tier.
-2. Run `python PATH_TO_STANDARDS/tools/audit.py PATH_TO_REPO` from any working directory. It is read-only and never runs the target's commands. A missing manifest is an adoption gap, not a reason to skip review.
+2. Run `uv run --project PATH_TO_STANDARDS --locked python PATH_TO_STANDARDS/tools/audit.py PATH_TO_REPO` from any working directory. It is read-only and never runs the target's commands. A missing manifest is an adoption gap, not a reason to skip review.
 3. Copy/merge the common files and selected configuration intentionally. Never replace existing manifests, lockfiles or workflows wholesale. Map equivalent tools rather than forcing a needless rewrite.
 4. Complete `docs/audit.md` for every baseline control and relevant profile. Record status, evidence, reviewed commit, reviewer and date. Keep evidence immutable/reproducible where possible. External or hosted settings need direct inspection.
 5. Create a prioritized remediation list with control ID, specific gap, risk, owner, target date and verification. First: exposed secrets, exploitable vulnerabilities, data-loss paths and unprotected production credentials. Next: reproducible builds, tests for critical behavior and blocking CI. Then: maintainability, documentation and expanded coverage.
@@ -49,6 +49,10 @@ Monorepos may declare optional `components` in the manifest. Each entry names it
 `test_directories` can name existing in-repo test locations such as `backend/tests` or a native platform's test target. A repository containing plans but no imported application source may declare `repository_kind: "specification"`; its runtime-test check is reported as requiring review, never as executed/passing tests. Reviewers must verify that classification and reassess when source is imported.
 
 ## Versions and reuse
+
+The command register accepts executable strings or explicit status objects with `status` (`unavailable` or `not-applicable`), `reason` and `tracking`. The auditor emits REVIEW for status objects. These records are never evidence that a check ran; an unavailable mandatory check remains an adoption gap. Do not use prose as an executable command or label absent checks as passing.
+
+A specification-only application repository may vendor this framework's Python tools. Its application runtime remains absent, while the complete `.engineering/` package has its own Python profile, locked tools and mandatory tool regression/static checks. Test the vendored tool package independently of application classification.
 
 The canonical policy lives in this repository. Until published, consumers use the scaffolded `.engineering/` snapshot. Keep its VERSION, docs and auditor together; do not edit the copied baseline to weaken a consumer's obligations. Project-specific additions belong in the consumer's own docs and AGENTS.md.
 

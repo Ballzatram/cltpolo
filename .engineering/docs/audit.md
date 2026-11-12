@@ -2,8 +2,8 @@
 
 Overall: **not-conforming — pending review**. Structural checks do not establish full conformance.
 
-- Framework version: 1.0.0
-- Project / owner: Engineering Standards / devin
+- Framework version: 1.0.1
+- Project / owner: Engineering Standards / Ballzatram
 - Reviewed commit, date and reviewer: pending
 - Profiles and risk tier: confirm `.standards.json`; add every applicable product profile
 - Automated check runs and immutable evidence links: pending
@@ -44,7 +44,7 @@ Record each selected profile and evidence addressing its additional MUST require
 
 | Control | Specific gap / risk | Owner | Due | Verification / tracking |
 | --- | --- | --- | --- | --- |
-| GOV-02 | Initial evidence review incomplete | devin | Set date | Complete this assessment |
+| GOV-02 | Initial evidence review incomplete | Ballzatram | Set date | Complete this assessment |
 
 ## Acceptance
 

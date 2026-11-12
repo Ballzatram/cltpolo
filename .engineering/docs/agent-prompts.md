@@ -5,7 +5,7 @@ These prompts help start work; they do not replace the policies or required chec
 ## New project
 
 ```text
-Build this project using Engineering Standards version 1.0.0 at <local path or
+Build this project using Engineering Standards version 1.0.1 at <local path or
 immutable canonical reference>. Read the universal baseline and select every
 applicable language/product profile. Record owner, lifecycle, risk and version
 in .standards.json, and vendor the exact policy snapshot in .engineering/.
@@ -23,7 +23,7 @@ Do not claim conformance from a structural pass alone.
 ## Existing repository
 
 ```text
-Assess this repository against Engineering Standards version 1.0.0 at <path>.
+Assess this repository against Engineering Standards version 1.0.1 at <path>.
 Inventory its languages, product types, data, deployment, ownership and risks.
 Run the read-only structural audit; inspect behavior, tests, pipeline trust,
 dependency/secret/source scanning, artifact build and relevant operations.

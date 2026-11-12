@@ -1,0 +1,5 @@
+# Verify hosted access and update this owner before enabling owner-review gates.
+* @Ballzatram
+/.github/ @Ballzatram
+/templates/ @Ballzatram
+/docs/baseline.md @Ballzatram

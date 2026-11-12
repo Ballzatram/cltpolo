@@ -1,0 +1,113 @@
+"""Run Gitleaks with base-revision policy inputs outside the candidate checkout."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import re
+import shutil
+import subprocess
+import tempfile
+import tomllib
+from pathlib import Path
+
+DEFAULT_CONFIG = b"[extend]\nuseDefault = true\n"
+
+
+def trusted_bytes(root: Path, revision: str, name: str, bootstrap: str | None) -> bytes:
+    if not re.fullmatch(r"[0-9a-fA-F]{40}", revision):
+        raise ValueError("Trusted revision must be an immutable Git commit SHA")
+    git = shutil.which("git")
+    if not git:
+        raise OSError("Git is required to select trusted scanner inputs")
+    result = subprocess.run(  # noqa: S603
+        [git, "show", f"{revision}:{name}"], cwd=root, capture_output=True, timeout=30
+    )
+    if result.returncode == 0:
+        return result.stdout
+    path = root / name
+    if bootstrap:
+        candidate = path.read_bytes()
+        if hashlib.sha256(candidate).hexdigest() != bootstrap:
+            raise ValueError(f"Owner-reviewed bootstrap checksum differs: {name}")
+        return candidate
+    return DEFAULT_CONFIG if name.endswith(".toml") else b""
+
+
+def scan(
+    root: Path,
+    scanner: Path,
+    revision: str,
+    config_hash: str | None = None,
+    ignore_hash: str | None = None,
+) -> int:
+    config = trusted_bytes(root, revision, ".gitleaks.toml", config_hash)
+    ignore = trusted_bytes(root, revision, ".gitleaksignore", ignore_hash)
+    data = tomllib.loads(config.decode("utf-8"))
+    if data.get("extend", {}).get("path"):
+        raise ValueError(
+            "Trusted scanner configuration cannot extend a candidate-controlled file"
+        )
+    with tempfile.TemporaryDirectory(prefix="trusted-gitleaks-") as td:
+        folder = Path(td).resolve()
+        if folder.is_relative_to(root.resolve()):
+            raise ValueError(
+                "Trusted scanner inputs must be outside the candidate checkout"
+            )
+        config_path, ignore_path = folder / "rules.toml", folder / "fingerprints"
+        config_path.write_bytes(config)
+        ignore_path.write_bytes(ignore)
+        return subprocess.run(  # noqa: S603
+            [
+                str(scanner.resolve()),
+                "git",
+                ".",
+                "--redact",
+                "--no-banner",
+                "--timeout",
+                "120",
+                "--config",
+                str(config_path),
+                "--gitleaks-ignore-path",
+                str(ignore_path),
+                "--ignore-gitleaks-allow",
+            ],
+            cwd=root,
+            timeout=150,
+        ).returncode
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--scanner", type=Path, default=Path("gitleaks"))
+    parser.add_argument("--trusted-revision")
+    parser.add_argument("--bootstrap-config-sha256")
+    parser.add_argument("--bootstrap-ignore-sha256")
+    args = parser.parse_args()
+    try:
+        revision = args.trusted_revision
+        if not revision:
+            git = shutil.which("git")
+            if not git:
+                raise OSError("Git is required")
+            revision = subprocess.check_output(  # noqa: S603
+                [git, "rev-parse", "--verify", "origin/HEAD"],
+                text=True,
+                timeout=30,
+                stderr=subprocess.DEVNULL,
+            ).strip()
+        scanner = Path(shutil.which(str(args.scanner)) or args.scanner)
+        return scan(
+            Path.cwd(),
+            scanner,
+            revision,
+            args.bootstrap_config_sha256,
+            args.bootstrap_ignore_sha256,
+        )
+    except (OSError, ValueError, subprocess.SubprocessError) as exc:
+        print(f"Secret scan failed: {exc}")
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

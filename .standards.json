@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "framework_version": "1.0.0",
+  "framework_version": "1.0.1",
   "framework_source": ".engineering",
   "owner": "Ballzatram",
   "repository": "Ballzatram/cltpolo",
@@ -8,17 +8,17 @@
   "lifecycle": "active",
   "profiles": [
     "python",
-    "other-languages",
+    "typescript",
     "web",
     "services"
   ],
   "commands": {
     "format": "uvx --from ruff==0.17.4 ruff format --check .",
-    "lint": "python .engineering/tools/audit.py .",
+    "lint": "uv run --project .engineering --locked python .engineering/tools/audit.py .",
     "types": "node --check script.js",
     "test": "python -m unittest discover -s tests -p \"test_property*.py\"",
     "build": "python scripts/property_pipeline.py --validate-only",
-    "security": "gitleaks git --redact --no-banner"
+    "security": "python .engineering/tools/secret_scan.py"
   },
   "components": [
     {
@@ -26,6 +26,12 @@
       "profile": "python",
       "dependency_manifest": ".engineering/python-runtime.txt",
       "lockfile": ".engineering/python-runtime.txt"
+    },
+    {
+      "path": ".",
+      "profile": "typescript",
+      "dependency_manifest": "package.json",
+      "lockfile": "package-lock.json"
     }
   ]
 }

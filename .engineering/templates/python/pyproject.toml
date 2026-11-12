@@ -1,0 +1,55 @@
+[build-system]
+requires = ["hatchling==1.33.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "starter-project"
+version = "0.1.0"
+description = "Replace with the project's purpose"
+readme = "README.md"
+requires-python = ">=3.12,<3.15"
+dependencies = []
+
+[dependency-groups]
+dev = [
+  "build>=1.3,<2",
+  "hatchling==1.33.0",
+  "mypy>=1.19,<2",
+  "pip-audit>=2.10,<3",
+  "pytest>=9,<10",
+  "pytest-cov>=7,<8",
+  "ruff>=0.17,<0.18",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/starter_package"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+extend-exclude = [".engineering"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP", "B", "SIM", "S"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src/starter_package"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib --strict-config --strict-markers --cov=starter_package --cov-branch --cov-report=term-missing --cov-report=xml --cov-fail-under=80"
+xfail_strict = true
+filterwarnings = ["error"]
+
+[tool.coverage.run]
+source = ["starter_package"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 80
