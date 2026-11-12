@@ -1,0 +1,84 @@
+name: engineering-checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+  merge_group:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 13 * * 1'
+permissions:
+  contents: read
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    name: node-${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run security
+      - run: npm run build
+      - run: npm run smoke
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: '0.13.7'
+      - run: uv run --project .engineering --locked python .engineering/tools/audit.py .
+  policy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24.22.3'
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: '0.13.7'
+      - name: Test the complete pinned policy tool package
+        run: uv run --directory .engineering --locked --python 3.12 python tools/check.py
+      - name: Verify fresh Python and TypeScript starters
+        run: uv run --directory .engineering --locked --python 3.12 python tools/validate_starters.py
+      - name: Audit application metadata with locked audit dependencies
+        run: uv run --project .engineering --locked --python 3.12 python .engineering/tools/audit.py .
+      - name: Install checksum-verified scanner
+        run: |
+          mkdir -p "$RUNNER_TEMP/engineering-tools"
+          curl --fail --silent --show-error --location 'https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz' --output "$RUNNER_TEMP/gitleaks.tar.gz"
+          echo '551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  '"$RUNNER_TEMP/gitleaks.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP/engineering-tools" gitleaks
+      - name: Scan history using trusted base policy inputs
+        env:
+          TRUSTED_REVISION: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+        run: python .engineering/tools/secret_scan.py --scanner "$RUNNER_TEMP/engineering-tools/gitleaks" --trusted-revision "$TRUSTED_REVISION" --candidate-revision "${{ github.sha }}"
+  standards-gate:
+    if: ${{ always() }}
+    needs: [verify, policy]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require all verification jobs to succeed
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python3 -c 'import json, os, sys; jobs = json.loads(os.environ["RESULTS"]); sys.exit(0 if jobs and all(job["result"] == "success" for job in jobs.values()) else 1)'

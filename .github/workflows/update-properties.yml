@@ -11,6 +11,8 @@ on:
       - '.github/workflows/update-properties.yml'
 permissions:
   contents: write
+  pull-requests: write
+  actions: write
 concurrency:
   group: update-property-dataset
   cancel-in-progress: false
@@ -22,14 +24,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: main
           fetch-depth: 1
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.11'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
       - name: Test research rules and pipeline
@@ -42,7 +44,7 @@ jobs:
         run: python scripts/property_pipeline.py --summary-path property-refresh-summary.json
       - name: Upload source health report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: property-refresh-summary
           path: property-refresh-summary.json
@@ -54,16 +56,16 @@ jobs:
           python scripts/property_pipeline.py --validate-only
       - name: Publish results and failure reports together
         if: success() && steps.research.outcome != 'skipped'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BASE_BRANCH: main
+          UPDATE_KIND: property-snapshot
         run: |
           git config user.name 'property-research-agent'
           git config user.email 'actions@github.com'
           git add data/charlotte_polo_properties.csv data/property-research.json
-          if ! git diff --cached --quiet; then
-            git commit -m 'Publish property research snapshot and source health'
-            git fetch origin main
-            git rebase origin/main
-            git push origin HEAD:main
-          fi
+          bash .github/scripts/publish-generated.sh
       - name: Keep a failed check visibly failed after publishing its report
         if: always() && steps.research.outcome == 'failure'
         run: |
