@@ -13,3 +13,5 @@ Tracked review threads addressed by these corrections:
 Merge/resolve only after candidate CI and relevant regression verification pass. Remaining product/operations/full-conformance gaps in docs/audit.md remain explicit; no waiver was invented.
 
 The local security command resolves the scanner on PATH and defaults to the fetched origin/HEAD revision. CI passes an explicit immutable trusted revision and checksum-reviewed bootstrap policy. Install the pinned scanner and fetch the default branch before local scanning. The policy package uses its own locked uv environment; the application does not need PyYAML as a runtime dependency.
+
+See [local tool setup](../.engineering/docs/local-tools.md) for exact cross-platform scanner assets, hashes and installation verification. The wrapper rejects missing/wrong scanner versions; bootstrap pins match committed Git bytes on every OS.

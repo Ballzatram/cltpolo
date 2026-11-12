@@ -12,6 +12,7 @@ import tomllib
 from pathlib import Path
 
 DEFAULT_CONFIG = b"[extend]\nuseDefault = true\n"
+SCANNER_VERSION = "8.30.1"
 
 
 def trusted_bytes(root: Path, revision: str, name: str, bootstrap: str | None) -> bytes:
@@ -41,6 +42,19 @@ def scan(
     config_hash: str | None = None,
     ignore_hash: str | None = None,
 ) -> int:
+    try:
+        version = subprocess.run(  # noqa: S603
+            [str(scanner.resolve()), "version"],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+    except OSError as exc:
+        raise OSError(
+            "Install Gitleaks 8.30.1 as documented in docs/local-tools.md"
+        ) from exc
+    if version.returncode or version.stdout.strip() != SCANNER_VERSION:
+        raise ValueError("Gitleaks 8.30.1 is required; see docs/local-tools.md")
     config = trusted_bytes(root, revision, ".gitleaks.toml", config_hash)
     ignore = trusted_bytes(root, revision, ".gitleaksignore", ignore_hash)
     data = tomllib.loads(config.decode("utf-8"))

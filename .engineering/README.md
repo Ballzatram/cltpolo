@@ -2,7 +2,7 @@
 
 A shared engineering baseline for every repository: readable code, meaningful tests, safe delivery, clear ownership, and evidence that it works.
 
-**Framework version: 1.0.1 — 2026-11-11.** This is an internal engineering policy, informed by published guidance. It is not a certification or a claim of NIST, OWASP, or regulatory compliance.
+**Framework version: 1.0.1 — 2026-11-12.** This is an internal engineering policy, informed by published guidance. It is not a certification or a claim of NIST, OWASP, or regulatory compliance.
 
 ## Start here
 

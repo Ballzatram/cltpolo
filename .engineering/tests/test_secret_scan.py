@@ -44,6 +44,8 @@ def test_scan_uses_external_trusted_paths_and_disables_inline_bypass(
 
     def run(args, **kwargs):
         calls.append(args)
+        if args[-1] == "version":
+            return subprocess.CompletedProcess(args, 0, "8.30.1", "")
         if Path(args[0]).name.lower() in {"git", "git.exe"}:
             return subprocess.CompletedProcess(args, 128, b"", b"")
         assert Path(args[args.index("--config") + 1]).read_bytes() == DEFAULT_CONFIG
@@ -53,18 +55,32 @@ def test_scan_uses_external_trusted_paths_and_disables_inline_bypass(
 
     monkeypatch.setattr(subprocess, "run", run)
     assert scan(tmp_path, tmp_path / "gitleaks", "a" * 40) == 0
-    assert len(calls) == 3
+    assert len(calls) == 4
 
 
 def test_config_cannot_extend_candidate_path(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     def run(args, **kwargs):
+        if args[-1] == "version":
+            return subprocess.CompletedProcess(args, 0, "8.30.1", "")
         data = b'[extend]\npath="candidate.toml"' if args[-1].endswith(".toml") else b""
         return subprocess.CompletedProcess(args, 0, data, b"")
 
     monkeypatch.setattr(subprocess, "run", run)
     with pytest.raises(ValueError, match="cannot extend"):
+        scan(tmp_path, tmp_path / "gitleaks", "a" * 40)
+
+
+def test_wrong_scanner_version_is_a_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda args, **kw: subprocess.CompletedProcess(args, 0, "8.0.0", ""),
+    )
+    with pytest.raises(ValueError, match="8.30.1 is required"):
         scan(tmp_path, tmp_path / "gitleaks", "a" * 40)
 
 
