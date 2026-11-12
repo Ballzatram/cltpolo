@@ -17,7 +17,7 @@ uv run --locked pytest
 uv run --locked pip-audit --skip-editable --vulnerability-service osv
 uv run --locked python -m build --no-isolation
 uv run --locked python tools/smoke.py
-python .engineering/tools/audit.py .
+uv run --project .engineering --locked python .engineering/tools/audit.py .
 ```
 
 To format locally: `uv run --locked ruff format .`. Update dependencies intentionally with `uv lock --upgrade`, review the diff and rerun checks. Do not use a lock update to bypass a failed compatibility or security review.
@@ -33,3 +33,5 @@ Dependency auditing uses OSV and skips the editable first-party package, which h
 `.standards.json` pins the framework to the bundled `.engineering/` snapshot. Add every applicable product profile and select the correct risk tier; the initial language-only/local setting is provisional. The structural audit is not a full conformance review.
 
 Before release: replace documentation prompts, choose license/distribution terms, configure actual CODEOWNERS and hosted branch/security settings, install secret scanning and complete the control/profile assessment. The example workflow does not deploy. A built wheel is not automatically published.
+
+The policy auditor requires uv 0.13.7 and Python 3.12+ in its separate locked .engineering environment; see .engineering/docs/local-tools.md.

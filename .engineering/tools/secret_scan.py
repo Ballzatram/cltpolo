@@ -21,11 +21,33 @@ def trusted_bytes(root: Path, revision: str, name: str, bootstrap: str | None) -
     git = shutil.which("git")
     if not git:
         raise OSError("Git is required to select trusted scanner inputs")
-    result = subprocess.run(  # noqa: S603
-        [git, "show", f"{revision}:{name}"], cwd=root, capture_output=True, timeout=30
-    )
-    if result.returncode == 0:
-        return result.stdout
+    if revision != "0" * 40:
+        available = subprocess.run(  # noqa: S603
+            [git, "cat-file", "-e", revision + "^{commit}"],
+            cwd=root,
+            capture_output=True,
+            timeout=30,
+        )
+        if available.returncode:
+            raise ValueError(
+                "Trusted commit is unavailable; fetch complete history before scanning"
+            )
+        result = subprocess.run(  # noqa: S603
+            [git, "show", f"{revision}:{name}"],
+            cwd=root,
+            capture_output=True,
+            timeout=30,
+        )
+        if result.returncode == 0:
+            return result.stdout
+        tree = subprocess.run(  # noqa: S603
+            [git, "ls-tree", "--name-only", revision, "--", name],
+            cwd=root,
+            capture_output=True,
+            timeout=30,
+        )
+        if tree.returncode or tree.stdout.strip():
+            raise ValueError("Trusted policy file cannot be read")
     path = root / name
     if bootstrap:
         candidate = path.read_bytes()
@@ -33,6 +55,32 @@ def trusted_bytes(root: Path, revision: str, name: str, bootstrap: str | None) -
             raise ValueError(f"Owner-reviewed bootstrap checksum differs: {name}")
         return candidate
     return DEFAULT_CONFIG if name.endswith(".toml") else b""
+
+
+def choose_revision(root: Path, requested: str | None, candidate: str | None) -> str:
+    if requested:
+        return requested
+    git = shutil.which("git")
+    if not git:
+        raise OSError("Git is required")
+    if candidate:
+        if not re.fullmatch(r"[0-9a-fA-F]{40}", candidate):
+            raise ValueError("Candidate revision must be an immutable commit SHA")
+        # Read the raw commit so a shallow boundary cannot masquerade as a root.
+        commit = subprocess.check_output(  # noqa: S603
+            [git, "cat-file", "-p", candidate], cwd=root, text=True, timeout=30
+        )
+        for line in commit.split("\n\n", 1)[0].splitlines():
+            if line.startswith("parent "):
+                return line.split()[1]
+        return "0" * 40
+    return subprocess.check_output(  # noqa: S603
+        [git, "rev-parse", "--verify", "origin/HEAD"],
+        cwd=root,
+        text=True,
+        timeout=30,
+        stderr=subprocess.DEVNULL,
+    ).strip()
 
 
 def scan(
@@ -103,21 +151,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scanner", type=Path, default=Path("gitleaks"))
     parser.add_argument("--trusted-revision")
+    parser.add_argument("--candidate-revision")
     parser.add_argument("--bootstrap-config-sha256")
     parser.add_argument("--bootstrap-ignore-sha256")
     args = parser.parse_args()
     try:
-        revision = args.trusted_revision
-        if not revision:
-            git = shutil.which("git")
-            if not git:
-                raise OSError("Git is required")
-            revision = subprocess.check_output(  # noqa: S603
-                [git, "rev-parse", "--verify", "origin/HEAD"],
-                text=True,
-                timeout=30,
-                stderr=subprocess.DEVNULL,
-            ).strip()
+        revision = choose_revision(
+            Path.cwd(), args.trusted_revision, args.candidate_revision
+        )
         scanner = Path(shutil.which(str(args.scanner)) or args.scanner)
         return scan(
             Path.cwd(),

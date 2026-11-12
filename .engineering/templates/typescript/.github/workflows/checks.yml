@@ -57,6 +57,8 @@ jobs:
           version: '0.13.7'
       - name: Test the complete pinned policy tool package
         run: uv run --directory .engineering --locked --python 3.12 python tools/check.py
+      - name: Verify fresh Python and TypeScript starters
+        run: uv run --directory .engineering --locked --python 3.12 python tools/validate_starters.py
       - name: Audit application metadata with locked audit dependencies
         run: uv run --project .engineering --locked --python 3.12 python .engineering/tools/audit.py .
       - name: Install checksum-verified scanner
@@ -67,8 +69,8 @@ jobs:
           tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP/engineering-tools" gitleaks
       - name: Scan history using trusted base policy inputs
         env:
-          TRUSTED_REVISION: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.sha }}
-        run: python .engineering/tools/secret_scan.py --scanner "$RUNNER_TEMP/engineering-tools/gitleaks" --trusted-revision "$TRUSTED_REVISION"
+          TRUSTED_REVISION: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+        run: python .engineering/tools/secret_scan.py --scanner "$RUNNER_TEMP/engineering-tools/gitleaks" --trusted-revision "$TRUSTED_REVISION" --candidate-revision "${{ github.sha }}"
   standards-gate:
     if: ${{ always() }}
     needs: [verify, policy]

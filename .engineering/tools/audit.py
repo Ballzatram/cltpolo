@@ -110,7 +110,18 @@ def action_findings(root: Path, paths: list[Path]) -> list[Finding]:
     pending = list(paths)
     visited: set[Path] = set()
     while pending:
-        path = pending.pop().resolve()
+        candidate = pending.pop()
+        try:
+            path = candidate.resolve()
+        except (OSError, RuntimeError) as exc:
+            findings.append(
+                Finding(
+                    f"action-file:{candidate.name}",
+                    "fail",
+                    f"Cannot resolve local action: {exc}",
+                )
+            )
+            continue
         if path in visited:
             continue
         visited.add(path)
@@ -168,7 +179,7 @@ def action_findings(root: Path, paths: list[Path]) -> list[Finding]:
                     )
                     continue
                 if reference.startswith("./"):
-                    local = (root / reference).resolve()
+                    local = root / reference
                     if local.is_dir():
                         local = next(
                             (
@@ -180,10 +191,10 @@ def action_findings(root: Path, paths: list[Path]) -> list[Finding]:
                         )
                     pending.append(local)
                     continue
-                pinned = bool(
-                    re.fullmatch(r"[^@]+@[0-9a-fA-F]{40}", reference)
-                ) or bool(
-                    re.fullmatch(r"docker://.+@sha256:[0-9a-fA-F]{64}", reference)
+                pinned = (
+                    bool(re.fullmatch(r"docker://.+@sha256:[0-9a-fA-F]{64}", reference))
+                    if reference.startswith("docker://")
+                    else bool(re.fullmatch(r"[^@]+@[0-9a-fA-F]{40}", reference))
                 )
                 findings.append(
                     Finding(
@@ -483,7 +494,7 @@ def main() -> int:
     args = parser.parse_args()
     try:
         findings = audit(args.repository)
-    except (OSError, UnicodeError, ValueError) as exc:
+    except (OSError, UnicodeError, ValueError, RuntimeError) as exc:
         findings = [Finding("read-error", "fail", str(exc))]
     failed = any(item.status == "fail" for item in findings)
     if args.as_json:

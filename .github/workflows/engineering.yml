@@ -24,6 +24,8 @@ jobs:
         version: 0.13.7
     - name: Test the complete pinned policy implementation
       run: uv run --directory .engineering --locked --python 3.12 python tools/check.py
+    - name: Validate fresh isolated starters
+      run: uv run --directory .engineering --locked --python 3.12 python tools/validate_starters.py
     - name: Validate pinned policy prerequisites
       run: uv run --project .engineering --locked --python 3.12 python .engineering/tools/audit.py .
     - name: Install checksum-verified secret scanner
@@ -38,9 +40,9 @@ jobs:
 
         '
     - name: Scan history using trusted base rules and fingerprints
-      run: python .engineering/tools/secret_scan.py --scanner "$RUNNER_TEMP/engineering-tools/gitleaks" --trusted-revision "$TRUSTED_REVISION" --bootstrap-config-sha256 b43c514c4a669a4f4463ad6958d45d0deb41e3debf86528146684685b485e760
+      run: python .engineering/tools/secret_scan.py --scanner "$RUNNER_TEMP/engineering-tools/gitleaks" --trusted-revision "$TRUSTED_REVISION" --candidate-revision "${{ github.sha }}" --bootstrap-config-sha256 b43c514c4a669a4f4463ad6958d45d0deb41e3debf86528146684685b485e760
       env:
-        TRUSTED_REVISION: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.sha }}
+        TRUSTED_REVISION: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
   native:
     runs-on: ubuntu-24.04
     timeout-minutes: 15

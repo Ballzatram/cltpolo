@@ -76,10 +76,28 @@ def create_project(
     """Copy reviewed templates and policies; do not install or execute dependencies."""
     if language not in ("python", "typescript"):
         raise ValueError("Supported starters: python, typescript")
-    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*(?:/[A-Za-z0-9_.-]+)?", owner):
+    segments = owner.split("/")
+    handle = r"[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9]))*"
+    if (
+        len(segments) > 2
+        or not all(re.fullmatch(handle, part) for part in segments)
+        or len(segments[0]) > 39
+        or (len(segments) == 2 and len(segments[1]) > 100)
+    ):
         raise ValueError(
             "Owner must be a GitHub username or organization/team, without @."
         )
+    project_name = name or destination.name.lower().replace("_", "-")
+    reserved = {
+        "con",
+        "prn",
+        "aux",
+        "nul",
+        *(f"com{i}" for i in range(1, 10)),
+        *(f"lpt{i}" for i in range(1, 10)),
+    }
+    if project_name.lower() in reserved:
+        raise ValueError("Project name is a reserved Windows device name")
     if destination.is_symlink():
         raise ValueError("Destination must not be a symlink.")
     destination = destination.resolve()
@@ -91,7 +109,6 @@ def create_project(
         )
     if destination.is_relative_to(framework_root.resolve()):
         raise ValueError("Create consumer projects outside the framework repository.")
-    project_name = name or destination.name.lower().replace("_", "-")
     if not re.fullmatch(r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*", project_name):
         raise ValueError(
             "Project name must be lowercase words/numbers separated by hyphens."

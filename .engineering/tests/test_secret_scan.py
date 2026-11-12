@@ -25,7 +25,9 @@ def test_bootstrap_is_checksum_checked(
     monkeypatch.setattr(
         subprocess,
         "run",
-        lambda *a, **kw: subprocess.CompletedProcess(a, 128, b"", b""),
+        lambda args, **kw: subprocess.CompletedProcess(
+            args, 0 if args[1] in {"cat-file", "ls-tree"} else 128, b"", b""
+        ),
     )
     (tmp_path / ".gitleaks.toml").write_bytes(DEFAULT_CONFIG)
     digest = hashlib.sha256(DEFAULT_CONFIG).hexdigest()
@@ -52,7 +54,9 @@ def test_scan_uses_external_trusted_paths_and_disables_inline_bypass(
         if args[-1] == "version":
             return subprocess.CompletedProcess(args, 0, "8.30.1", "")
         if Path(args[0]).name.lower() in {"git", "git.exe"}:
-            return subprocess.CompletedProcess(args, 128, b"", b"")
+            return subprocess.CompletedProcess(
+                args, 0 if args[1] in {"cat-file", "ls-tree"} else 128, b"", b""
+            )
         assert Path(args[args.index("--config") + 1]).read_bytes() == DEFAULT_CONFIG
         assert not Path(args[args.index("--config") + 1]).is_relative_to(tmp_path)
         assert "--gitleaks-ignore-path" in args and "--ignore-gitleaks-allow" in args
@@ -62,7 +66,7 @@ def test_scan_uses_external_trusted_paths_and_disables_inline_bypass(
 
     monkeypatch.setattr(subprocess, "run", run)
     assert scan(tmp_path, tmp_path / "gitleaks", "a" * 40) == 0
-    assert len(calls) == 4
+    assert len(calls) == 8
 
 
 def test_config_cannot_extend_candidate_path(

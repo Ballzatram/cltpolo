@@ -1,6 +1,6 @@
-# **PROJECT_NAME**
+# **__PROJECT_NAME__**
 
-Owner: **OWNER**. Status: prototype; standards review pending.
+Owner: **__OWNER__**. Status: prototype; standards review pending.
 
 Replace this introduction with purpose, users, non-goals and usage. The label-normalization function is a tested example, not completed product functionality. Complete architecture, operational and audit records before release.
 
@@ -17,7 +17,7 @@ npm test
 npm run security
 npm run build
 npm run smoke
-python .engineering/tools/audit.py .
+uv run --project .engineering --locked python .engineering/tools/audit.py .
 ```
 
 Use `npm run format` to format locally. CI runs on Linux and Windows. The starter is Node-only; add the web/UI profile, browser support, accessibility checks and component/E2E tests if building a website.
@@ -29,3 +29,5 @@ The lockfile uses narrow `minimatch` overrides for the lint toolchain to address
 `.standards.json` pins the framework to the bundled `.engineering/` snapshot. Add applicable product profiles and select the right risk tier; language-only/local is provisional. A structural pass does not complete the manual review in `docs/audit.md`.
 
 Before release: replace documentation prompts, select license/distribution terms, configure real ownership and hosted protection/security settings, add secret and source-security scanning, and complete the control/profile review. npm audit scans known dependency advisories only. This private starter does not publish or deploy. A future library needs package metadata, exports, consumer installation tests and an explicit release workflow.
+
+The policy auditor requires uv 0.13.7 and Python 3.12+ in its separate locked .engineering environment; see .engineering/docs/local-tools.md.

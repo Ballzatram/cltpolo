@@ -52,7 +52,7 @@ Monorepos may declare optional `components` in the manifest. Each entry names it
 
 The command register accepts executable strings or explicit status objects with `status` (`unavailable` or `not-applicable`), `reason` and `tracking`. The auditor emits REVIEW for status objects. These records are never evidence that a check ran; an unavailable mandatory check remains an adoption gap. Do not use prose as an executable command or label absent checks as passing.
 
-A specification-only application repository may vendor this framework's Python tools. Its application runtime remains absent, while the complete `.engineering/` package has its own Python profile, locked tools and mandatory tool regression/static checks. Test the vendored tool package independently of application classification.
+A specification-only application repository may vendor this framework's Python tools. Its application runtime remains absent, while the complete `.engineering/` package has its own Python profile, locked tools and tool regression/static checks under the existing CODE-01 and TEST-01 obligations. Test the vendored tool package independently of application classification.
 
 The canonical policy lives in this repository. Until published, consumers use the scaffolded `.engineering/` snapshot. Keep its VERSION, docs and auditor together; do not edit the copied baseline to weaken a consumer's obligations. Project-specific additions belong in the consumer's own docs and AGENTS.md.
 

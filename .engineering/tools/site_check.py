@@ -70,6 +70,7 @@ class Page(HTMLParser):
         self.references: list[str] = []
         self.external_scripts: list[tuple[str, str]] = []
         self.scripts: list[tuple[str, str]] = []
+        self.script_order: list[tuple[str, str | None, str]] = []
         self._in_title = False
         self._script: list[str] | None = None
         self._script_type = ""
@@ -103,6 +104,7 @@ class Page(HTMLParser):
             if attributes.get("src"):
                 if kind in JS_TYPES:
                     self.external_scripts.append((kind, str(attributes["src"])))
+                    self.script_order.append((kind, str(attributes["src"]), ""))
             else:
                 self._script = []
                 self._script_type = kind
@@ -118,6 +120,7 @@ class Page(HTMLParser):
             self._in_title = False
         if tag == "script" and self._script is not None:
             self.scripts.append((self._script_type, "".join(self._script)))
+            self.script_order.append((self._script_type, None, "".join(self._script)))
             self._script = None
 
 
@@ -223,22 +226,6 @@ def inspect(root: Path, pages: list[str], *, syntax: bool = True) -> list[str]:
             errors.append(f"{relative}: page title is required")
         if not parser.language.strip():
             errors.append(f"{relative}: document language is required")
-        import_map: dict[str, str] = {}
-        for kind, code in parser.scripts:
-            if kind == "importmap":
-                data = json.loads(code)
-                for key, value in data.get("imports", {}).items():
-                    import_map[key] = urljoin(
-                        urljoin(
-                            ORIGIN + page.relative_to(root).as_posix(),
-                            parser.base or "",
-                        ),
-                        value,
-                    )
-                if data.get("scopes"):
-                    errors.append(
-                        f"{relative}: scoped import maps require browser validation"
-                    )
         for reference in parser.references:
             try:
                 target, fragment = _resolve(root, page, reference, parser.base)
@@ -257,18 +244,50 @@ def inspect(root: Path, pages: list[str], *, syntax: bool = True) -> list[str]:
                         )
             except ValueError as exc:
                 errors.append(f"{relative}: {exc}")
-        for kind, reference in parser.external_scripts:
-            target, _ = _resolve(root, page, reference, parser.base)
-            if target is not None and target.is_file():
-                scripts.append(
-                    (target, "module" if kind == "module" else "classic", import_map)
-                )
-        for index, (kind, code) in enumerate(parser.scripts):
-            if kind in JS_TYPES:
-                for reference in parse(
+        import_map: dict[str, str] = {}
+        for index, (kind, script_reference, code) in enumerate(parser.script_order):
+            if kind == "importmap":
+                try:
+                    data = json.loads(code)
+                    if not isinstance(data, dict) or not isinstance(
+                        data.get("imports", {}), dict
+                    ):
+                        raise ValueError("Import map and imports must be objects")
+                    for key, value in data.get("imports", {}).items():
+                        if (
+                            not isinstance(key, str)
+                            or not isinstance(value, str)
+                            or (key.endswith("/") and not value.endswith("/"))
+                        ):
+                            raise ValueError("Invalid import-map key or prefix target")
+                        import_map[key] = urljoin(
+                            urljoin(
+                                ORIGIN + page.relative_to(root).as_posix(),
+                                parser.base or "",
+                            ),
+                            value,
+                        )
+                    if data.get("scopes"):
+                        errors.append(
+                            f"{relative}: scoped import maps require browser validation"
+                        )
+                except (ValueError, TypeError) as exc:
+                    errors.append(f"{relative}: invalid import map: {exc}")
+            elif kind in JS_TYPES and script_reference:
+                target, _ = _resolve(root, page, script_reference, parser.base)
+                if target is not None and target.is_file():
+                    scripts.append(
+                        (
+                            target,
+                            "module" if kind == "module" else "classic",
+                            dict(import_map),
+                        )
+                    )
+            elif kind in JS_TYPES:
+                for dependency in parse(
                     code, kind, f"{relative}: inline script {index}"
                 ):
-                    enqueue(page, reference, import_map, parser.base)
+                    enqueue(page, dependency, dict(import_map), parser.base)
     while scripts:
         script, kind, imports = scripts.pop()
         key = script, kind, tuple(sorted(imports.items()))

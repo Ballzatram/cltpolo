@@ -3,7 +3,7 @@
 Overall: **not-conforming — pending review**. Structural checks do not establish full conformance.
 
 - Framework version: 1.0.1
-- Project / owner: **PROJECT_NAME** / **OWNER**
+- Project / owner: **__PROJECT_NAME__** / **__OWNER__**
 - Reviewed commit, date and reviewer: pending
 - Profiles and risk tier: confirm `.standards.json`; add every applicable product profile
 - Automated check runs and immutable evidence links: pending
