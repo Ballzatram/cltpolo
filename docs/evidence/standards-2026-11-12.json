@@ -1,0 +1,16 @@
+{
+  "date": "2026-11-12",
+  "base_revision": "45e0e0341a97a1c54135c9db8b24f7320e918d1c",
+  "candidate_parent": "98d2a2856b46000f150365f85f417c7084ac962f",
+  "pull_request": "https://github.com/Ballzatram/cltpolo/pull/23",
+  "runtime_contract": "Existing application behavior is preserved; no live external writes are used as verification.",
+  "hosted_protection": "Required PR and strict GitHub Actions standards-gate, including administrators; no force push/deletion.",
+  "conformance": "Not full conformance; unresolved controls remain in docs/audit.md.",
+  "base_application_inventory": {
+    "application_files_compared": 37,
+    "identical_application_files": 37,
+    "changed": []
+  },
+  "generated_updates": "Existing generators retain their inputs, selected outputs and validation. Generated output uses unique automation branches, an explicitly dispatched engineering workflow and checked squash auto-merge. Both repositories default workflow tokens to read; only update workflows request contents/pull-requests/actions write. GitHub workflow PR creation and repository auto-merge are enabled; no workflow approves reviews.",
+  "automation_tests": "Four offline Bash control-flow regressions: unchanged output, unique branch + gate + auto-merge, diff failure and commit failure. No GitHub writes are performed by those tests."
+}

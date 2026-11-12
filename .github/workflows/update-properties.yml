@@ -11,6 +11,8 @@ on:
       - '.github/workflows/update-properties.yml'
 permissions:
   contents: write
+  pull-requests: write
+  actions: write
 concurrency:
   group: update-property-dataset
   cancel-in-progress: false
@@ -54,16 +56,16 @@ jobs:
           python scripts/property_pipeline.py --validate-only
       - name: Publish results and failure reports together
         if: success() && steps.research.outcome != 'skipped'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BASE_BRANCH: main
+          UPDATE_KIND: property-snapshot
         run: |
           git config user.name 'property-research-agent'
           git config user.email 'actions@github.com'
           git add data/charlotte_polo_properties.csv data/property-research.json
-          if ! git diff --cached --quiet; then
-            git commit -m 'Publish property research snapshot and source health'
-            git fetch origin main
-            git rebase origin/main
-            git push origin HEAD:main
-          fi
+          bash .github/scripts/publish-generated.sh
       - name: Keep a failed check visibly failed after publishing its report
         if: always() && steps.research.outcome == 'failure'
         run: |

@@ -61,6 +61,7 @@ jobs:
         run: |
           node --test tests/*.test.cjs tests/*.test.mjs
           python -m unittest discover -s tests -p 'test_property*.py' -v
+          python -m unittest discover -s tests -p 'test_generated_publication.py' -v
           python scripts/property_pipeline.py --validate-only
       - name: Pinned browser test tooling
         run: |

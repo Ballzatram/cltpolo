@@ -19,3 +19,7 @@ Default branches and deployed services are not changed by preparing this branch.
 118 Node model/worker tests passed. The Python source/pipeline suite ran 73 cases with one existing skip. Browser results are recorded separately when available. Runtime code, property data, payment rules and remote-refresh behavior are unchanged. No live payment or refresh was executed.
 
 See docs/audit.md for unresolved controls. A structural pass is not full conformance.
+
+## Final candidate checks
+
+See [merge verification](merge-verification.md) for current gates, commands and actual performance/coverage measurements. This supersedes the initial local-only/native-pending notes above. See .standards.json for the executable command register. Hosted feature restrictions and remaining conformance work remain explicit.

@@ -3,7 +3,7 @@
 Overall: **not-conforming — initial adoption implemented; review and legacy gaps remain**. No approved waivers have been invented.
 
 - Framework: 1.0.0
-- Automated assessment: Codex, 2026-11-11; independent maintainer review pending
+- Automated assessment: Codex, updated 2026-11-12; owner authorized merge; independent product/operations review remains pending
 - Owner: Ballzatram
 - Baseline revision: `45e0e0341a97a1c54135c9db8b24f7320e918d1c`
 - Profiles: python, other-languages, web, services
@@ -15,8 +15,8 @@ Overall: **not-conforming — initial adoption implemented; review and legacy ga
 | ARCH-01 | pass | Existing component and preservation boundaries are recorded; no new runtime service or architecture was introduced. |
 | ARCH-02 | pending | Requires project-specific evidence and maintainer review. |
 | BUILD-01 | pending | Requires project-specific evidence and maintainer review. |
-| CI-01 | pending | PR/default-branch/merge-queue checks are configured and actionlint-validated. Candidate GitHub runs must finish before merge. |
-| CI-02 | pending | New jobs use read-only credentials and verified action pins. Hosted branch/release/environment protections need owner review. |
+| CI-01 | pass | Pinned PR/default/merge-group checks were exercised; successful final-head Engineering Standards CI is required before merge. See docs/merge-verification.md and the linked PR checks. |
+| CI-02 | pass | Live default-branch protection was applied and read back: PR required, strict standards-gate bound to GitHub Actions, administrators enforced, force pushes/deletion denied. Solo-owner approval count is zero; deployment-environment review remains separate. |
 | CODE-01 | fail | Native syntax/type checks are retained where present. Full legacy formatting and strict static-analysis adoption remain a tracked gap; no broad suppression was introduced. |
 | CODE-02 | pending | Requires project-specific evidence and maintainer review. |
 | DATA-01 | pending | Requires project-specific evidence and maintainer review. |
@@ -51,3 +51,7 @@ Action references were pinned to verified commits for their existing tags; exist
 | OPS-01 / DATA-01 / UX-01 | Complete applicable recovery, monitoring and manual accessibility reviews | Ballzatram | Before release |
 
 Native-platform and product-specific checks that were not executed remain pending. Specification-only repositories must import real source and select its actual stack before runtime controls can be assessed.
+
+## Merge-time evidence
+
+See [merge verification](merge-verification.md) for measured performance, hosted enforcement, source preservation and current coverage evidence. Residual failures/pending reviews above remain explicit; merging the adoption controls is not a conformance certificate.
