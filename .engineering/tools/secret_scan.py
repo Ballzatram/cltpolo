@@ -62,6 +62,14 @@ def scan(
         raise ValueError(
             "Trusted scanner configuration cannot extend a candidate-controlled file"
         )
+    git = shutil.which("git")
+    if not git:
+        raise OSError("Git is required")
+    git_directory = Path(
+        subprocess.check_output(  # noqa: S603
+            [git, "rev-parse", "--absolute-git-dir"], cwd=root, text=True, timeout=30
+        ).strip()
+    ).resolve()
     with tempfile.TemporaryDirectory(prefix="trusted-gitleaks-") as td:
         folder = Path(td).resolve()
         if folder.is_relative_to(root.resolve()):
@@ -75,7 +83,7 @@ def scan(
             [
                 str(scanner.resolve()),
                 "git",
-                ".",
+                str(git_directory),
                 "--redact",
                 "--no-banner",
                 "--timeout",
@@ -86,7 +94,7 @@ def scan(
                 str(ignore_path),
                 "--ignore-gitleaks-allow",
             ],
-            cwd=root,
+            cwd=folder,
             timeout=150,
         ).returncode
 

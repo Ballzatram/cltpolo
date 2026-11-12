@@ -41,6 +41,11 @@ def test_scan_uses_external_trusted_paths_and_disables_inline_bypass(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     calls = []
+    metadata = tmp_path / ".git"
+    metadata.mkdir()
+    monkeypatch.setattr(
+        subprocess, "check_output", lambda *args, **kwargs: str(metadata)
+    )
 
     def run(args, **kwargs):
         calls.append(args)
@@ -51,6 +56,8 @@ def test_scan_uses_external_trusted_paths_and_disables_inline_bypass(
         assert Path(args[args.index("--config") + 1]).read_bytes() == DEFAULT_CONFIG
         assert not Path(args[args.index("--config") + 1]).is_relative_to(tmp_path)
         assert "--gitleaks-ignore-path" in args and "--ignore-gitleaks-allow" in args
+        assert args[2] == str(metadata)
+        assert not Path(kwargs["cwd"]).is_relative_to(tmp_path)
         return subprocess.CompletedProcess(args, 0)
 
     monkeypatch.setattr(subprocess, "run", run)
