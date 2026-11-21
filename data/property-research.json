@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-11T18:41:33Z",
+  "generatedAt": "2026-11-12T14:27:40Z",
   "brief": {
     "version": "2026-09-21-r2",
     "minimumAcres": 20,
@@ -582,7 +582,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-11-11T18:41:18Z",
+      "Listing Checked At": "2026-11-12T14:27:27Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "--/4430074",
@@ -644,7 +644,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-11-11T18:41:18Z",
+      "Listing Checked At": "2026-11-12T14:27:27Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -706,7 +706,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-11-11T18:41:18Z",
+      "Listing Checked At": "2026-11-12T14:27:27Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -768,7 +768,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-11-11T18:41:18Z",
+      "Listing Checked At": "2026-11-12T14:27:27Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -830,7 +830,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-11-11T18:41:18Z",
+      "Listing Checked At": "2026-11-12T14:27:27Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -892,7 +892,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — York County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/york-county/",
-      "Listing Checked At": "2026-11-11T18:41:18Z",
+      "Listing Checked At": "2026-11-12T14:27:27Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "",
       "MLS / External Reference": "",
@@ -954,7 +954,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — Chester County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
-      "Listing Checked At": "2026-11-11T18:41:18Z",
+      "Listing Checked At": "2026-11-12T14:27:27Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "Broker describes about an hour or longer from Charlotte",
       "MLS / External Reference": "",
@@ -1016,7 +1016,7 @@
       "Nearest I-77 Reference": "",
       "Scrape Source Name": "Mossy Oak Properties — Chester County",
       "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
-      "Listing Checked At": "2026-11-11T18:41:18Z",
+      "Listing Checked At": "2026-11-12T14:27:27Z",
       "Source Check Outcome": "Public broker facts parsed; suitability unverified",
       "Source Drive Conflict": "Broker describes about an hour or longer from Charlotte",
       "MLS / External Reference": "",
@@ -1151,12 +1151,43 @@
       "Expansion Status": "unverified",
       "Verified Drive Minutes": "",
       "Usable Flat Acres": ""
+    },
+    {
+      "ID": "MOP-122960",
+      "Dashboard Include": "Yes",
+      "Property Name": "Little Sandy River Tract",
+      "Property URL": "https://www.mossyoakproperties.com/property/little-sandy-river-tract-chester-south-carolina/122960/",
+      "Source URL": "https://www.mossyoakproperties.com/property/little-sandy-river-tract-chester-south-carolina/122960/",
+      "Listing External ID": "122960",
+      "Acres": "170.0",
+      "County": "Chester County",
+      "City": "Chester",
+      "State": "SC",
+      "Address / Property": "Stone Road",
+      "Status": "New Listing",
+      "Source": "Mossy Oak Properties",
+      "Listing Notes": "Broker lists 170.0 acres. Broker describes rolling terrain; a flat usable polo footprint has not been established. Polo layout and I-77 access require independent review.",
+      "Listing Checked At": "2026-11-12T14:27:27Z",
+      "Source Check Outcome": "Public broker facts parsed; suitability unverified",
+      "Listing Verification Status": "Broker source retrieved; confirm availability directly. Terrain, route and polo layout are not verified.",
+      "Scrape Source Name": "Mossy Oak Properties — Chester County",
+      "Scrape Source URL": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
+      "Source Drive Conflict": "",
+      "List Price": "755161.0",
+      "Latitude": "34.605037",
+      "Longitude": "-81.339979",
+      "Terrain Status": "unverified",
+      "Arena Fit": "unverified",
+      "Grass Fit": "unverified",
+      "Corridor Status": "unverified",
+      "Expansion Status": "unverified",
+      "Next Due Diligence": "Confirm a contiguous flat arena/support footprint and separate grass format; verify I-77 south access, an Uptown route within 45 minutes, drainage and permitted use."
     }
   ],
   "health": {
     "status": "partial",
-    "attemptedAt": "2026-11-11T18:41:18Z",
-    "finishedAt": "2026-11-11T18:41:33Z",
+    "attemptedAt": "2026-11-12T14:27:27Z",
+    "finishedAt": "2026-11-12T14:27:40Z",
     "sources": [
       {
         "name": "Mossy Oak Properties — York County",
@@ -1172,9 +1203,9 @@
         "url": "https://www.mossyoakproperties.com/land-for-sale/south-carolina/chester-county/",
         "http": 200,
         "status": "read",
-        "listingLinks": 4,
+        "listingLinks": 5,
         "note": "Listing links collected; each property is parsed and screened separately.",
-        "reportedTotal": 4
+        "reportedTotal": 5
       },
       {
         "name": "Mossy Oak Properties — Mecklenburg County",
@@ -1286,6 +1317,14 @@
         "result": "outside-discovery-scope"
       },
       {
+        "url": "https://www.mossyoakproperties.com/property/little-sandy-river-tract-chester-south-carolina/122960/",
+        "source": "Mossy Oak Properties — Chester County",
+        "http": 200,
+        "status": "parsed",
+        "note": "Individual broker property facts read",
+        "result": "new-unverified-research-record"
+      },
+      {
         "url": "https://www.mossyoakproperties.com/property/ridgeview-east-chester-south-carolina/79707/",
         "source": "Mossy Oak Properties — Chester County",
         "http": 200,
@@ -1332,13 +1371,19 @@
         "note": "Source HTTP error"
       }
     ],
-    "rowsAdded": 0,
+    "rowsAdded": 1,
     "rowsChanged": 0,
-    "listingsChecked": 14,
-    "listingPagesAttempted": 16,
+    "listingsChecked": 15,
+    "listingPagesAttempted": 17,
     "outOfScope": 6,
     "unavailableNewListingsExcluded": 0,
-    "changes": [],
+    "changes": [
+      {
+        "id": "MOP-122960",
+        "kind": "added",
+        "fields": []
+      }
+    ],
     "coverage": "Configured public broker inventory only; not a complete MLS or market search.",
     "pausedPortals": [
       {
@@ -1350,16 +1395,16 @@
         "reason": "Automated requests returned HTTP 429 in the September 20 run. Paused; an authorized feed is needed for reliable coverage."
       }
     ],
-    "listingUrlsDiscovered": 16,
+    "listingUrlsDiscovered": 17,
     "listingLimitReached": false,
     "nextListingOffset": 0,
     "sourcesRead": 5,
     "sourcesAttempted": 5,
     "listingRefreshSucceeded": true,
-    "message": "Parsed 14 individual listing pages; added 0 research records and changed 0 existing records. Broker coverage is limited; source facts are not verified polo suitability. Some source pages failed or inventory is incomplete."
+    "message": "Parsed 15 individual listing pages; added 1 research records and changed 0 existing records. Broker coverage is limited; source facts are not verified polo suitability. Some source pages failed or inventory is incomplete."
   },
-  "ledgerSha256": "0315e82f3e3cdee82e6ecbb2d1fc2b9c70bd4f254f6b28d1901228a1e26f96a6",
-  "latestListingReviewAt": "2026-11-11T18:41:18Z",
-  "workflowRunId": "43080110151",
-  "codeRevision": "267312c3687cc928bcea67deaef50994bc5f60a0"
+  "ledgerSha256": "904646fa7816559aa791a1a1c3685bd60610b296565012e3388af8dbbcedbd7c",
+  "latestListingReviewAt": "2026-11-12T14:27:27Z",
+  "workflowRunId": "43237347036",
+  "codeRevision": "18f5f45f6057df5cdb2824b1cb7f9e1f94184e1b"
 }
